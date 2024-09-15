@@ -191,7 +191,10 @@
         scroll-behavior: smooth;
     }
 }
-
+.custom-card {
+    background: linear-gradient(120deg, #8db0d8, #13447c, #000000);
+    color: white;
+}
 .line {
     position: absolute;
     width: 0;
@@ -469,7 +472,7 @@ body {
 }
 
 .body-inicio {
-    margin-top: 6rem;
+    background:rgba(222, 226, 230, 0.75);
 }
 
 hr {
@@ -3178,10 +3181,10 @@ textarea.form-control-lg {
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: var(--bs-body-color);
+    color: #fff;
     text-align: center;
     white-space: nowrap;
-    background-color: var(--bs-tertiary-bg);
+    background-color:  #8db0d8;
     border: var(--bs-border-width) solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
 }
@@ -4391,7 +4394,9 @@ fieldset:disabled .btn {
     border: 0;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
 }
-
+.nav-span {    
+    color: #215975;    
+}
 .enlace-link {
     display: block;
     padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
@@ -4534,7 +4539,7 @@ fieldset:disabled .btn {
 
 .navbar {
     --bs-navbar-padding-x: 0;
-    --bs-navbar-padding-y: 0.5rem;
+    --bs-navbar-padding-y: 0;
     --bs-navbar-color: rgba(var(--bs-emphasis-color-rgb), 0.65);
     --bs-navbar-hover-color: rgba(var(--bs-emphasis-color-rgb), 0.8);
     --bs-navbar-disabled-color: rgba(var(--bs-emphasis-color-rgb), 0.3);
@@ -6473,7 +6478,7 @@ fieldset:disabled .btn {
     --bs-tooltip-margin: ;
     --bs-tooltip-font-size: 0.875rem;
     --bs-tooltip-color: var(--bs-body-bg);
-    --bs-tooltip-bg: var(--bs-emphasis-color);
+    --bs-tooltip-bg: var(--bs-primary-border-subtle);
     --bs-tooltip-border-radius: var(--bs-border-radius);
     --bs-tooltip-opacity: 0.9;
     --bs-tooltip-arrow-width: 0.8rem;
@@ -8275,7 +8280,7 @@ fieldset:disabled .btn {
 }
 
 .shadow-lg {
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    box-shadow: 0 1rem 3rem #8db0d8 !important;
 }
 
 .shadow-none {
