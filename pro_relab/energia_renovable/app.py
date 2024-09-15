@@ -570,6 +570,39 @@ def irradiance_prediction():
     prediction_g = 1
     print (prediction_g)
     return render_template('informe_y_Estadistica/date_davis.html',prediction_g = prediction_g)
+#------------------------Craeacion de proyectos--------------------------
+#mostrar modal proyecto
+@app.route('/ver_modal_proyecto')
+def ver_modal_proyecto():   
+    return render_template('creacion_de_proyecto/crea_proyecto.html')
+#Crear Proyecto
+@app.route('/add_proyecto', methods=['POST'])
+def add_proyecto():
+    nom_pro = request.form['nom_pro']
+    cred_pro = request.form['cred_pro']
+    cbat_pro = request.form['cbat_pro']
+    user_id = session.get('user_id')
+
+    # Conectar a la base de datos y buscar si el proyecto ya existe
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT id_pro FROM proyecto WHERE nom_pro = %s AND id_usu = %s;', (nom_pro, user_id))
+            proyecto = cur.fetchone()
+
+            # Verificar si el proyecto ya existe
+            if proyecto is not None:
+                return 'exist'
+            else:
+                # Insertar el nuevo proyecto en la base de datos
+                cur.execute('INSERT INTO proyecto (nom_pro, cred_pro, cbat_pro, id_usu) VALUES (%s, %s, %s, %s) RETURNING id_pro;', 
+                            (nom_pro, cred_pro, cbat_pro, user_id))
+
+                # Guardar los cambios y obtener el id_pro del nuevo proyecto
+                id_pro = cur.fetchone()[0]
+                conn.commit()
+
+                return jsonify({'id_pro': id_pro})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

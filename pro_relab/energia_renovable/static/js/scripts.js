@@ -84,6 +84,21 @@ $(document).ready(function() {
         }
     });
 });
+// ----------------CREACION DE PROYECTOS ----------------
+//modal del proyecto
+$(document).ready(function() {
+    $('#modal_proyecto').off('click').on('click', function(event) {
+        event.preventDefault();
+        
+        // Abre el modal si no está ya visible
+        if (!$('#modalProyecto').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalProyecto').modal('show');
+            });
+        }
+    });
+});
 
 //TOOLTIP
 
