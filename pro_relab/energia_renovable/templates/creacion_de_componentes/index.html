@@ -1,0 +1,94 @@
+{% block head %} {% include 'layouts/head.html' %} {% endblock %}
+
+
+<body  class="body-inicio">
+    {% block navbar %} {% include 'layouts/navbar.html' %} {% endblock %}
+    <section class="container-fluid">  
+        <div class="row">
+            <div class="sidebar border border-right col-md-3 col-lg-2 p-3 bg-body-tertiary" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                <div class="offcanvas-header">
+                    <h4 class="offcanvas-title" id="offcanvasRightLabel" style="margin-bottom: 2rem;color:#13447c;font-size: 22px;"><b>Componentes Creados</b></h4>
+                </div>
+                <div class="offcanvas-body">
+                    <!-- Sección Fotovoltaico -->
+                    <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Fotovoltaico</b></label>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <a href="/update_panel" class="nav-link text-dark nav-color" title="Paneles agregados">
+                                Ver Paneles
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="/update_inversor" class="nav-link text-dark nav-color" title="Inversores agregados">
+                                Ver Inversores
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#" class="nav-link text-dark nav-color" title="Reguladores agregados">
+                                Ver Reguladores
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="/update_bateria" class="nav-link text-dark nav-color" title="Baterias agregadas">
+                                Ver Baterias
+                            </a>
+                        </li>
+                    </ul>
+            
+                    <hr>
+            
+                    <!-- Sección Hídrico -->
+                    <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Hidrico</b></label>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <a href="#" class="nav-link text-dark nav-color" title="Tanques agregados">
+                                Ver Tanques
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#" class="nav-link text-dark nav-color" title="Motobombas agregadas">
+                                Ver Motobombas
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#" class="nav-link text-dark nav-color" title="Turbinas agregados">
+                                Ver Turbinas
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#" class="nav-link text-dark nav-color" title="Generadores Electricos agregados">
+                                Ver Generadores Electricos
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+                        
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="container" data-aos="fade-up">
+                    <div class="row" style="margin-bottom: 2rem; margin-top: 2rem;">
+                        <div class="col ms-sm-auto">                            
+                            {% if num_comp==1 %}
+                                {% block editar_panel %} {% include 'creacion_de_componentes/editar_panel.html' %} {% endblock %}  
+                            {% elif num_comp==2 %}
+                                {% block editar_bateria %} {% include 'creacion_de_componentes/editar_bateria.html' %} {% endblock %}
+                            {% elif num_comp==3 %}
+                                {% block editar_inversor %} {% include 'creacion_de_componentes/editar_inversor.html' %} {% endblock %}                               
+                            {% endif %}
+                        </div>
+                        
+                    </div>                  
+                    
+                </div>
+            </main>
+        </div>
+    </section>   
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts "></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js "></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/datatables.js"></script>
+    <script src="/static/js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</body>

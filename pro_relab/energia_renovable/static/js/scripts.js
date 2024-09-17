@@ -100,6 +100,208 @@ $(document).ready(function() {
     });
 });
 
+//modal del panel
+$(document).ready(function() {
+    $('#modal_panel').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#modal_panel').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalPanel').modal('show');
+            });
+        }
+    });
+});
+
+//modal del bateria
+$(document).ready(function() {
+    $('#modal_bateria').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#modal_bateria').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalBateria').modal('show');
+            });
+        }
+    });
+});
+
+//modal del inversor
+$(document).ready(function() {
+    $('#modal_inversor').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#modal_inversor').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalInversor').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto inversor
+$(document).ready(function() {
+    $('#project_inversor').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_inversor').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectInversor').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto inversor card
+$(document).ready(function() {
+    $('#project_inversor_card').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_inversor_card').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectInversorCard').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto arreglo
+$(document).ready(function() {
+    $('#project_arreglo').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_arreglo').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectArreglo').modal('show');
+            });
+        }
+    });
+});
+
+
+//modal serie pararlelo arreglo
+$(document).ready(function() {
+    $('[id^="projectSerie_"]').off('click').on('click', function(event) {
+        event.preventDefault();
+        var modalId = $(this).attr('id').split("_")[1];
+        // Abre el modal si no está ya visible
+        if (!$('[id^="projectSerie_"]').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectSerie' + modalId).modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto banco
+$(document).ready(function() {
+    $('#project_banco').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_banco').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectBanco').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto banco dod
+$(document).ready(function() {
+    $('#project_bancoDOD').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_bancoDOD').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectBancoDOD').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto carga
+$(document).ready(function() {
+    $('#project_carga').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_carga').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectCarga').modal('show');
+            });
+        }
+    });
+});
+
+//modal escribit potencia carga del projecto
+$(document).ready(function() {
+    $('[id^="projectCarga_"]').off('click').on('click', function(event) {
+        event.preventDefault();
+        var modalId = $(this).attr('id').split("_")[1];
+        // Abre el modal si no está ya visible
+        if (!$('[id^="projectCarga_"]').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectCarga' + modalId).modal('show');
+            });
+        }
+    });
+});
+
+//modal serie pararlelo banco
+$(document).ready(function() {
+    $('[id^="projectSerieBanco_"]').off('click').on('click', function(event) {
+        event.preventDefault();
+        var modalId = $(this).attr('id').split("_")[1];
+        // Abre el modal si no está ya visible
+        if (!$('[id^="projectSerieBanco_"]').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectSerieBanco' + modalId).modal('show');
+            });
+        }
+    });
+});
+
+//modal eliminar arreglo del projecto
+$(document).ready(function() {
+    $('[id^="delArr_"]').off('click').on('click', function(event) {
+        event.preventDefault();
+        var modalId = $(this).attr('id').split("_")[1];
+        // Abre el modal si no está ya visible
+        if (!$('[id^="delArr_"]').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#delArr' + modalId).modal('show');
+            });
+        }
+    });
+});
+
+//modal eliminar banco del projecto
+$(document).ready(function() {
+    $('[id^="delBan_"]').off('click').on('click', function(event) {
+        event.preventDefault();
+        var modalId = $(this).attr('id').split("_")[1];
+        // Abre el modal si no está ya visible
+        if (!$('[id^="delBan_"]').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#delBan' + modalId).modal('show');
+            });
+        }
+    });
+});
+
 //TOOLTIP
 
 document.addEventListener('DOMContentLoaded', function() {

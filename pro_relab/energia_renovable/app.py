@@ -1,11 +1,10 @@
 import psycopg2
 import hashlib
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
-from datetime import date, datetime, timedelta
+from datetime import datetime
 import threading
 import time
 import requests # elementos para datos davis
-import xml.etree.ElementTree as ET # elementos para datos davis
 import pandas as pd #Extrer los datos del archivo plano
 
 
@@ -237,7 +236,7 @@ def update_user():
     error = request.args.get('error')  # Obtiene el indicador de error de los parámetros de la URL
     user_id = session.get('user_id')  # Obtiene el ID del usuario autenticado de la sesión
     if user_id is None:  # Si el usuario no ha iniciado sesión
-        return redirect(url_for('redirigir'))  # Redirige a la página de inicio de sesión   
+        return redirect(url_for('inicio_sesion'))  # Redirige a la página de inicio de sesión   
     
     # Obtener más información del usuario a partir de su ID
     with get_db_connection() as conn:  # Abre una conexión a la base de datos
@@ -575,6 +574,7 @@ def irradiance_prediction():
 @app.route('/ver_modal_proyecto')
 def ver_modal_proyecto():   
     return render_template('creacion_de_proyecto/crea_proyecto.html')
+
 #Crear Proyecto
 @app.route('/add_proyecto', methods=['POST'])
 def add_proyecto():
@@ -603,6 +603,428 @@ def add_proyecto():
 
                 return jsonify({'id_pro': id_pro})
 
+#Iniciar Proyecto
+@app.route('/inicio_proyecto')
+def inicio_proyecto():  
+    id_pro = request.args.get('id_pro')
+    user_id = session.get('user_id')
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT * FROM proyecto WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
+            pro = cur.fetchone()
+            if pro:
+                return render_template('creacion_de_proyecto/proyecto.html', pro=pro)
+            else:
+                # Redireccionar a la página de inicio o a donde prefieras
+                return redirect(url_for('inicio_principal')) 
+
+#Crear Componentes
+#mostrar modal panel
+@app.route('/ver_modal_panel')
+def ver_modal_panel():
+    # Conectar a la base de datos
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Ejecutar la consulta para obtener todas las tecnologías de panel
+            cur.execute('SELECT * FROM tecnologia_panel;')
+            tecno = cur.fetchall()  # Obtener todos los resultados de la consulta
+
+    # Pasar los resultados a la plantilla
+    return render_template('creacion_de_componentes/crea_panel.html', tecno=tecno)
+
+#mostrar modal inversor
+@app.route('/ver_modal_inversor')
+def ver_modal_inversor():    
+    return render_template('creacion_de_componentes/crea_inversor.html')
+
+#mostrar modal bateria
+@app.route('/ver_modal_bateria')
+def ver_modal_bateria():
+    return render_template('creacion_de_componentes/crea_bateria.html')
+
+# Crear panel modal       
+@app.route('/add_panel', methods=['POST'])
+def add_panel():
+    ref_pan = request.form['ref_pan']
+    idu_pan = request.form['idu_pan']
+    pmax_pan = float(request.form['pmax_pan'])  # Convierte los valores a números flotantes
+    vmp_pan = float(request.form['vmp_pan'])
+    imp_pan = float(request.form['imp_pan'])
+    voc_pan = float(request.form['voc_pan'])
+    isc_pan = float(request.form['isc_pan'])
+    lar_pan = float(request.form['lar_pan'])
+    anc_pan = float(request.form['anc_pan'])
+    efi_pan = float(request.form['efi_pan'])
+    are_pan = lar_pan * anc_pan
+    nom_tec = request.form['tec_pan']
+    den_pan = pmax_pan / are_pan
+    user_id = session.get('user_id')
+    pmax_cal_pan = vmp_pan * imp_pan
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Buscar tecnología en la base de datos
+            cur.execute('SELECT * FROM tecnologia_panel WHERE nom_tec = %s;', (nom_tec,))
+            tecno = cur.fetchone()
+
+            # Si la tecnología no existe, insertarla
+            if tecno is None:
+                cur.execute('INSERT INTO tecnologia_panel (nom_tec) VALUES (%s) RETURNING id_tec;', (nom_tec,))
+                id_tec = cur.fetchone()[0]
+                conn.commit()  # Confirmar la inserción de la nueva tecnología
+            else:
+                id_tec = tecno[0]  # Suponiendo que el id_tec es la primera columna
+
+            # Buscar el panel en la base de datos
+            cur.execute('SELECT * FROM panel WHERE idu_pan = %s AND status = %s;', (idu_pan, True))
+            panel = cur.fetchone()
+
+            # Verificar si el panel ya existe
+            if panel is not None:
+                return 'exist'
+
+            # Validar la potencia máxima calculada
+            if pmax_cal_pan > pmax_pan - 0.6 and pmax_cal_pan < pmax_pan + 0.6:
+                cur.execute('''
+                    INSERT INTO panel (ref_pan, efi_pan, idu_pan, pmax_pan, vmp_pan, imp_pan, voc_pan, isc_pan, lar_pan, anc_pan, are_pan, id_tec, den_pan, id_usu)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                ''', (ref_pan, efi_pan, idu_pan, pmax_pan, vmp_pan, imp_pan, voc_pan, isc_pan, lar_pan, anc_pan, are_pan, id_tec, den_pan, user_id))
+                conn.commit()  # Confirmar la inserción del nuevo panel
+
+                return 'success'
+            else:
+                return 'error'
+
+# Crear inversor modal
+@app.route('/add_inversor', methods=['POST'])
+def add_inversor():
+    ref_inv = request.form['ref_inv']
+    reg_inv = request.form['reg_inv']
+    idu_inv = request.form['idu_inv']
+    ent_inv = request.form['ent_inv']
+    pmax_inv = float(request.form['pmax_inv'])  # Convierte los valores a números flotantes
+    vme_inv = float(request.form['vme_inv'])
+    ime_inv = float(request.form['ime_inv'])
+    vsa_inv = float(request.form['vsa_inv'])
+    ond_inv = request.form['ond_inv']
+    efi_inv = float(request.form['efi_inv'])
+    user_id = session.get('user_id')
+    
+    pmax_cal_inv = vme_inv * ime_inv  # Calcula la potencia máxima
+
+    # Conectar a la base de datos y buscar si el inversor ya existe
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Buscar el inversor en la base de datos
+            cur.execute('SELECT * FROM inversor WHERE idu_inv = %s AND status = %s;', (idu_inv, True))
+            inversor = cur.fetchone()
+
+            # Verificar si los datos ya existen en la base de datos
+            if inversor is not None:
+                return 'exist'
+
+            # Verificar la potencia máxima calculada
+            if pmax_cal_inv > pmax_inv - 0.6 and pmax_cal_inv < pmax_inv + 0.6:
+                # Insertar el nuevo inversor
+                cur.execute('''
+                    INSERT INTO inversor (ref_inv, reg_inv, idu_inv, ent_inv, pmax_inv, vme_inv, ime_inv, vsa_inv, ond_inv, efi_inv, id_usu)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                ''', (ref_inv, reg_inv, idu_inv, ent_inv, pmax_inv, vme_inv, ime_inv, vsa_inv, ond_inv, efi_inv, user_id))
+
+                conn.commit()  # Confirmar la inserción
+                return 'success'
+            else:
+                return 'error'
+
+
+# Crear bateria modal
+@app.route('/add_bateria', methods=['POST'])
+def add_bateria():
+    ref_bat = request.form['ref_bat']
+    vol_bat = float(request.form['vol_bat'])
+    cap_bat = float(request.form['cap_bat'])
+    ene_bat = vol_bat * cap_bat
+    idu_bat = request.form['idu_bat']
+    user_id = session.get('user_id')
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Buscar la batería en la base de datos
+            cur.execute('SELECT * FROM bateria WHERE idu_bat = %s AND status = %s;', (idu_bat, True))
+            bateria = cur.fetchone()
+
+            # Verificar si la batería ya existe en la base de datos
+            if bateria is not None:
+                return 'exist'
+
+            # Si la batería no existe, agregar una nueva
+            cur.execute('''
+                INSERT INTO bateria (ref_bat, idu_bat, vol_bat, cap_bat, ene_bat, id_usu)
+                VALUES (%s, %s, %s, %s, %s, %s);
+            ''', (ref_bat, idu_bat, vol_bat, cap_bat, ene_bat, user_id))
+            conn.commit()  # Confirmar la inserción
+
+            return 'success'
+
+
+#Lista de componentes index
+@app.route('/component_list')
+def component_list():
+    user_id = session.get('user_id')
+    if user_id is None:
+        # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+        return redirect(url_for('inicio_sesion'))
+    return redirect(url_for('update_panel'))
+    
+#list  paneles
+@app.route('/update_panel')
+def update_panel(): 
+    success = request.args.get('success')
+    error = request.args.get('error')
+    user_id = session.get('user_id')
+    num_comp = 1
+    if user_id is None:
+        # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+        return redirect(url_for('inicio_sesion'))
+    
+    # Conectar a la base de datos para obtener información del usuario
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener información del usuario desde la base de datos
+            cur.execute('SELECT * FROM usuario WHERE id_usu = %s;', (user_id,))
+            user = cur.fetchone()
+            
+            if user and user[4] == 'Administrador':
+                # Obtener todas las tecnologías de los paneles
+                cur.execute('SELECT * FROM tecnologia_panel;')
+                tecno = cur.fetchall()
+                
+                # Obtener los paneles y las tecnologías asociadas
+                cur.execute('''
+                    SELECT *
+                    FROM panel p 
+                    JOIN tecnologia_panel t ON p.id_tec = t.id_tec;
+                ''')
+
+                pan_usu = cur.fetchall()
+                # Renderizar el template dependiendo de los parámetros 'success' y 'error'
+                if success == "1" or error == "2":
+                    return render_template(
+                        'creacion_de_componentes/index.html',success=success, error=error, tecno=tecno, user_comp=user, pan_usu=pan_usu, num_comp=num_comp)
+                else:
+                    return render_template('creacion_de_componentes/index.html',tecno=tecno, user_comp=user, pan_usu=pan_usu, num_comp=num_comp )
+            else:
+                return redirect(url_for('inicio_principal'))
+
+#guardar elactualizado del panel
+@app.route('/update_panel_save', methods=['POST'])
+def update_panel_save():
+    id_pan = request.form['id_pan']
+    ref_pan = request.form['ref_pan']
+    est_pan = request.form['est_pan']
+    # Mapeo de cadenas a booleanos
+    boolean_map = {'True': True, 'False': False}
+    est_pan = boolean_map.get(est_pan, False) 
+    pmax_pan = float(request.form['pmax_pan'])
+    vmp_pan = float(request.form['vmp_pan'])
+    imp_pan = float(request.form['imp_pan'])
+    voc_pan = float(request.form['voc_pan'])
+    isc_pan = float(request.form['isc_pan'])
+    lar_pan = float(request.form['lar_pan'])
+    anc_pan = float(request.form['anc_pan'])
+    are_pan = lar_pan * anc_pan
+    nom_tec = request.form['tec_pan']
+    den_pan = pmax_pan / are_pan
+    user_id = session.get('user_id')
+
+    # Conectar a la base de datos
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener información del panel a partir de su ID
+            cur.execute('SELECT * FROM panel WHERE id_pan = %s;', (id_pan,))
+            panel_data = cur.fetchone()
+            if panel_data:
+                
+                if est_pan == False:
+                    cur.execute('''UPDATE panel SET deleted_at = %s WHERE id_pan = %s; ''', (datetime.now() , id_pan))
+                    conn.commit()
+                elif est_pan == True:
+                    cur.execute('''UPDATE panel SET deleted_at = %s WHERE id_pan = %s; ''', (None , id_pan))
+                    conn.commit()
+                    
+                # Si el panel existe, se verifica la tecnología
+                cur.execute('SELECT id_tec FROM tecnologia_panel WHERE nom_tec = %s;', (nom_tec,))
+                tecno = cur.fetchone()
+                pmax_cal_pan = vmp_pan * imp_pan
+                # Si la tecnología no existe, crearla
+                if not tecno:
+                    cur.execute('INSERT INTO tecnologia_panel (nom_tec) VALUES (%s) RETURNING id_tec;', (nom_tec,))
+                    id_tec = cur.fetchone()[0]
+                    conn.commit()
+                else:
+                    id_tec = tecno[0]
+                # Verificar si el valor calculado de Pmax es válido
+                if pmax_cal_pan > pmax_pan - 0.5 and pmax_cal_pan < pmax_pan + 0.5:
+                    
+                    # Actualizar los datos del panel
+                    cur.execute('''
+                        UPDATE panel
+                        SET ref_pan = %s, pmax_pan = %s, vmp_pan = %s, imp_pan = %s, voc_pan = %s, isc_pan = %s,
+                            lar_pan = %s, anc_pan = %s, id_tec = %s, den_pan = %s, status = %s, id_usu = %s
+                        WHERE id_pan = %s;
+                    ''', (ref_pan, pmax_pan, vmp_pan, imp_pan, voc_pan, isc_pan, lar_pan, anc_pan, id_tec, den_pan, est_pan, user_id, id_pan))
+                    conn.commit()
+
+                    success = '1'
+                    return redirect(url_for('update_panel', success=success))
+                else:
+                    error = '2'
+                    return redirect(url_for('update_panel', error=error))
+
+    return redirect(url_for('update_panel'))
+#list  baterias
+@app.route('/update_bateria')
+def update_bateria(): 
+    success = request.args.get('success')
+    user_id = session.get('user_id')
+    num_comp = 2
+    if user_id is None:
+        return redirect(url_for('inicio_sesion'))
+    # Conectar a la base de datos
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener más información del usuario
+            cur.execute('SELECT * FROM usuario WHERE id_usu = %s;', (user_id,))
+            user = cur.fetchone()
+            if user and user[4] == 'Administrador':
+                # Obtener todas las baterías
+                cur.execute('SELECT * FROM bateria;')
+                bat_usu = cur.fetchall()
+                
+                return render_template('creacion_de_componentes/index.html', success=success, user_comp=user, bat_usu=bat_usu, num_comp=num_comp)
+            else:
+                return redirect(url_for('inicio_principal'))
+
+
+#guardar el actualizado del bateria
+@app.route('/update_bateria_save', methods=['POST'])
+def update_bateria_save(): 
+    id_bat = request.form['id_bat']
+    ref_bat = request.form['ref_bat']
+    vol_bat = float(request.form['vol_bat'])
+    cap_bat = float(request.form['cap_bat'])
+    ene_bat = vol_bat * cap_bat
+    est_bat = request.form['est_bat']
+    # Mapeo de cadenas a booleanos
+    boolean_map = {'True': True, 'False': False}
+    est_bat = boolean_map.get(est_bat, False) 
+    user_id = session.get('user_id')
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:            
+            # Si la batería existe, actualizar los datos
+            cur.execute('SELECT * FROM bateria WHERE id_bat = %s;', (id_bat,))
+            bateria = cur.fetchone()
+            if bateria:
+                if est_bat == False:
+                    cur.execute(''' UPDATE bateria SET deleted_at = %s WHERE id_bat = %s; ''', (datetime.now() , id_bat))
+                    conn.commit()
+                elif est_bat == True:
+                    cur.execute(''' UPDATE bateria SET deleted_at = %s WHERE id_bat = %s; ''', (None , id_bat))
+                    conn.commit()
+                    
+                cur.execute(''' UPDATE bateria
+                    SET ref_bat = %s, vol_bat = %s, cap_bat = %s, ene_bat = %s, id_usu = %s,status = %s
+                    WHERE id_bat = %s;
+                ''', (ref_bat, vol_bat, cap_bat, ene_bat, user_id,est_bat, id_bat))
+                
+                conn.commit()
+                success = '1'
+                return redirect(url_for('update_bateria', success=success))
+
+    return redirect(url_for('update_bateria'))
+
+   
+@app.route('/update_inversor')
+def update_inversor():     
+    success = request.args.get('success')
+    error = request.args.get('error')
+    user_id = session.get('user_id')
+    num_comp=3
+    if user_id is None:
+        return redirect(url_for('inicio_sesion'))
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener más información del usuario
+            cur.execute('SELECT * FROM usuario WHERE id_usu = %s;', (user_id,))
+            user = cur.fetchone()
+
+            if user and user[4] == 'Administrador':
+                # Obtener todos los inversores
+                cur.execute('SELECT * FROM inversor;')
+                inv_usu = cur.fetchall()
+                
+                return render_template('creacion_de_componentes/index.html', error=error, success=success, user_comp=user, inv_usu=inv_usu, num_comp=num_comp)
+            else:
+                return redirect(url_for('inicio_principal'))
+
+
+#guardar el actualizado del inversor
+@app.route('/update_inversor_save', methods=['POST'])
+def update_inversor_save(): 
+    id_inv = request.form['id_inv']
+    ref_inv = request.form['ref_inv']
+    reg_inv = request.form['reg_inv']
+    est_inv = request.form['est_inv']
+    ent_inv = request.form['ent_inv']
+    # Mapeo de cadenas a booleanos
+    boolean_map = {'True': True, 'False': False}
+    est_inv = boolean_map.get(est_inv, False) 
+    pmax_inv = float(request.form['pmax_inv'])
+    vme_inv = float(request.form['vme_inv'])
+    ime_inv = float(request.form['ime_inv'])
+    vsa_inv = float(request.form['vsa_inv'])
+    ond_inv = request.form['ond_inv']
+    efi_inv = float(request.form['efi_inv'])
+    user_id = session.get('user_id')
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            
+            # Si el inversor existe, actualizar los datos
+            cur.execute('SELECT * FROM inversor WHERE id_inv = %s;', (id_inv,))
+            inversor = cur.fetchone()
+
+            if inversor:
+                
+                if est_inv == False:
+                    cur.execute(''' UPDATE inversor SET deleted_at = %s WHERE id_inv = %s; ''', (datetime.now() , id_inv))
+                    conn.commit()
+                if est_inv == True:
+                    cur.execute(''' UPDATE inversor SET deleted_at = %s WHERE id_inv = %s; ''', (None, id_inv))
+                    conn.commit()
+                    
+                # Verificar la potencia máxima calculada
+                pmax_cal_inv = vme_inv * ime_inv
+                if pmax_cal_inv > pmax_inv - 0.6 and pmax_cal_inv < pmax_inv + 0.6:
+                    cur.execute('''
+                        UPDATE inversor
+                        SET ref_inv = %s, ent_inv = %s, pmax_inv = %s, vme_inv = %s, ime_inv = %s,
+                            vsa_inv = %s, ond_inv = %s, efi_inv = %s, id_usu = %s,reg_inv = %s,status=%s
+                        WHERE id_inv = %s;
+                    ''', (ref_inv, ent_inv, pmax_inv, vme_inv, ime_inv, vsa_inv, ond_inv, efi_inv, user_id,reg_inv,est_inv, id_inv))
+                    
+                    conn.commit()
+                    success = '1'
+                    return redirect(url_for('update_inversor', success=success))
+                else:
+                    error = '2'
+                    return redirect(url_for('update_inversor', error=error))
+
+    return redirect(url_for('update_inversor'))
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
