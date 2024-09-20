@@ -84,22 +84,8 @@ $(document).ready(function() {
         }
     });
 });
-// ----------------CREACION DE PROYECTOS ----------------
-//modal del proyecto
-$(document).ready(function() {
-    $('#modal_proyecto').off('click').on('click', function(event) {
-        event.preventDefault();
-        
-        // Abre el modal si no está ya visible
-        if (!$('#modalProyecto').hasClass('show')) {
-            $.get($(this).attr('href'), function(data) {
-                $('#modalContent').html(data);
-                $('#modalProyecto').modal('show');
-            });
-        }
-    });
-});
 
+// ----------------CREACION DE COMPONENTES ----------------
 //modal del panel
 $(document).ready(function() {
     $('#modal_panel').off('click').on('click', function(event) {
@@ -137,6 +123,36 @@ $(document).ready(function() {
             $.get($(this).attr('href'), function(data) {
                 $('#modalContent').html(data);
                 $('#modalInversor').modal('show');
+            });
+        }
+    });
+});
+
+//modal del regulador
+$(document).ready(function() {
+    $('#modal_regulador').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#modal_regulador').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalRegulador').modal('show');
+            });
+        }
+    });
+});
+
+// ----------------CREACION DE PROYECTOS ----------------
+//modal del proyecto
+$(document).ready(function() {
+    $('#modal_proyecto').off('click').on('click', function(event) {
+        event.preventDefault();
+        
+        // Abre el modal si no está ya visible
+        if (!$('#modalProyecto').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalProyecto').modal('show');
             });
         }
     });

@@ -643,6 +643,11 @@ def ver_modal_inversor():
 def ver_modal_bateria():
     return render_template('creacion_de_componentes/crea_bateria.html')
 
+#mostrar modal regulador
+@app.route('/ver_modal_regulador')
+def ver_modal_regulador():
+    return render_template('creacion_de_componentes/crea_regulador.html')
+
 # Crear panel modal       
 @app.route('/add_panel', methods=['POST'])
 def add_panel():
@@ -766,6 +771,41 @@ def add_bateria():
             conn.commit()  # Confirmar la inserción
 
             return 'success'
+
+# Crear regulador modal
+@app.route('/add_regulador', methods=['POST'])
+def add_regulador():
+    ref_reg = request.form['ref_reg']
+    vol_reg = float(request.form['vol_reg'])
+    cor_reg = float(request.form['cor_reg'])
+    pot_reg = float(request.form['pot_reg'])  
+    idu_reg = request.form['idu_reg']
+    user_id = session.get('user_id')
+    
+    pot_cal_reg = vol_reg * cor_reg  # Calcula la potencia máxima
+
+    # Conectar a la base de datos y buscar si el regulador ya existe
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Buscar el regulador en la base de datos
+            cur.execute('SELECT * FROM regulador WHERE idu_reg = %s AND status = %s;', (idu_reg, True))
+            regulador = cur.fetchone()
+
+            # Verificar si los datos ya existen en la base de datos
+            if regulador is not None:
+                return 'exist'
+
+            # Verificar la potencia máxima calculada
+            if pot_cal_reg > pot_reg - 0.6 and pot_cal_reg < pot_reg + 0.6:
+                # Insertar el nuevo regulador
+                cur.execute('''
+                INSERT INTO regulador (ref_reg, idu_reg, vol_reg, cor_reg, pot_reg, id_usu)
+                VALUES (%s, %s, %s, %s, %s, %s);
+                ''', (ref_reg, idu_reg, vol_reg, cor_reg, pot_reg, user_id))
+                conn.commit()  # Confirmar la inserción
+                return 'success'
+            else:
+                return 'error'
 
 
 #Lista de componentes index
@@ -1025,6 +1065,80 @@ def update_inversor_save():
 
     return redirect(url_for('update_inversor'))
     
+
+@app.route('/update_regulador')
+def update_regulador():     
+    success = request.args.get('success')
+    error = request.args.get('error')
+    user_id = session.get('user_id')
+    num_comp=4
+    if user_id is None:
+        return redirect(url_for('inicio_sesion'))
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener más información del usuario
+            cur.execute('SELECT * FROM usuario WHERE id_usu = %s;', (user_id,))
+            user = cur.fetchone()
+
+            if user and user[4] == 'Administrador':
+                # Obtener todos los reguladores
+                cur.execute('SELECT * FROM regulador;')
+                reg_usu = cur.fetchall()
+                
+                return render_template('creacion_de_componentes/index.html', error=error, success=success, user_comp=user, reg_usu=reg_usu, num_comp=num_comp)
+            else:
+                return redirect(url_for('inicio_principal'))
+
+
+#guardar el actualizado del regulador
+@app.route('/update_regulador_save', methods=['POST'])
+def update_regulador_save(): 
+    id_reg = request.form['id_reg']
+    ref_reg = request.form['ref_reg']
+    est_reg = request.form['est_reg']
+    # Mapeo de cadenas a booleanos
+    boolean_map = {'True': True, 'False': False}
+    est_reg = boolean_map.get(est_reg, False) 
+    pot_reg = float(request.form['pot_reg'])
+    vol_reg = float(request.form['vol_reg'])
+    cor_reg = float(request.form['cor_reg'])
+    user_id = session.get('user_id')
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            
+            # Si el regulador existe, actualizar los datos
+            cur.execute('SELECT * FROM regulador WHERE id_reg = %s;', (id_reg,))
+            regulador = cur.fetchone()
+
+            if regulador:
+                
+                if est_reg == False:
+                    cur.execute(''' UPDATE regulador SET deleted_at = %s WHERE id_reg = %s; ''', (datetime.now() , id_reg))
+                    conn.commit()
+                if est_reg == True:
+                    cur.execute(''' UPDATE regulador SET deleted_at = %s WHERE id_reg = %s; ''', (None, id_reg))
+                    conn.commit()
+                    
+                # Verificar la potencia máxima calculada
+                pot_cal_reg = vol_reg * cor_reg
+                if pot_cal_reg > pot_reg - 0.6 and pot_cal_reg < pot_reg + 0.6:
+                    cur.execute('''
+                        UPDATE regulador
+                        SET ref_reg = %s, pot_reg = %s, vol_reg = %s, cor_reg = %s,
+                            id_usu = %s,status=%s
+                        WHERE id_reg = %s;
+                    ''', (ref_reg,  pot_reg, vol_reg, cor_reg,user_id,est_reg, id_reg))
+                    
+                    conn.commit()
+                    success = '1'
+                    return redirect(url_for('update_regulador', success=success))
+                else:
+                    error = '2'
+                    return redirect(url_for('update_regulador', error=error))
+
+    return redirect(url_for('update_regulador'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -44,10 +44,7 @@
                                     } else if (response === 'exist') {
                                         // Los datos ya existen: mostrar alerta
                                         $('#alertContainer').html('<div class="alert alert-danger">El bateria que intentas agregar ya existe.</div>');
-                                    } else if (response === 'error') {
-                                        // Los datos ya existen: mostrar alerta
-                                        $('#alertContainer').html('<div class="alert alert-danger">El bateria no cumple con el margen de error.</div>');
-                                    }
+                                    } 
                                 },
                                 error: function() {
                                     // Error en la solicitud AJAX

@@ -2,8 +2,45 @@
 
 <body class="body-inicio">
     {% block navbar %} {% include 'layouts/navbar.html' %} {% endblock %}
-    <section class="align-items-center justify-content-center">
-        
+    <section class="align-items-center justify-content-center" >
+        <div id="carouselExampleCaptions" class="carousel slide">
+            <div class="carousel-indicators">
+              <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+              <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+              <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner" style="margin-top: 4rem;height: 27rem;">
+              <div class="carousel-item active">
+                <img src="/static/images/Fotos/Paneles.jpg" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                    <h3 class="mb-3">Texto un poco más arriba 1</h3>
+                    <p>Descripción opcional</p>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <img src="/static/images/Fotos/Paneles.jpg" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                    <h3 class="mb-3">Texto un poco más arriba 1</h3>
+                    <p>Descripción opcional</p>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <img src="/static/images/Fotos/Paneles.jpg" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                    <h3 class="mb-3">Texto un poco más arriba 1</h3>
+                    <p>Descripción opcional</p>
+                </div>
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+        </div>
     </section>
     <script rel="stylesheet " src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js "></script>
     <script src="{{ url_for( 'static', filename='js/bootstrap.min.js' ) }} "></script>
