@@ -818,8 +818,70 @@ def component_list():
     return redirect(url_for('update_panel'))
     
 #list  paneles
-@app.route('/update_panel')
-def update_panel(): 
+@app.route('/update_panel', methods=['GET', 'POST'])
+def update_panel():
+    if request.method == 'POST': 
+        id_pan = request.form['id_pan']
+        ref_pan = request.form['ref_pan']
+        est_pan = request.form['est_pan']
+        # Mapeo de cadenas a booleanos
+        boolean_map = {'True': True, 'False': False}
+        est_pan = boolean_map.get(est_pan, False) 
+        pmax_pan = float(request.form['pmax_pan'])
+        vmp_pan = float(request.form['vmp_pan'])
+        imp_pan = float(request.form['imp_pan'])
+        voc_pan = float(request.form['voc_pan'])
+        isc_pan = float(request.form['isc_pan'])
+        lar_pan = float(request.form['lar_pan'])
+        anc_pan = float(request.form['anc_pan'])
+        are_pan = lar_pan * anc_pan
+        nom_tec = request.form['tec_pan']
+        den_pan = pmax_pan / are_pan
+        user_id = session.get('user_id')
+
+        # Conectar a la base de datos
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener información del panel a partir de su ID
+                cur.execute('SELECT * FROM panel WHERE id_pan = %s;', (id_pan,))
+                panel_data = cur.fetchone()
+                if panel_data:
+                    
+                    if est_pan == False:
+                        cur.execute('''UPDATE panel SET deleted_at = %s WHERE id_pan = %s; ''', (datetime.now() , id_pan))
+                        conn.commit()
+                    elif est_pan == True:
+                        cur.execute('''UPDATE panel SET deleted_at = %s WHERE id_pan = %s; ''', (None , id_pan))
+                        conn.commit()
+                        
+                    # Si el panel existe, se verifica la tecnología
+                    cur.execute('SELECT id_tec FROM tecnologia_panel WHERE nom_tec = %s;', (nom_tec,))
+                    tecno = cur.fetchone()
+                    pmax_cal_pan = vmp_pan * imp_pan
+                    # Si la tecnología no existe, crearla
+                    if not tecno:
+                        cur.execute('INSERT INTO tecnologia_panel (nom_tec) VALUES (%s) RETURNING id_tec;', (nom_tec,))
+                        id_tec = cur.fetchone()[0]
+                        conn.commit()
+                    else:
+                        id_tec = tecno[0]
+                    # Verificar si el valor calculado de Pmax es válido
+                    if pmax_cal_pan > pmax_pan - 0.5 and pmax_cal_pan < pmax_pan + 0.5:
+                        
+                        # Actualizar los datos del panel
+                        cur.execute('''
+                            UPDATE panel
+                            SET ref_pan = %s, pmax_pan = %s, vmp_pan = %s, imp_pan = %s, voc_pan = %s, isc_pan = %s,
+                                lar_pan = %s, anc_pan = %s, id_tec = %s, den_pan = %s, status = %s, id_usu = %s
+                            WHERE id_pan = %s;
+                        ''', (ref_pan, pmax_pan, vmp_pan, imp_pan, voc_pan, isc_pan, lar_pan, anc_pan, id_tec, den_pan, est_pan, user_id, id_pan))
+                        conn.commit()
+
+                        success = '1'
+                        return redirect(url_for('update_panel', success=success))
+                    else:
+                        error = '2'
+                        return redirect(url_for('update_panel', error=error))
     success = request.args.get('success')
     error = request.args.get('error')
     user_id = session.get('user_id')
@@ -857,75 +919,45 @@ def update_panel():
             else:
                 return redirect(url_for('inicio_principal'))
 
-#guardar elactualizado del panel
-@app.route('/update_panel_save', methods=['POST'])
-def update_panel_save():
-    id_pan = request.form['id_pan']
-    ref_pan = request.form['ref_pan']
-    est_pan = request.form['est_pan']
-    # Mapeo de cadenas a booleanos
-    boolean_map = {'True': True, 'False': False}
-    est_pan = boolean_map.get(est_pan, False) 
-    pmax_pan = float(request.form['pmax_pan'])
-    vmp_pan = float(request.form['vmp_pan'])
-    imp_pan = float(request.form['imp_pan'])
-    voc_pan = float(request.form['voc_pan'])
-    isc_pan = float(request.form['isc_pan'])
-    lar_pan = float(request.form['lar_pan'])
-    anc_pan = float(request.form['anc_pan'])
-    are_pan = lar_pan * anc_pan
-    nom_tec = request.form['tec_pan']
-    den_pan = pmax_pan / are_pan
-    user_id = session.get('user_id')
 
-    # Conectar a la base de datos
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            # Obtener información del panel a partir de su ID
-            cur.execute('SELECT * FROM panel WHERE id_pan = %s;', (id_pan,))
-            panel_data = cur.fetchone()
-            if panel_data:
-                
-                if est_pan == False:
-                    cur.execute('''UPDATE panel SET deleted_at = %s WHERE id_pan = %s; ''', (datetime.now() , id_pan))
-                    conn.commit()
-                elif est_pan == True:
-                    cur.execute('''UPDATE panel SET deleted_at = %s WHERE id_pan = %s; ''', (None , id_pan))
-                    conn.commit()
-                    
-                # Si el panel existe, se verifica la tecnología
-                cur.execute('SELECT id_tec FROM tecnologia_panel WHERE nom_tec = %s;', (nom_tec,))
-                tecno = cur.fetchone()
-                pmax_cal_pan = vmp_pan * imp_pan
-                # Si la tecnología no existe, crearla
-                if not tecno:
-                    cur.execute('INSERT INTO tecnologia_panel (nom_tec) VALUES (%s) RETURNING id_tec;', (nom_tec,))
-                    id_tec = cur.fetchone()[0]
-                    conn.commit()
-                else:
-                    id_tec = tecno[0]
-                # Verificar si el valor calculado de Pmax es válido
-                if pmax_cal_pan > pmax_pan - 0.5 and pmax_cal_pan < pmax_pan + 0.5:
-                    
-                    # Actualizar los datos del panel
-                    cur.execute('''
-                        UPDATE panel
-                        SET ref_pan = %s, pmax_pan = %s, vmp_pan = %s, imp_pan = %s, voc_pan = %s, isc_pan = %s,
-                            lar_pan = %s, anc_pan = %s, id_tec = %s, den_pan = %s, status = %s, id_usu = %s
-                        WHERE id_pan = %s;
-                    ''', (ref_pan, pmax_pan, vmp_pan, imp_pan, voc_pan, isc_pan, lar_pan, anc_pan, id_tec, den_pan, est_pan, user_id, id_pan))
-                    conn.commit()
-
-                    success = '1'
-                    return redirect(url_for('update_panel', success=success))
-                else:
-                    error = '2'
-                    return redirect(url_for('update_panel', error=error))
-
-    return redirect(url_for('update_panel'))
 #list  baterias
-@app.route('/update_bateria')
-def update_bateria(): 
+@app.route('/update_bateria', methods=['GET', 'POST'])
+def update_bateria():
+    if request.method == 'POST': 
+        id_bat = request.form['id_bat']
+        ref_bat = request.form['ref_bat']
+        vol_bat = float(request.form['vol_bat'])
+        cap_bat = float(request.form['cap_bat'])
+        ene_bat = vol_bat * cap_bat
+        est_bat = request.form['est_bat']
+        # Mapeo de cadenas a booleanos
+        boolean_map = {'True': True, 'False': False}
+        est_bat = boolean_map.get(est_bat, False) 
+        user_id = session.get('user_id')
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Si la batería existe, actualizar los datos
+                cur.execute('SELECT * FROM bateria WHERE id_bat = %s;', (id_bat,))
+                bateria = cur.fetchone()
+                if bateria:
+                    if est_bat == False:
+                        cur.execute(''' UPDATE bateria SET deleted_at = %s WHERE id_bat = %s; ''', (datetime.now() , id_bat))
+                        conn.commit()
+                    elif est_bat == True:
+                        cur.execute(''' UPDATE bateria SET deleted_at = %s WHERE id_bat = %s; ''', (None , id_bat))
+                        conn.commit()
+                        
+                    cur.execute(''' UPDATE bateria
+                        SET ref_bat = %s, vol_bat = %s, cap_bat = %s, ene_bat = %s, id_usu = %s,status = %s
+                        WHERE id_bat = %s;
+                    ''', (ref_bat, vol_bat, cap_bat, ene_bat, user_id,est_bat, id_bat))
+                    
+                    conn.commit()
+                    success = '1'
+                    return redirect(url_for('update_bateria', success=success))
+
+        
     success = request.args.get('success')
     user_id = session.get('user_id')
     num_comp = 2
@@ -947,47 +979,59 @@ def update_bateria():
                 return redirect(url_for('inicio_principal'))
 
 
-#guardar el actualizado del bateria
-@app.route('/update_bateria_save', methods=['POST'])
-def update_bateria_save(): 
-    id_bat = request.form['id_bat']
-    ref_bat = request.form['ref_bat']
-    vol_bat = float(request.form['vol_bat'])
-    cap_bat = float(request.form['cap_bat'])
-    ene_bat = vol_bat * cap_bat
-    est_bat = request.form['est_bat']
-    # Mapeo de cadenas a booleanos
-    boolean_map = {'True': True, 'False': False}
-    est_bat = boolean_map.get(est_bat, False) 
-    user_id = session.get('user_id')
-
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:            
-            # Si la batería existe, actualizar los datos
-            cur.execute('SELECT * FROM bateria WHERE id_bat = %s;', (id_bat,))
-            bateria = cur.fetchone()
-            if bateria:
-                if est_bat == False:
-                    cur.execute(''' UPDATE bateria SET deleted_at = %s WHERE id_bat = %s; ''', (datetime.now() , id_bat))
-                    conn.commit()
-                elif est_bat == True:
-                    cur.execute(''' UPDATE bateria SET deleted_at = %s WHERE id_bat = %s; ''', (None , id_bat))
-                    conn.commit()
-                    
-                cur.execute(''' UPDATE bateria
-                    SET ref_bat = %s, vol_bat = %s, cap_bat = %s, ene_bat = %s, id_usu = %s,status = %s
-                    WHERE id_bat = %s;
-                ''', (ref_bat, vol_bat, cap_bat, ene_bat, user_id,est_bat, id_bat))
-                
-                conn.commit()
-                success = '1'
-                return redirect(url_for('update_bateria', success=success))
-
-    return redirect(url_for('update_bateria'))
-
    
-@app.route('/update_inversor')
-def update_inversor():     
+@app.route('/update_inversor', methods=['GET', 'POST'])
+def update_inversor(): 
+    if request.method == 'POST': 
+        id_inv = request.form['id_inv']
+        ref_inv = request.form['ref_inv']
+        reg_inv = request.form['reg_inv']
+        est_inv = request.form['est_inv']
+        ent_inv = request.form['ent_inv']
+        # Mapeo de cadenas a booleanos
+        boolean_map = {'True': True, 'False': False}
+        est_inv = boolean_map.get(est_inv, False) 
+        pmax_inv = float(request.form['pmax_inv'])
+        vme_inv = float(request.form['vme_inv'])
+        ime_inv = float(request.form['ime_inv'])
+        vsa_inv = float(request.form['vsa_inv'])
+        ond_inv = request.form['ond_inv']
+        efi_inv = float(request.form['efi_inv'])
+        user_id = session.get('user_id')
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                
+                # Si el inversor existe, actualizar los datos
+                cur.execute('SELECT * FROM inversor WHERE id_inv = %s;', (id_inv,))
+                inversor = cur.fetchone()
+
+                if inversor:
+                    
+                    if est_inv == False:
+                        cur.execute(''' UPDATE inversor SET deleted_at = %s WHERE id_inv = %s; ''', (datetime.now() , id_inv))
+                        conn.commit()
+                    if est_inv == True:
+                        cur.execute(''' UPDATE inversor SET deleted_at = %s WHERE id_inv = %s; ''', (None, id_inv))
+                        conn.commit()
+                        
+                    # Verificar la potencia máxima calculada
+                    pmax_cal_inv = vme_inv * ime_inv
+                    if pmax_cal_inv > pmax_inv - 0.6 and pmax_cal_inv < pmax_inv + 0.6:
+                        cur.execute('''
+                            UPDATE inversor
+                            SET ref_inv = %s, ent_inv = %s, pmax_inv = %s, vme_inv = %s, ime_inv = %s,
+                                vsa_inv = %s, ond_inv = %s, efi_inv = %s, id_usu = %s,reg_inv = %s,status=%s
+                            WHERE id_inv = %s;
+                        ''', (ref_inv, ent_inv, pmax_inv, vme_inv, ime_inv, vsa_inv, ond_inv, efi_inv, user_id,reg_inv,est_inv, id_inv))
+                        
+                        conn.commit()
+                        success = '1'
+                        return redirect(url_for('update_inversor', success=success))
+                    else:
+                        error = '2'
+                        return redirect(url_for('update_inversor', error=error))
+
     success = request.args.get('success')
     error = request.args.get('error')
     user_id = session.get('user_id')
@@ -1011,63 +1055,53 @@ def update_inversor():
                 return redirect(url_for('inicio_principal'))
 
 
-#guardar el actualizado del inversor
-@app.route('/update_inversor_save', methods=['POST'])
-def update_inversor_save(): 
-    id_inv = request.form['id_inv']
-    ref_inv = request.form['ref_inv']
-    reg_inv = request.form['reg_inv']
-    est_inv = request.form['est_inv']
-    ent_inv = request.form['ent_inv']
-    # Mapeo de cadenas a booleanos
-    boolean_map = {'True': True, 'False': False}
-    est_inv = boolean_map.get(est_inv, False) 
-    pmax_inv = float(request.form['pmax_inv'])
-    vme_inv = float(request.form['vme_inv'])
-    ime_inv = float(request.form['ime_inv'])
-    vsa_inv = float(request.form['vsa_inv'])
-    ond_inv = request.form['ond_inv']
-    efi_inv = float(request.form['efi_inv'])
-    user_id = session.get('user_id')
+@app.route('/update_regulador', methods=['GET', 'POST'])
+def update_regulador():  
+    if request.method == 'POST':
+        id_reg = request.form['id_reg']
+        ref_reg = request.form['ref_reg']
+        est_reg = request.form['est_reg']
+        # Mapeo de cadenas a booleanos
+        boolean_map = {'True': True, 'False': False}
+        est_reg = boolean_map.get(est_reg, False) 
+        pot_reg = float(request.form['pot_reg'])
+        vol_reg = float(request.form['vol_reg'])
+        cor_reg = float(request.form['cor_reg'])
+        user_id = session.get('user_id')
 
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            
-            # Si el inversor existe, actualizar los datos
-            cur.execute('SELECT * FROM inversor WHERE id_inv = %s;', (id_inv,))
-            inversor = cur.fetchone()
-
-            if inversor:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
                 
-                if est_inv == False:
-                    cur.execute(''' UPDATE inversor SET deleted_at = %s WHERE id_inv = %s; ''', (datetime.now() , id_inv))
-                    conn.commit()
-                if est_inv == True:
-                    cur.execute(''' UPDATE inversor SET deleted_at = %s WHERE id_inv = %s; ''', (None, id_inv))
-                    conn.commit()
-                    
-                # Verificar la potencia máxima calculada
-                pmax_cal_inv = vme_inv * ime_inv
-                if pmax_cal_inv > pmax_inv - 0.6 and pmax_cal_inv < pmax_inv + 0.6:
-                    cur.execute('''
-                        UPDATE inversor
-                        SET ref_inv = %s, ent_inv = %s, pmax_inv = %s, vme_inv = %s, ime_inv = %s,
-                            vsa_inv = %s, ond_inv = %s, efi_inv = %s, id_usu = %s,reg_inv = %s,status=%s
-                        WHERE id_inv = %s;
-                    ''', (ref_inv, ent_inv, pmax_inv, vme_inv, ime_inv, vsa_inv, ond_inv, efi_inv, user_id,reg_inv,est_inv, id_inv))
-                    
-                    conn.commit()
-                    success = '1'
-                    return redirect(url_for('update_inversor', success=success))
-                else:
-                    error = '2'
-                    return redirect(url_for('update_inversor', error=error))
+                # Si el regulador existe, actualizar los datos
+                cur.execute('SELECT * FROM regulador WHERE id_reg = %s;', (id_reg,))
+                regulador = cur.fetchone()
 
-    return redirect(url_for('update_inversor'))
-    
-
-@app.route('/update_regulador')
-def update_regulador():     
+                if regulador:
+                    
+                    if est_reg == False:
+                        cur.execute(''' UPDATE regulador SET deleted_at = %s WHERE id_reg = %s; ''', (datetime.now() , id_reg))
+                        conn.commit()
+                    if est_reg == True:
+                        cur.execute(''' UPDATE regulador SET deleted_at = %s WHERE id_reg = %s; ''', (None, id_reg))
+                        conn.commit()
+                        
+                    # Verificar la potencia máxima calculada
+                    pot_cal_reg = vol_reg * cor_reg
+                    if pot_cal_reg > pot_reg - 0.6 and pot_cal_reg < pot_reg + 0.6:
+                        cur.execute('''
+                            UPDATE regulador
+                            SET ref_reg = %s, pot_reg = %s, vol_reg = %s, cor_reg = %s,
+                                id_usu = %s,status=%s
+                            WHERE id_reg = %s;
+                        ''', (ref_reg,  pot_reg, vol_reg, cor_reg,user_id,est_reg, id_reg))
+                        
+                        conn.commit()
+                        success = '1'
+                        return redirect(url_for('update_regulador', success=success))
+                    else:
+                        error = '2'
+                        return redirect(url_for('update_regulador', error=error))
+      
     success = request.args.get('success')
     error = request.args.get('error')
     user_id = session.get('user_id')
@@ -1090,55 +1124,6 @@ def update_regulador():
             else:
                 return redirect(url_for('inicio_principal'))
 
-
-#guardar el actualizado del regulador
-@app.route('/update_regulador_save', methods=['POST'])
-def update_regulador_save(): 
-    id_reg = request.form['id_reg']
-    ref_reg = request.form['ref_reg']
-    est_reg = request.form['est_reg']
-    # Mapeo de cadenas a booleanos
-    boolean_map = {'True': True, 'False': False}
-    est_reg = boolean_map.get(est_reg, False) 
-    pot_reg = float(request.form['pot_reg'])
-    vol_reg = float(request.form['vol_reg'])
-    cor_reg = float(request.form['cor_reg'])
-    user_id = session.get('user_id')
-
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            
-            # Si el regulador existe, actualizar los datos
-            cur.execute('SELECT * FROM regulador WHERE id_reg = %s;', (id_reg,))
-            regulador = cur.fetchone()
-
-            if regulador:
-                
-                if est_reg == False:
-                    cur.execute(''' UPDATE regulador SET deleted_at = %s WHERE id_reg = %s; ''', (datetime.now() , id_reg))
-                    conn.commit()
-                if est_reg == True:
-                    cur.execute(''' UPDATE regulador SET deleted_at = %s WHERE id_reg = %s; ''', (None, id_reg))
-                    conn.commit()
-                    
-                # Verificar la potencia máxima calculada
-                pot_cal_reg = vol_reg * cor_reg
-                if pot_cal_reg > pot_reg - 0.6 and pot_cal_reg < pot_reg + 0.6:
-                    cur.execute('''
-                        UPDATE regulador
-                        SET ref_reg = %s, pot_reg = %s, vol_reg = %s, cor_reg = %s,
-                            id_usu = %s,status=%s
-                        WHERE id_reg = %s;
-                    ''', (ref_reg,  pot_reg, vol_reg, cor_reg,user_id,est_reg, id_reg))
-                    
-                    conn.commit()
-                    success = '1'
-                    return redirect(url_for('update_regulador', success=success))
-                else:
-                    error = '2'
-                    return redirect(url_for('update_regulador', error=error))
-
-    return redirect(url_for('update_regulador'))
 
 if __name__ == '__main__':
     app.run(debug=True)
