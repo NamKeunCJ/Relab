@@ -21,48 +21,53 @@
         });
     });
 </script>
-<div class="modal fade" id="projectSerie{{ sarr.id_sarr }}" tabindex="-1" role="dialog" aria-labelledby="ProjectArregloModalLabel" aria-hidden="true">
+<div class="modal fade" id="projectSerie{{ sarr[0] }}" tabindex="-1" role="dialog" aria-labelledby="ProjectArregloModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Informacion del panel</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="form-ser-pan" method="POST" action="{{ url_for('edit_panel') }}">
-                <div class="modal-body">
-                    <h5 style="margin-bottom: 1rem;"><b> Informacion del panel:  </b></h5>
-                    {%if info is not none %} {% if info.Panel.est_pan=='Deshabilitado'%}
-                    <div class="alert alert-danger">El {{info.Panel.ref_pan}} con identificacion {{info.Panel.idu_pan}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro panel.</div>
-                    {% endif %}
-                    <table class="table table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Referencia del Panel</th>
-                                <th>Potencia Máxima (Pmax)</th>
-                                <th>Voltaje Máxima (Vmp)</th>
-                                <th>Corriente Máxima (Imp)</th>
-                                <th>Voltaje Circuito Abierto (Voc)</th>
-                                <th>Corriente Corto Circuito (Isc)</th>
-                                <th>Area del panel m^2</th>
-                                <th>Tecnología del Panel</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{{info.Panel.ref_pan}}</td>
-                                <td>{{info.Panel.pmax_pan}}</td>
-                                <td>{{info.Panel.vmp_pan}}</td>
-                                <td>{{info.Panel.imp_pan}}</td>
-                                <td>{{info.Panel.voc_pan}}</td>
-                                <td>{{info.Panel.isc_pan}}</td>
-                                <td>{{info.Panel.are_pan}}</td>
-                                <td>{{info.TecnologiaPanel.nom_tec}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% else %} No hay informacion para mostrar en este momento. {%endif%}
-                    <input type="hidden" name="id_sarr" value="{{ sarr.id_sarr }}">
-                    <h5 style="margin-top: 2rem; margin-bottom: 2rem;"><b> Escoge el panel que se requiera:  </b></h5>
+            <form id="form-ser-pan" method="POST" action="/edit_panel">                
+                <div class="modal-body" style="padding: 2rem;">
+                    <div>
+                        {%if info is not none %} 
+                            {% if info[15]==false%}
+                                <div class="alert alert-danger">El {{info[1]}} con identificacion {{info[12]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro panel.</div>
+                            {% endif %}                        
+                            <table class="table table-responsive" >
+                                <thead>
+                                    <tr>
+                                        <th>Referencia del Panel</th>
+                                        <th>Potencia Máxima (Pmax)</th>
+                                        <th>Voltaje Máxima (Vmp)</th>
+                                        <th>Corriente Máxima (Imp)</th>
+                                        <th>Voltaje Circuito Abierto (Voc)</th>
+                                        <th>Corriente Corto Circuito (Isc)</th>
+                                        <th>Area del panel m^2</th>
+                                        <th>Tecnología del Panel</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{info[1]}}</td>
+                                        <td>{{info[2]}}</td>
+                                        <td>{{info[3]}}</td>
+                                        <td>{{info[4]}}</td>
+                                        <td>{{info[5]}}</td>
+                                        <td>{{info[6]}}</td>
+                                        <td>{{info[9]}}</td>
+                                        <td>{{info[20]}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% else %} 
+                            No hay informacion para mostrar en este momento. 
+                        {%endif%}
+                    </div>
+                    <h5 style="margin-bottom: 1rem;"><b> Informacion del panel:  </b></h5>                    
+                    <input type="hidden" name="id_sarr" value="{{ sarr[0] }}">
+                    <h5 style="margin-top: 2rem; margin-bottom: 2rem;"><b> Escoge el panel que se requiera:  </b></h5>                    
                     <table id="tabla" class="table table-responsive">
                         <thead>
                             <tr>
@@ -78,22 +83,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {%for panel, tecnologia in pan%}
+                            {%for panel in pan%}
                             <tr>
-                                <td>{{panel.ref_pan}}</td>
-                                <td>{{panel.pmax_pan}}</td>
-                                <td>{{panel.vmp_pan}}</td>
-                                <td>{{panel.imp_pan}}</td>
-                                <td>{{panel.voc_pan}}</td>
-                                <td>{{panel.isc_pan}}</td>
-                                <td>{{panel.are_pan}}</td>
-                                <td>{{tecnologia.nom_tec}}</td>
-                                <td><input class="form-check-input" type="radio" name="id_pan" id="id_pan" value="{{panel.id_pan}}" required></td>
+                                <td>{{panel[1]}}</td>
+                                <td>{{panel[2]}}</td>
+                                <td>{{panel[3]}}</td>
+                                <td>{{panel[4]}}</td>
+                                <td>{{panel[5]}}</td>
+                                <td>{{panel[6]}}</td>
+                                <td>{{panel[9]}}</td>
+                                <td>{{panel[20]}}</td>
+                                <td><input class="form-check-input" type="radio" name="id_pan" id="id_pan" value="{{panel[0]}}" required></td>
                             </tr>
                             {%endfor%}
                         </tbody>
                     </table>
-                    <div id="alertContainer" style="margin-top:2rem"></div>
+                    <div id="alertContainer" style="margin-top:2rem"></div>                    
                 </div>
                 <script>
                     //alerta danger panel

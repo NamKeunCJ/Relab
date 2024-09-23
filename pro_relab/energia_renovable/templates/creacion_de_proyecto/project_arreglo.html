@@ -6,11 +6,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             {% if pro %}
-            <form method="POST" action="{{ url_for('add_arreglo_project') }}">
+            <form method="POST" action="/add_arreglo_project">
                 <div class="modal-body">
-                    <input type="hidden" name="id_pro" value="{{ pro.id_pro }}">
-                    <input type="hidden" name="id_inv" value="{{ pro.id_inv }}">
-                    <h5 style="margin-bottom: 3rem;"><b> •Nombre del proyecto ({{ pro.nom_pro }}) </b></h5>
+                    <input type="hidden" name="id_pro" value="{{ pro[0] }}">
+                    <input type="hidden" name="id_inv" value="{{ pro[4 ]}}">
+                    <h5 style="margin-bottom: 3rem;"><b> •Nombre del proyecto ({{ pro[1] }}) </b></h5>
                     <div class="form-group mb-3">
                         <label for="num_ser">¿Cuantas series tendrá el arreglo?:</label>
                         <input type="number" class="form-control" id="num_ser" name="num_ser" min="1" max="10" required>

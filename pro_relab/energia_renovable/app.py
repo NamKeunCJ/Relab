@@ -569,55 +569,6 @@ def irradiance_prediction():
     prediction_g = 1
     print (prediction_g)
     return render_template('informe_y_Estadistica/date_davis.html',prediction_g = prediction_g)
-#------------------------Craeacion de proyectos--------------------------
-#mostrar modal proyecto
-@app.route('/ver_modal_proyecto')
-def ver_modal_proyecto():   
-    return render_template('creacion_de_proyecto/crea_proyecto.html')
-
-#Crear Proyecto
-@app.route('/add_proyecto', methods=['POST'])
-def add_proyecto():
-    nom_pro = request.form['nom_pro']
-    cred_pro = request.form['cred_pro']
-    cbat_pro = request.form['cbat_pro']
-    user_id = session.get('user_id')
-
-    # Conectar a la base de datos y buscar si el proyecto ya existe
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute('SELECT id_pro FROM proyecto WHERE nom_pro = %s AND id_usu = %s;', (nom_pro, user_id))
-            proyecto = cur.fetchone()
-
-            # Verificar si el proyecto ya existe
-            if proyecto is not None:
-                return 'exist'
-            else:
-                # Insertar el nuevo proyecto en la base de datos
-                cur.execute('INSERT INTO proyecto (nom_pro, cred_pro, cbat_pro, id_usu) VALUES (%s, %s, %s, %s) RETURNING id_pro;', 
-                            (nom_pro, cred_pro, cbat_pro, user_id))
-
-                # Guardar los cambios y obtener el id_pro del nuevo proyecto
-                id_pro = cur.fetchone()[0]
-                conn.commit()
-
-                return jsonify({'id_pro': id_pro})
-
-#Iniciar Proyecto
-@app.route('/inicio_proyecto')
-def inicio_proyecto():  
-    id_pro = request.args.get('id_pro')
-    user_id = session.get('user_id')
-    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute('SELECT * FROM proyecto WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
-            pro = cur.fetchone()
-            if pro:
-                return render_template('creacion_de_proyecto/proyecto.html', pro=pro)
-            else:
-                # Redireccionar a la página de inicio o a donde prefieras
-                return redirect(url_for('inicio_principal')) 
 
 #Crear Componentes
 #mostrar modal panel
@@ -1123,6 +1074,286 @@ def update_regulador():
                 return render_template('creacion_de_componentes/index.html', error=error, success=success, user_comp=user, reg_usu=reg_usu, num_comp=num_comp)
             else:
                 return redirect(url_for('inicio_principal'))
+
+#------------------------Craeacion de proyectos--------------------------
+#mostrar modal proyecto
+@app.route('/ver_modal_proyecto')
+def ver_modal_proyecto():   
+    return render_template('creacion_de_proyecto/crea_proyecto.html')
+
+#Crear Proyecto
+@app.route('/add_proyecto', methods=['POST'])
+def add_proyecto():
+    nom_pro = request.form['nom_pro']
+    cred_pro = request.form['cred_pro']
+    cbat_pro = request.form['cbat_pro']
+    user_id = session.get('user_id')
+
+    # Conectar a la base de datos y buscar si el proyecto ya existe
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT id_pro FROM proyecto WHERE nom_pro = %s AND id_usu = %s;', (nom_pro, user_id))
+            proyecto = cur.fetchone()
+
+            # Verificar si el proyecto ya existe
+            if proyecto is not None:
+                return 'exist'
+            else:
+                # Insertar el nuevo proyecto en la base de datos
+                cur.execute('INSERT INTO proyecto (nom_pro, cred_pro, cbat_pro, id_usu) VALUES (%s, %s, %s, %s) RETURNING id_pro;', 
+                            (nom_pro, cred_pro, cbat_pro, user_id))
+
+                # Guardar los cambios y obtener el id_pro del nuevo proyecto
+                id_pro = cur.fetchone()[0]
+                conn.commit()
+
+                return jsonify({'id_pro': id_pro})
+
+#Iniciar Proyecto
+@app.route('/inicio_proyecto_fotovoltaica')
+def inicio_proyecto_fotovoltaica():  
+    id_pro = request.args.get('id_pro')
+    user_id = session.get('user_id')
+
+    # Obtener detalles del proyecto
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''
+                SELECT * FROM proyecto p
+                LEFT JOIN inversor i ON i.id_inv = p.id_inv
+                LEFT JOIN regulador r ON r.id_reg = p.id_reg
+                LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
+                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro
+                LEFT JOIN carga c ON c.id_pro = p.id_pro
+                WHERE p.id_pro = %s AND p.id_usu = %s 
+                ORDER BY ap.id_arr, c.id_car;
+            ''', (id_pro, user_id))
+            proyecto_completo = cur.fetchall()
+
+            # Almacenar arreglos completos
+            arreglos_completos = []
+            for arr in proyecto_completo:
+                cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[39],))
+                paralelo = cur.fetchall()
+
+                series_totales = []
+                for par in paralelo:
+                    cur.execute('SELECT * FROM serie_arreglo WHERE id_parr=%s ORDER BY id_sarr DESC;', (par[0],))
+                    serie = cur.fetchall()
+
+                    paneles_totales = []
+                    for ser in serie:
+                        cur.execute('''
+                            select p.*, ser.* from serie_arreglo ser LEFT JOIN panel p on ser.id_pan=p.id_pan
+                            WHERE id_sarr=%s;
+                        ''', (ser[0],))
+                        panel = cur.fetchone()
+                        paneles_totales.append(panel)
+
+                    series_totales.append({
+                        'paralelo': par,
+                        'series': serie,
+                        'paneles': paneles_totales
+                    })
+
+                arreglos_completos.append({
+                    'arreglo': arr,
+                    'paralelos': paralelo,
+                    'series_totales': series_totales
+                })
+
+            # Obtenemos el proyecto principal
+            cur.execute('SELECT * FROM proyecto WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
+            pro = cur.fetchone()
+
+            if pro:
+                # Pasamos todo a la plantilla
+                return render_template('creacion_de_proyecto/proyecto.html', pro=pro, arreglos_completos=arreglos_completos,zip=zip)
+            else:
+                return redirect(url_for('inicio_principal'))
+
+
+#mostrar modal para agregar el arreglo alproyecto
+@app.route('/modal_arreglo_project')
+def modal_arreglo_project(): 
+    id_pro = request.args.get('id_pro')
+    print(id_pro)
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT * FROM proyecto WHERE id_pro = %s ;', (id_pro,))
+            pro = cur.fetchone()  
+    return render_template('creacion_de_proyecto/project_arreglo.html', pro = pro )
+
+#agregar el arreglo alproyecto
+@app.route('/add_arreglo_project', methods=['POST'])
+def add_arreglo_project(): 
+    id_pro = request.form['id_pro']
+    id_inv = request.form['id_inv']
+    num_ser = int(request.form['num_ser'])
+    num_pan_ser = int(request.form['num_pan_ser']) 
+
+    # Usando la conexión manual a la base de datos
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Insertar nuevo arreglo de paneles
+            cur.execute('''
+                INSERT INTO arreglo_de_paneles (id_pro, fil_arr, col_arr) 
+                VALUES (%s, %s, %s) RETURNING id_arr;
+            ''', (id_pro, num_ser, num_pan_ser))
+            id_arr = cur.fetchone()[0]  # Obtener el ID del nuevo arreglo insertado
+            
+            paralelos_ids = []
+            series_ids = []    
+            
+            # Insertar cada paralelo y serie
+            for _ in range(num_ser):
+                # Insertar en paralelo_arreglo
+                cur.execute('''
+                    INSERT INTO paralelo_arreglo (id_arr) 
+                    VALUES (%s) RETURNING id_parr;
+                ''', (id_arr,))
+                id_parr = cur.fetchone()[0]  # Obtener el ID del paralelo recién insertado
+                paralelos_ids.append(id_parr) 
+                
+                for _ in range(num_pan_ser):        
+                    # Insertar en serie_arreglo
+                    cur.execute('''
+                        INSERT INTO serie_arreglo (id_parr) 
+                        VALUES (%s) RETURNING id_sarr;
+                    ''', (id_parr,))
+                    id_sarr = cur.fetchone()[0]  # Obtener el ID de la serie recién insertada
+                    series_ids.append(id_sarr) 
+                    
+            # Confirmar todas las transacciones
+            conn.commit()
+
+    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+
+#Modificar coordenadas de cada arreglo que muevo
+@app.route('/update-coordinates', methods=['POST'])
+def update_coordinates():
+    data = request.get_json()
+    id_arr = data.get('id')
+    x = data.get('x')
+    y = data.get('y')
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            print(id_arr)
+            print(x)
+            print(y)
+            cur.execute('''
+                UPDATE arreglo_de_paneles 
+                SET x_arr = %s, y_arr = %s 
+                WHERE id_arr = %s;
+            ''', (x, y, id_arr))
+            conn.commit()
+    # Aquí deberías añadir la lógica para guardar las coordenadas en tu base de datos
+    # Por ejemplo:
+    # update_coordinates_in_db(arr_id, x, y)
+
+    return jsonify(success=True)  # Respuesta de éxito
+
+
+# Mostrar modal para llenar los series
+@app.route('/modal_panel_serie')
+def modal_panel_serie(): 
+    id_sarr = request.args.get('id_sarr')
+    print(id_sarr)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener la información de la serie arreglo
+            cur.execute('SELECT * FROM serie_arreglo WHERE id_sarr = %s;', (id_sarr,))
+            sarr = cur.fetchone()
+            # Obtener los paneles habilitados y su tecnología
+            cur.execute('''
+                SELECT p.*, tp.* FROM panel p JOIN tecnologia_panel tp ON p.id_tec = tp.id_tec
+                WHERE p.status = %s;
+            ''', (True,))
+            pan = cur.fetchall()
+            # Obtener información del panel actual en la serie
+            cur.execute('''
+                SELECT p.*, tp.*FROM serie_arreglo sa JOIN panel p ON sa.id_pan = p.id_pan JOIN tecnologia_panel tp ON p.id_tec = tp.id_tec
+                WHERE sa.id_sarr = %s;''', (id_sarr,))
+            info = cur.fetchone()
+
+    # Renderizar la plantilla con los datos obtenidos
+    return render_template('creacion_de_proyecto/serie_panel.html', sarr=sarr, pan=pan, info=info)
+
+@app.route('/edit_panel', methods=['POST'])
+def edit_panel():
+    # Obtiene los valores enviados en el formulario POST
+    id_sarr = request.form['id_sarr']
+    print(id_sarr)
+    id_pan = request.form['id_pan']
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener la información de la serie arreglo
+            cur.execute('SELECT id_parr FROM serie_arreglo WHERE id_sarr = %s;', (id_sarr,))
+            id_parr = cur.fetchone()
+
+            # Actualizar el valor de id_pan en el registro de SerieArreglo
+            cur.execute('UPDATE serie_arreglo SET id_pan = %s WHERE id_sarr = %s;', (id_pan, id_sarr))
+            conn.commit()
+
+            # Realiza una consulta para obtener los resultados necesarios
+            cur.execute('''
+                SELECT 
+                    SUM(p.vmp_pan) * MIN(p.imp_pan),
+                    SUM(p.vmp_pan),
+                    MIN(p.imp_pan),
+                    SUM(p.are_pan),
+                    AVG(p.efi_pan)
+                FROM panel p
+                JOIN serie_arreglo sa ON sa.id_pan = p.id_pan
+                JOIN paralelo_arreglo pa ON pa.id_parr = sa.id_parr
+                WHERE pa.id_parr = %s AND p.imp_pan != 0
+                GROUP BY sa.id_parr, pa.id_arr;
+            ''', (id_parr,))                      
+            results = cur.fetchone()
+            print(results)
+            if results:
+                pser, vser, iser, area, efis = results
+                cur.execute('SELECT id_arr FROM paralelo_arreglo WHERE id_parr = %s;', (id_parr,))
+                id_arr = cur.fetchone()  
+                # Actualizar el registro de ParaleloArreglo
+                cur.execute('''
+                    UPDATE paralelo_arreglo 
+                    SET pser_parr = %s, vser_parr = %s, iser_parr = %s, aser_parr = %s, efi_parr = %s 
+                    WHERE id_parr = %s;
+                ''', (pser, vser, iser, area, efis, id_parr))
+                conn.commit()
+
+                # Consultar el arreglo de paneles
+                cur.execute('''
+                    SELECT 
+                        MIN(pa.vser_parr) * SUM(pa.iser_parr),
+                        MIN(pa.vser_parr),
+                        SUM(pa.iser_parr),
+                        SUM(pa.aser_parr),
+                        pa.id_arr,
+                        AVG(pa.efi_parr)
+                    FROM paralelo_arreglo pa
+                    JOIN arreglo_de_paneles ap ON ap.id_arr = pa.id_arr
+                    WHERE pa.id_arr = %s AND pa.vser_parr != 0
+                    GROUP BY pa.id_arr;
+                ''', (id_arr,))
+                result_par = cur.fetchone()
+
+                if result_par:
+                    parr, vparr, iparr, area, id_arr, efip = result_par
+                    
+                    # Actualizar el registro de ArregloDePaneles
+                    cur.execute('''
+                        UPDATE arreglo_de_paneles 
+                        SET ptot_arr = %s, vmax_arr = %s, imax_arr = %s, area_arr = %s, efi_arr = %s 
+                        WHERE id_arr = %s;
+                    ''', (parr, vparr, iparr, area, efip, id_arr))
+                    conn.commit()
+                return 'success'
+    return 'success'
 
 
 if __name__ == '__main__':

@@ -25,8 +25,162 @@
 <div class="col-sm-4">
     <h5 class="title-subpro"> • {{ pro[1] }}</h5>
 </div>
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;height: 80vh;">
-    <div class="card-body" style="overflow-x: auto;">
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
+    <div id="scrollContainer" class="card-body" style="overflow-x: auto; overflow-y: auto; position: relative; height: 100%;">
+        <style>
+            .icon_table {
+                border-collapse: collapse;
+                width: 150px;
+                position: absolute;
+                z-index: 10;
+                cursor: move;
+            }
+
+            .linea {
+                position: absolute;
+                height: 2px;
+                background-color: black;
+                transform-origin: 0 0;
+                z-index: 1;
+            }
+
+            /* Estilos para asegurar que los íconos no salgan del contenedor */
+            #scrollContainer {
+                position: relative;
+                height: 100%;
+            }
+        </style>
+
+        {% for arr_completo in arreglos_completos %}
         
+            <table class="icono1_{{ arr_completo.arreglo[39] }} icon_table " draggable="true" style="height: 3cm;width: 3cm; text-align: center;">
+                {% if arr_completo.arreglo[45] is not none %}
+                    {% for par_data in arr_completo.series_totales %}
+                        <tr>
+                            {% for ser, panel in zip(par_data.series, par_data.paneles) %}
+                                {% if ser[1] is not none %}
+                                    {% set panel_image = 'panel.png' %}
+                                    {% if panel[13] == 1 %}
+                                        {% set panel_image = 'panel-monocristalino.png' %}
+                                    {% elif panel[13] == 2 %}
+                                        {% set panel_image = 'panel-policristalino.png' %}
+                                    {% elif panel[13] == 3 %}
+                                        {% set panel_image = 'panel-amorfo.png' %}
+                                    {% endif %}
+                                {% else %}
+                                    {% set panel_image = 'panel-none.png' %}
+                                {% endif %}
+                                
+                                <td>
+                                    <a class="img-panel-project nav-link" id="projectSerie_{{ ser[0] }}" href="/modal_panel_serie?id_sarr={{ ser[0] }}" title="{{ panel[13] }}">
+                                        <img src="{{ url_for('static', filename='images/' + panel_image) }}" style="width: 3.8rem;">
+                                    </a>
+                                </td>
+
+                                {% if loop.index0 < arr_completo.arreglo[46] - 1 %}
+                                    <td style="width: 2rem;">
+                                        <img src="{{ url_for('static', filename='images/conexion_p.png') }}" style="width: 2rem;">
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        
+                        {% if loop.index0 < arr_completo.arreglo[45] - 1 %}
+                            <tr>
+                                {% for j in range(arr_completo.arreglo[46] * 2 - 1) %}
+                                    {% if j == 0 or j == arr_completo.arreglo[46] * 2 - 2 %}
+                                        <td style="height: 4rem; position: relative;">
+                                            <img src="{{ url_for('static', filename='images/conexion_linea.png') }}" style="height: 2.5rem;">
+                                        </td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </table>
+        {% endfor %}
+
+        <table id="icono2" class="icon_table" draggable="true">
+            <tr><td>Inversor</td></tr>
+        </table>
+
+        <div class="linea"></div>
+
+        {% for arr_completo in arreglos_completos %}
+        <script>
+            function initIcono(arr_id, x_arr, y_arr) {
+                const icono1 = document.querySelector('.icono1_' + arr_id);
+                const icono2 = document.getElementById('icono2');
+                const linea = document.createElement('div');
+                linea.classList.add('linea');
+                document.getElementById('scrollContainer').appendChild(linea);
+        
+                // Establecer posiciones iniciales
+                Object.assign(icono1.style, { position: 'absolute', left: `${x_arr}px`, top: `${y_arr}px` });
+                Object.assign(icono2.style, { position: 'absolute', left: '200px', top: '300px' });
+        
+                const calcularCentro = (el) => {
+                    const { left, top, width, height } = el.getBoundingClientRect();
+                    const { left: pLeft, top: pTop } = document.getElementById('scrollContainer').getBoundingClientRect();
+                    return {
+                        x: left + width / 2 - pLeft + document.getElementById('scrollContainer').scrollLeft,
+                        y: top + height / 2 - pTop + document.getElementById('scrollContainer').scrollTop
+                    };
+                };
+        
+                const actualizarLinea = () => {
+                    const { x: x1, y: y1 } = calcularCentro(icono1);
+                    const { x: x2, y: y2 } = calcularCentro(icono2);
+                    Object.assign(linea.style, {
+                        width: `${Math.hypot(x2 - x1, y2 - y1)}px`,
+                        transform: `rotate(${Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI)}deg)`,
+                        top: `${y1}px`,
+                        left: `${x1}px`,
+                        position: 'absolute'
+                    });
+                };
+        
+                actualizarLinea();
+        
+                document.addEventListener('dragstart', (e) => draggedElement = e.target);
+                document.addEventListener('dragover', (e) => e.preventDefault());
+                document.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedElement) {
+                        const { left: pLeft, top: pTop } = document.getElementById('scrollContainer').getBoundingClientRect();
+                        const x = Math.max(0, e.clientX - pLeft - draggedElement.offsetWidth / 2);
+                        const y = Math.max(0, e.clientY - pTop - draggedElement.offsetHeight / 2);
+                        
+                        Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
+                        actualizarLinea();
+        
+                        const currentId = draggedElement.classList[0].split('_')[1];
+                        fetch('/update-coordinates', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: currentId, x, y })
+                        })
+                        .then(response => response.json())
+                        .then(data => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar'))
+                        .catch(console.error);
+                    }
+                });
+        
+                document.getElementById('scrollContainer').addEventListener('scroll', actualizarLinea);
+            }
+        
+            initIcono("{{ arr_completo.arreglo[39] }}", "{{ arr_completo.arreglo[52] }}", "{{ arr_completo.arreglo[53] }}");
+        </script> 
+        
+        {% endfor %}
+
     </div>
 </div>
+
+
+
+
+
