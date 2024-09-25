@@ -50,6 +50,9 @@ select * from dato_irradiancia where created_at >= '2024-08-13' and created_at <
 
 
 
+delete from dato_irradiancia;
+SELECT setval(pg_get_serial_sequence('dato_irradiancia', 'id_irr'), 1, false);
+COPY PUBLIC.dato_irradiancia (created_at,prom_irr,max_irr) FROM 'C:\Dataset_2013_2024_Completo.csv' DELIMITER ',' CSV HEADER;
 
 
 
