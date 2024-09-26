@@ -1081,7 +1081,7 @@ def add_proyecto():
     # Conectar a la base de datos y buscar si el proyecto ya existe
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('SELECT id_pro FROM proyecto WHERE nom_pro = %s AND id_usu = %s;', (nom_pro, user_id))
+            cur.execute('SELECT id_pro FROM proyecto_fotovoltaica WHERE nom_pro = %s AND id_usu = %s;', (nom_pro, user_id))
             proyecto = cur.fetchone()
 
             # Verificar si el proyecto ya existe
@@ -1089,7 +1089,7 @@ def add_proyecto():
                 return 'exist'
             else:
                 # Insertar el nuevo proyecto en la base de datos
-                cur.execute('INSERT INTO proyecto (nom_pro, cred_pro, cbat_pro, id_usu) VALUES (%s, %s, %s, %s) RETURNING id_pro;', 
+                cur.execute('INSERT INTO proyecto_fotovoltaica (nom_pro, cred_pro, cbat_pro, id_usu) VALUES (%s, %s, %s, %s) RETURNING id_pro;', 
                             (nom_pro, cred_pro, cbat_pro, user_id))
 
                 # Guardar los cambios y obtener el id_pro del nuevo proyecto
@@ -1103,12 +1103,12 @@ def add_proyecto():
 def inicio_proyecto_fotovoltaica():  
     id_pro = request.args.get('id_pro')
     user_id = session.get('user_id')
-
+    
     # Obtener detalles del proyecto
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''
-                SELECT * FROM proyecto p
+                SELECT * FROM proyecto_fotovoltaica p
                 LEFT JOIN inversor i ON i.id_inv = p.id_inv
                 LEFT JOIN regulador r ON r.id_reg = p.id_reg
                 LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
@@ -1118,11 +1118,10 @@ def inicio_proyecto_fotovoltaica():
                 ORDER BY ap.id_arr, c.id_car;
             ''', (id_pro, user_id))
             proyecto_completo = cur.fetchall()
-
             # Almacenar arreglos completos
             arreglos_completos = []
             for arr in proyecto_completo:
-                cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[39],))
+                cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[43],))
                 paralelo = cur.fetchall()
 
                 series_totales = []
@@ -1152,12 +1151,17 @@ def inicio_proyecto_fotovoltaica():
                 })
 
             # Obtenemos el proyecto principal
-            cur.execute('SELECT * FROM proyecto WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
+            cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
             pro = cur.fetchone()
-
+            cur.execute('''SELECT COUNT(id_inv) AS cant_inv, COUNT(id_reg) AS cant_reg,
+                (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = %s) AS cant_arr,
+                (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = %s) AS cant_ban
+                FROM proyecto_fotovoltaica 
+                WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,))
+            cant_componentes = cur.fetchone()
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', pro=pro, arreglos_completos=arreglos_completos,zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', pro=pro,proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos,cant_componentes=cant_componentes,zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
 
@@ -1170,7 +1174,7 @@ def modal_arreglo_project():
     # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('SELECT * FROM proyecto WHERE id_pro = %s ;', (id_pro,))
+            cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s ;', (id_pro,))
             pro = cur.fetchone()  
     return render_template('creacion_de_proyecto/project_arreglo.html', pro = pro )
 
@@ -1223,27 +1227,72 @@ def add_arreglo_project():
 @app.route('/update-coordinates', methods=['POST'])
 def update_coordinates():
     data = request.get_json()
-    id_arr = data.get('id')
-    x = data.get('x')
-    y = data.get('y')
-    
+    # Recibir los datos del JSON
+    id_arr = data.get('arr_id')  # ID del arreglo de paneles
+    id_pro = data.get('pro_id')  # ID del proyecto
+    x = data.get('x')            # Nueva coordenada X del arreglo de paneles
+    y = data.get('y')            # Nueva coordenada Y del arreglo de paneles
+    x_inv = data.get('x_inv')    # Nueva coordenada X del inversor
+    y_inv = data.get('y_inv')    # Nueva coordenada Y del inversor
+
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            print(id_arr)
-            print(x)
-            print(y)
-            cur.execute('''
-                UPDATE arreglo_de_paneles 
-                SET x_arr = %s, y_arr = %s 
-                WHERE id_arr = %s;
-            ''', (x, y, id_arr))
-            conn.commit()
-    # Aquí deberías añadir la lógica para guardar las coordenadas en tu base de datos
-    # Por ejemplo:
-    # update_coordinates_in_db(arr_id, x, y)
+            # Validar que id_arr sea un valor válido antes de ejecutar la consulta
+            if id_arr !='None':
+                print('ENTRO1')
+                cur.execute('''
+                    UPDATE arreglo_de_paneles 
+                    SET x_arr = %s, y_arr = %s 
+                    WHERE id_arr = %s;
+                ''', (x, y, id_arr))
+                conn.commit()
+            # Validar que id_pro sea un valor válido antes de ejecutar la consulta
+            if id_pro !='None':
+                print('ENTRO2')
+                cur.execute('''
+                    UPDATE proyecto_fotovoltaica 
+                    SET xinv_pro = %s, yinv_pro = %s 
+                    WHERE id_pro = %s;
+                ''', (x_inv, y_inv, id_pro))
+                conn.commit()
 
     return jsonify(success=True)  # Respuesta de éxito
 
+
+
+
+#mostrar modal para agregar el inversor alproyecto
+@app.route('/modal_inversor_project')
+def modal_inversor_project():    
+    id_pro = request.args.get('id_pro')
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('select * from proyecto_fotovoltaica where id_pro= %s ;', (id_pro,))
+            pro = cur.fetchone() 
+            cur.execute('select * from arreglo_de_paneles where id_pro= %s ;', (id_pro,))
+            arr = cur.fetchall() 
+            cur.execute('select * from inversor where status= %s ;', (True,))
+            inv = cur.fetchall() 
+            cur.execute('select pro.*, inv.* from proyecto_fotovoltaica pro join inversor inv on pro.id_inv=inv.id_inv where pro.id_pro= %s ;', (id_pro,))
+            info = cur.fetchone() 
+            
+            
+    return render_template('creacion_de_proyecto/project_inversor.html', pro = pro, arr=arr , inv = inv, info=info)
+#agregar el inversor alproyecto
+@app.route('/add_inversor_project', methods=['POST'])
+def add_inversor_project():     
+    id_pro = request.form['id_pro']
+    id_inv = request.form['id_inv']
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''
+                UPDATE proyecto_fotovoltaica 
+                SET id_inv = %s 
+                WHERE id_pro = %s;
+            ''', (id_inv, id_pro))
+            conn.commit()
+    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
 
 # Mostrar modal para llenar los series
 @app.route('/modal_panel_serie')

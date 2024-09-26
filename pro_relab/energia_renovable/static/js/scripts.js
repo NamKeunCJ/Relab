@@ -142,7 +142,7 @@ $(document).ready(function() {
     });
 });
 
-// ----------------CREACION DE PROYECTOS ----------------
+// ----------------CREACION DE PROYECTOS FOTOVOLTAICOS----------------
 //modal del proyecto
 $(document).ready(function() {
     $('#modal_proyecto').off('click').on('click', function(event) {
@@ -160,7 +160,7 @@ $(document).ready(function() {
 
 //modal proyecto inversor
 $(document).ready(function() {
-    $('#project_inversor').off('click').on('click', function(event) {
+    $('.project_inversor').off('click').on('click', function(event) {
         event.preventDefault();
         // Abre el modal si no está ya visible
         if (!$('#project_inversor').hasClass('show')) {

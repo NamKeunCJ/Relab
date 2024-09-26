@@ -7,15 +7,21 @@
         <!--para poder agregar, editar y elimnar componentes rol administrador --->
         <!--Para empezar a crear un proyecto --->
         {% if pro and pro[0] is not none %}             
-            <ul class="nav list-unstyled" style="margin-top: 0.20cm;">
+            <ul class="nav list-unstyled" style="margin-top: 0.20cm;">  
+                {% set ent_inv = proyecto_completo[0] %}              
+                {% set is_disabled = ent_inv[18] == cant_componentes[2] %}
                 <li class="nav-item d-flex align-items-center mb-3" id="item_arreglo">
-                    <a class="icon nav-link d-flex align-items-center" id="project_arreglo" href="/modal_arreglo_project?id_pro={{pro[0]}}" title="Añade un arreglo de paneles a tu proyecto">
+                    <a class="icon nav-link d-flex align-items-center {{ 'disabled' if is_disabled else '' }}" 
+                    id="project_arreglo" 
+                    href="/modal_arreglo_project?id_pro={{pro[0]}}" 
+                    title="Añade un arreglo de paneles a tu proyecto">
                         <img src="/static/images/icon_arreglo.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
                         <span class="d-none d-md-inline">Añadir arreglo</span>
                     </a>
                 </li>
-                <li class="nav-item d-flex align-items-center mb-3" id="item_inversor">
-                    <a class="icon nav-link d-flex align-items-center" id="project_inversor" href="#" title="Añade un inversor a tu proyecto">
+
+                <li class="nav-item d-flex align-items-center mb-3" id="item_inversor">                    
+                    <a class="icon nav-link d-flex align-items-center project_inversor" href="/modal_inversor_project?id_pro={{pro[0]}}" title="Añade un inversor a tu proyecto">
                         <img src="static/images/icon_inversor.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
                         <span class="d-none d-md-inline">Añadir inversor</span>
                     </a>

@@ -29,11 +29,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             {% if pro %}
-            <form method="POST" action="{{ url_for('add_inversor_project') }}">
+            <form method="POST" action="/add_inversor_project">
                 <div class="modal-body">
                     <h5 style="margin-bottom: 1rem;"><b> Informacion del Inversor:  </b></h5>
-                    {%if info is not none %} {% if info.Inversor.est_inv=='Deshabilitado' %}
-                    <div class="alert alert-danger">El inversor {{info.Inversor.ref_inv}} con identificacion {{info.Inversor.idu_inv}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro inversor.</div>
+                    {%if info is not none %} 
+                    {% if info[23]==false %}
+                        <div class="alert alert-danger">El inversor {{info[13]}} con identificacion {{info[22]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro inversor.</div>
                     {% endif %}
                     <table class="table table-responsive">
                         <thead>
@@ -50,14 +51,14 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{info.Inversor.ref_inv}}</td>
-                                <td>{{info.Inversor.ent_inv}}</td>
-                                <td>{{info.Inversor.vme_inv}}</td>
-                                <td>{{info.Inversor.ime_inv}}</td>
-                                <td>{{info.Inversor.pmax_inv}}</td>
-                                <td>{{info.Inversor.vsa_inv}}</td>
-                                <td>{{info.Inversor.efi_inv}}</td>
-                                <td>{{info.Inversor.ond_inv}}</td>
+                                <td>{{info[17]}}</td>
+                                <td>{{info[18]}}</td>
+                                <td>{{info[20]}}</td>
+                                <td>{{info[21]}}</td>
+                                <td>{{info[19]}}</td>
+                                <td>{{info[18]}}</td>
+                                <td>{{info[23]}}</td>
+                                <td>{{info[22]}}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -70,8 +71,8 @@
                         <strong>Advertencia!</strong> Recuerda si cambias el inversor a uno que tenga menos entradas que la cantidad de arreglos, los ultimos arreglos se eliminara.
                     </div>
                     {% endif %}
-                    <input type="hidden" name="id_pro" value="{{ pro.id_pro }}">
-                    <h5 style="margin-bottom: 3rem; margin-top: 3rem; "><b> •Nombre del proyecto ({{ pro.nom_pro }}) </b></h5>
+                    <input type="hidden" name="id_pro" value="{{ pro[0] }}">
+                    <h5 style="margin-bottom: 3rem; margin-top: 3rem; "><b> •Nombre del proyecto ({{ pro[1] }}) </b></h5>
                     <table id="tabla" class="table table-responsive">
                         <thead>
                             <tr>
@@ -87,17 +88,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {%for inv in inv%}
+                            {%for inv in inv %}
                             <tr>
-                                <td>{{inv.ref_inv}}</td>
-                                <td>{{inv.ent_inv}}</td>
-                                <td>{{inv.vme_inv}}</td>
-                                <td>{{inv.ime_inv}}</td>
-                                <td>{{inv.pmax_inv}}</td>
-                                <td>{{inv.vsa_inv}}</td>
-                                <td>{{inv.efi_inv}}</td>
-                                <td>{{inv.ond_inv}}</td>
-                                <td><input class="form-check-input" type="radio" name="id_inv" id="id_inv" value="{{inv.id_inv}}" required></td>
+                                <td>{{inv[1]}}</td>
+                                <td>{{inv[2]}}</td>
+                                <td>{{inv[4]}}</td>
+                                <td>{{inv[5]}}</td>
+                                <td>{{inv[3]}}</td>
+                                <td>{{inv[6]}}</td>
+                                <td>{{inv[8]}}</td>
+                                <td>{{inv[7]}}</td>
+                                <td><input class="form-check-input" type="radio" name="id_inv" id="id_inv" value="{{inv[0]}}" required></td>
                             </tr>
                             {%endfor%}
                         </tbody>
