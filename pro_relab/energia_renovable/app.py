@@ -1164,9 +1164,10 @@ def inicio_proyecto_fotovoltaica():
             pro = cur.fetchone()
             cur.execute('''SELECT COUNT(id_inv) AS cant_inv, COUNT(id_reg) AS cant_reg,
                 (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = %s) AS cant_arr,
-                (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = %s) AS cant_ban
+                (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = %s) AS cant_ban,
+                (SELECT COUNT(id_car) FROM carga WHERE id_pro = %s) AS cant_car
                 FROM proyecto_fotovoltaica 
-                WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,))
+                WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,id_pro,))
             cant_componentes = cur.fetchone()
             if pro:
                 # Pasamos todo a la plantilla

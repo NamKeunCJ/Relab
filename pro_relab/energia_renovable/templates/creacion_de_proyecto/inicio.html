@@ -113,20 +113,18 @@
                     </td></tr>
                 </table>
             {% endif %}
-        {% if pro_com[32] =='Si' %}
-            {% if cant_componentes[0]!=0 %}
-                <table class="regulador icon_table" draggable="true">
-                    <tr><td>
-                        <div class="col d-flex align-items-end justify-content-center ">                        
-                            <a class="img-zoom-project nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
-                                regulador
-                            </a>
-                        </div>
-                    </td></tr>
-                </table>
-            {% endif %}
+        {% if pro_com[32] == 'No' and cant_componentes[0]!=0 %}
+            <table class="regulador icon_table" draggable="true">
+                <tr><td>
+                    <div class="col d-flex align-items-end justify-content-center ">                        
+                        <a class="img-zoom-project nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
+                            regulador
+                        </a>
+                    </div>
+                </td></tr>
+            </table>
         {% endif %}
-        {% if cant_componentes[3]==0 %}
+        {% if cant_componentes[3]!=0 %}
             <table class="banco icon_table" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
@@ -137,7 +135,7 @@
                 </td></tr>
             </table>
         {% endif %}
-        {% if cant_componentes[3]==0 %}
+        {% if cant_componentes[4]!=0 %}
             <table class="carga icon_table" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
@@ -148,7 +146,7 @@
                 </td></tr>
             </table>
         {% endif %}
-        {% if pro_com[3] =='Si' %}
+        {% if pro_com[3] =='Si' and cant_componentes[0]!=0 %}
             <table class="red icon_table" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
@@ -177,7 +175,7 @@
                         let linea1, linea2, linea3, linea4, linea5;
             
                         // Revisar si regulador está presente para establecer las conexiones
-                        if (condition === 'Si') {
+                        if (condition === 'No') {
                             linea1 = arreglo && regulador ? document.createElement('div') : null;
                             linea2 = regulador && banco ? document.createElement('div') : null;
                             linea3 = banco && inversor ? document.createElement('div') : null;
@@ -205,7 +203,7 @@
                         setPos(carga, x_car, y_car);
                         setPos(red, x_red, y_red); 
             
-                        if (condition === 'Si') {
+                        if (condition === 'No') {
                             setPos(regulador, x_reg, y_reg);
                         }
             
@@ -226,8 +224,8 @@
                         };
             
                         const actualizarLineas = () => {
-                            actualizarLinea(linea1, arreglo, condition === 'Si' ? regulador : inversor);
-                            actualizarLinea(linea2, condition === 'Si' ? regulador : inversor, banco);
+                            actualizarLinea(linea1, arreglo, condition === 'No' ? regulador : inversor);
+                            actualizarLinea(linea2, condition === 'No' ? regulador : inversor, banco);
                             actualizarLinea(linea3, inversor, carga); // Asegura la conexión entre inversor e carga
                             actualizarLinea(linea4, banco, inversor); // Asegura la conexión correcta sin líneas duplicadas
                             actualizarLinea(linea5, inversor, red); // Asegura la conexión entre inversor e red
@@ -260,8 +258,8 @@
                                 body: JSON.stringify({
                                     arr_id, x: x_arr, y: y_arr, pro_id: id_pro,
                                     x_inv, y_inv,
-                                    x_reg: condition === 'Si' ? x_reg : null,
-                                    y_reg: condition === 'Si' ? y_reg : null,
+                                    x_reg: condition === 'No' ? x_reg : null,
+                                    y_reg: condition === 'No' ? y_reg : null,
                                     x_ban, y_ban, x_car, y_car, x_red, y_red 
                                 })
                             }).then(res => res.json()).then(data => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar')).catch(console.error);
@@ -272,8 +270,8 @@
                     }
             
                     const condition = "{{ pro_com[32] }}";
-                    const xIco3 = condition === 'Si' ? "{{ x_reg }}" : null;
-                    const yIco3 = condition === 'Si' ? "{{ y_reg }}" : null;
+                    const xIco3 = condition === 'No' ? "{{ x_reg }}" : null;
+                    const yIco3 = condition === 'No' ? "{{ y_reg }}" : null;
             
                     initIcono(
                         "{{ arr_completo.arreglo[44] }}",
