@@ -33,8 +33,8 @@
                 <div class="modal-body">
                     <h5 style="margin-bottom: 1rem;"><b> Informacion del Inversor:  </b></h5>
                     {%if info is not none %} 
-                    {% if info[23]==false %}
-                        <div class="alert alert-danger">El inversor {{info[13]}} con identificacion {{info[22]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro inversor.</div>
+                    {% if info[24]==false %}
+                        <div class="alert alert-danger">El inversor {{info[14]}} con identificacion {{info[23]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro inversor.</div>
                     {% endif %}
                     <table class="table table-responsive">
                         <thead>
@@ -51,14 +51,14 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{info[17]}}</td>
                                 <td>{{info[18]}}</td>
-                                <td>{{info[20]}}</td>
-                                <td>{{info[21]}}</td>
                                 <td>{{info[19]}}</td>
-                                <td>{{info[18]}}</td>
-                                <td>{{info[23]}}</td>
+                                <td>{{info[21]}}</td>
                                 <td>{{info[22]}}</td>
+                                <td>{{info[20]}}</td>
+                                <td>{{info[23]}}</td>
+                                <td>{{info[25]}}</td>
+                                <td>{{info[24]}}</td>
                             </tr>
                         </tbody>
                     </table>

@@ -23,7 +23,7 @@
     });
 </script>
 <div class="col-sm-4">
-    <h5 class="title-subpro"> • {{ pro[1] }}</h5>
+    <h5 class="title-subpro"> • {{ pro_com[1] }}</h5>
 </div>
 <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
     <div id="scrollContainer" class="card-body" style="overflow-x: auto; overflow-y: auto; position: relative; height: 100%;">
@@ -51,9 +51,9 @@
             }
         </style>
         {% if cant_componentes[2]!=0 %}
-            {% for arr_completo in arreglos_completos %}        
-                <table class="icono1_{{ arr_completo.arreglo[43] }} icon_table " draggable="true" style="height: 3cm;width: 3cm; text-align: center;">
-                    {% if arr_completo.arreglo[49] is not none %}
+            {% for arr_completo in arreglos_completos %}   
+                <table class="arreglo_{{ arr_completo.arreglo[44] }} icon_table " draggable="true" style="height: 3cm;width: 3cm; text-align: center;">
+                    {% if arr_completo.arreglo[50] is not none %}
                         {% for par_data in arr_completo.series_totales %}
                             <tr>
                                 {% for ser, panel in zip(par_data.series, par_data.paneles) %}
@@ -71,12 +71,12 @@
                                     {% endif %}
                                     
                                     <td>
-                                        <a class="img-panel-project nav-link" id="projectSerie_{{ ser[0] }}" href="/modal_panel_serie?id_sarr={{ ser[0] }}" title="{{ panel[13] }}">
+                                        <a class="img-zoom-project nav-link" id="projectSerie_{{ ser[0] }}" href="/modal_panel_serie?id_sarr={{ ser[0] }}" title="{{ panel[13] }}">
                                             <img src="{{ url_for('static', filename='images/' + panel_image) }}" style="width: 3.8rem;">
                                         </a>
                                     </td>
 
-                                    {% if loop.index0 < arr_completo.arreglo[50] - 1 %}
+                                    {% if loop.index0 < arr_completo.arreglo[51] - 1 %}
                                         <td style="width: 2rem;">
                                             <img src="{{ url_for('static', filename='images/conexion_p.png') }}" style="width: 2rem;">
                                         </td>
@@ -84,10 +84,10 @@
                                 {% endfor %}
                             </tr>
                             
-                            {% if loop.index0 < arr_completo.arreglo[49] - 1 %}
+                            {% if loop.index0 < arr_completo.arreglo[50] - 1 %}
                                 <tr>
-                                    {% for j in range(arr_completo.arreglo[50] * 2 - 1) %}
-                                        {% if j == 0 or j == arr_completo.arreglo[50] * 2 - 2 %}
+                                    {% for j in range(arr_completo.arreglo[51] * 2 - 1) %}
+                                        {% if j == 0 or j == arr_completo.arreglo[51] * 2 - 2 %}
                                             <td style="height: 4rem; position: relative;">
                                                 <img src="{{ url_for('static', filename='images/conexion_linea.png') }}" style="height: 2.5rem;">
                                             </td>
@@ -103,100 +103,198 @@
             {% endfor %}
         {% endif %}
         {% if cant_componentes[0]!=0 %}
-            <table id="icono2" class="icon_table" draggable="true">
-                <tr><td>
-                    <div class="col d-flex align-items-end justify-content-center ">
-                        {% if proyecto_completo %}
-                            {% set pro_com = proyecto_completo[0] %}
-                            <a class="img-inversor-project img-zoom-project nav-link project_inversor" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[17] }}">
+                <table class="inversor icon_table" draggable="true">
+                    <tr><td>
+                        <div class="col d-flex align-items-end justify-content-center ">                        
+                            <a class="img-zoom-project nav-link project_inversor" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
                                 <img src="{{ url_for('static', filename='images/inversor.png') }}" class="esquina-inversor" style="width: 2.7rem;">
                             </a>
-                        {% endif %}
-
+                        </div>
+                    </td></tr>
+                </table>
+            {% endif %}
+        {% if pro_com[32] =='Si' %}
+            {% if cant_componentes[0]!=0 %}
+                <table class="regulador icon_table" draggable="true">
+                    <tr><td>
+                        <div class="col d-flex align-items-end justify-content-center ">                        
+                            <a class="img-zoom-project nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
+                                regulador
+                            </a>
+                        </div>
+                    </td></tr>
+                </table>
+            {% endif %}
+        {% endif %}
+        {% if cant_componentes[3]==0 %}
+            <table class="banco icon_table" draggable="true">
+                <tr><td>
+                    <div class="col d-flex align-items-end justify-content-center ">                        
+                        <a class="img-zoom-project nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[17] }}">
+                            banco 
+                        </a>
                     </div>
                 </td></tr>
             </table>
         {% endif %}
-
+        {% if cant_componentes[3]==0 %}
+            <table class="carga icon_table" draggable="true">
+                <tr><td>
+                    <div class="col d-flex align-items-end justify-content-center ">                        
+                        <a class="img-zoom-project nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
+                            carga 
+                        </a>
+                    </div>
+                </td></tr>
+            </table>
+        {% endif %}
+        {% if pro_com[3] =='Si' %}
+            <table class="red icon_table" draggable="true">
+                <tr><td>
+                    <div class="col d-flex align-items-end justify-content-center ">                        
+                        <a class="img-zoom-project nav-link project_inversor"  href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[17] }}">
+                            <img src="/static/images/red.png" style="width: 2.7rem;" class="img-zoom-project" title="Red">
+                        </a>
+                    </div>
+                </td></tr>
+            </table>
+        {% endif %}
         <div class="linea"></div>
 
         {% for arr_completo in arreglos_completos %}
-        {% if proyecto_completo %}
             {% set pro_com = proyecto_completo[0] %}
-            
             <script>
-                function initIcono(arr_id, x_arr, y_arr, id_pro, x_inv, y_inv) {
-                    const icono1 = document.querySelector(`.icono1_${arr_id}`);
-                    const icono2 = document.getElementById('icono2');
-                    const scrollContainer = document.getElementById('scrollContainer');
+                document.addEventListener('DOMContentLoaded', function() {
+                    function initIcono(arr_id, x_arr, y_arr, id_pro, x_inv, y_inv, x_reg, y_reg, x_ban, y_ban, x_car, y_car, x_red, y_red, condition) {
+                        const arreglo = document.querySelector(`.arreglo_${arr_id}`);
+                        const inversor = document.querySelector('.inversor');
+                        const regulador = document.querySelector('.regulador');
+                        const banco = document.querySelector('.banco');
+                        const carga = document.querySelector('.carga');
+                        const red = document.querySelector('.red');
+                        const scrollContainer = document.getElementById('scrollContainer');
             
-                    // Crear la línea solo si ambos iconos están presentes
-                    const linea = (icono1 && icono2) ? document.createElement('div') : null;
-                    if (linea) {
-                        linea.classList.add('linea');
-                        scrollContainer.appendChild(linea);
-                    }
+                        let linea1, linea2, linea3, linea4, linea5;
             
-                    // Establecer posiciones iniciales de los iconos si existen
-                    if (icono1) Object.assign(icono1.style, { position: 'absolute', left: `${x_arr}px`, top: `${y_arr}px` });
-                    if (icono2) Object.assign(icono2.style, { position: 'absolute', left: `${x_inv}px`, top: `${y_inv}px` });
+                        // Revisar si regulador está presente para establecer las conexiones
+                        if (condition === 'Si') {
+                            linea1 = arreglo && regulador ? document.createElement('div') : null;
+                            linea2 = regulador && banco ? document.createElement('div') : null;
+                            linea3 = banco && inversor ? document.createElement('div') : null;
+                            linea4 = inversor && carga ? document.createElement('div') : null;  // Conexión de inversor a carga
+                            linea5 = inversor && red ? document.createElement('div') : null;  // Conexión de inversor a red
+                        } else {
+                            linea1 = arreglo && inversor ? document.createElement('div') : null;
+                            linea2 = inversor && banco ? document.createElement('div') : null;
+                            linea3 = inversor && carga ? document.createElement('div') : null;
+                            linea4 = null; // Evitar crear una línea entre banco e inversor si no hay regulador
+                            linea5 = inversor && red ? document.createElement('div') : null;
+                        }
             
-                    const calcularCentro = el => {
-                        const { left, top, width, height } = el.getBoundingClientRect();
-                        const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
-                        return {
-                            x: left + width / 2 - pLeft + scrollContainer.scrollLeft,
-                            y: top + height / 2 - pTop + scrollContainer.scrollTop
+                        // Añadir las líneas al contenedor
+                        linea1 && scrollContainer.appendChild(linea1).classList.add('linea');
+                        linea2 && scrollContainer.appendChild(linea2).classList.add('linea');
+                        linea3 && scrollContainer.appendChild(linea3).classList.add('linea');
+                        linea4 && scrollContainer.appendChild(linea4).classList.add('linea');
+                        linea5 && scrollContainer.appendChild(linea5).classList.add('linea');
+            
+                        const setPos = (el, x, y) => el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
+                        setPos(arreglo, x_arr, y_arr);
+                        setPos(inversor, x_inv, y_inv);
+                        setPos(banco, x_ban, y_ban);
+                        setPos(carga, x_car, y_car);
+                        setPos(red, x_red, y_red); 
+            
+                        if (condition === 'Si') {
+                            setPos(regulador, x_reg, y_reg);
+                        }
+            
+                        const calcularCentro = el => {
+                            const { left, top, width, height } = el.getBoundingClientRect();
+                            const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
+                            return { x: left + width / 2 - pLeft + scrollContainer.scrollLeft, y: top + height / 2 - pTop + scrollContainer.scrollTop };
                         };
-                    };
             
-                    const actualizarLinea = () => {
-                        if (linea && icono1 && icono2) {
-                            const [p1, p2] = [calcularCentro(icono1), calcularCentro(icono2)];
+                        const actualizarLinea = (linea, el1, el2) => {
+                            if (!linea || !el1 || !el2) return;
+                            const [p1, p2] = [calcularCentro(el1), calcularCentro(el2)];
                             Object.assign(linea.style, {
                                 width: `${Math.hypot(p2.x - p1.x, p2.y - p1.y)}px`,
                                 transform: `rotate(${Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI}deg)`,
                                 top: `${p1.y}px`, left: `${p1.x}px`, position: 'absolute'
                             });
-                        }
-                    };
+                        };
             
-                    actualizarLinea();
+                        const actualizarLineas = () => {
+                            actualizarLinea(linea1, arreglo, condition === 'Si' ? regulador : inversor);
+                            actualizarLinea(linea2, condition === 'Si' ? regulador : inversor, banco);
+                            actualizarLinea(linea3, inversor, carga); // Asegura la conexión entre inversor e carga
+                            actualizarLinea(linea4, banco, inversor); // Asegura la conexión correcta sin líneas duplicadas
+                            actualizarLinea(linea5, inversor, red); // Asegura la conexión entre inversor e red
+                        };
             
-                    document.addEventListener('dragstart', e => draggedElement = e.target);
-                    document.addEventListener('dragover', e => e.preventDefault());
-                    document.addEventListener('drop', e => {
-                        e.preventDefault();
-                        if (draggedElement) {
+                        document.addEventListener('dragstart', e => draggedElement = e.target);
+                        document.addEventListener('dragover', e => e.preventDefault());
+            
+                        document.addEventListener('drop', e => {
+                            e.preventDefault();
+                            if (!draggedElement) return;
                             const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
-                            const x = Math.max(0, e.clientX - pLeft - draggedElement.offsetWidth / 2);
-                            const y = Math.max(0, e.clientY - pTop - draggedElement.offsetHeight / 2);
+                            const x = Math.max(0, e.clientX - pLeft - draggedElement.offsetWidth / 2 + scrollContainer.scrollLeft);
+                            const y = Math.max(0, e.clientY - pTop - draggedElement.offsetHeight / 2 + scrollContainer.scrollTop);
             
-                            // Verificar si es panel solar o inversor
-                            if (draggedElement === icono1) [x_arr, y_arr] = [x, y];
-                            else if (draggedElement === icono2) [x_inv, y_inv] = [x, y];
+                            if (draggedElement === arreglo) [x_arr, y_arr] = [x, y];
+                            else if (draggedElement === inversor) [x_inv, y_inv] = [x, y];
+                            else if (draggedElement === regulador) [x_reg, y_reg] = [x, y];
+                            else if (draggedElement === banco) [x_ban, y_ban] = [x, y];
+                            else if (draggedElement === carga) [x_car, y_car] = [x, y];
+                            else if (draggedElement === red) [x_red, y_red] = [x, y]; 
+            
                             Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
             
-                            actualizarLinea();
+                            actualizarLineas();
             
                             fetch('/update-coordinates', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ arr_id, x: x_arr, y: y_arr, pro_id: id_pro, x_inv, y_inv })
+                                body: JSON.stringify({
+                                    arr_id, x: x_arr, y: y_arr, pro_id: id_pro,
+                                    x_inv, y_inv,
+                                    x_reg: condition === 'Si' ? x_reg : null,
+                                    y_reg: condition === 'Si' ? y_reg : null,
+                                    x_ban, y_ban, x_car, y_car, x_red, y_red 
+                                })
                             }).then(res => res.json()).then(data => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar')).catch(console.error);
-                        }
-                    });
+                        });
             
-                    scrollContainer.addEventListener('scroll', actualizarLinea);
-                }
+                        scrollContainer.addEventListener('scroll', actualizarLineas);
+                        actualizarLineas();
+                    }
             
-                initIcono("{{ arr_completo.arreglo[43] }}", "{{ arr_completo.arreglo[56] }}", "{{ arr_completo.arreglo[57] }}", "{{ pro_com[0] }}", "{{ pro_com[12] }}", "{{ pro_com[13] }}");
+                    const condition = "{{ pro_com[32] }}";
+                    const xIco3 = condition === 'Si' ? "{{ x_reg }}" : null;
+                    const yIco3 = condition === 'Si' ? "{{ y_reg }}" : null;
+            
+                    initIcono(
+                        "{{ arr_completo.arreglo[44] }}",
+                        "{{ arr_completo.arreglo[57] }}",
+                        "{{ arr_completo.arreglo[58] }}",
+                        "{{ pro_com[0] }}",
+                        "{{ pro_com[11] }}",
+                        "{{ pro_com[12] }}",
+                        "{{ pro_com[13] }}",
+                        "{{ pro_com[14] }}",
+                        "{{ x_ban }}",
+                        "{{ y_ban }}",
+                        "{{ x_car }}",
+                        "{{ y_car }}",
+                        "{{ pro_com[15] }}",
+                        "{{ pro_com[16] }}",
+                        condition
+                    );
+                });
             </script>
             
-            
-            
-        {% endif %}
-        
         {% endfor %}
 
     </div>

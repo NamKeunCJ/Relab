@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="proyecto-form" method="POST" action="/add_proyecto">
-                <div class="modal-body" style="height: 18rem;">
+                <div class="modal-body" style="height: 12rem;">
                     <div class="form-group mb-3">
                         <label for="nom_pro">Escribe el nombre del proyecto:</label>
                         <input type="text" class="form-control" id="nom_pro" name="nom_pro" maxlength="100" required>
@@ -15,14 +15,6 @@
                     <div class="form-group" style="margin-top: 1rem;">
                         <label for="cred_pro">¿Su estructura se conectará a la red eléctrica?: </label>
                         <select class="form-control" id="cred_pro" name="cred_pro" required>
-                            <option value="" disabled selected>Selecciona una respuesta</option>
-                            <option value="Si">Si</option>                          
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="cbat_pro">¿Su estructura se conectará a una bateria?: </label>
-                        <select class="form-control" id="cbat_pro" name="cbat_pro" required>
                             <option value="" disabled selected>Selecciona una respuesta</option>
                             <option value="Si">Si</option>                          
                             <option value="No">No</option>

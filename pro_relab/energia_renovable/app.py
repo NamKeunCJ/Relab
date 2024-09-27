@@ -261,6 +261,10 @@ def update_user():
                     return render_template('autenticacion_y_registro/edit_user.html', rol=rol, edit_usu=edit_usu)  # Renderiza la plantilla con los datos obtenidos
             else:
                 return redirect(url_for('inicio_principal'))  # Si el usuario no es Administrador, redirige a la página principal
+            
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------ESTACION DAVIS Y DATOS DE DEMANDA-------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #Conexion de la estacion meteorologica con el sistema de informacion
 def davis():
@@ -559,7 +563,10 @@ def irradiance_prediction():
     print (prediction_g)
     return render_template('informe_y_Estadistica/date_davis.html',prediction_g = prediction_g)
 
-#Crear Componentes
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------CREAR COMPONENTES Y EDITARLOS-------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 #mostrar modal panel
 @app.route('/ver_modal_panel')
 def ver_modal_panel():
@@ -1064,7 +1071,10 @@ def update_regulador():
             else:
                 return redirect(url_for('inicio_principal'))
 
-#------------------------Craeacion de proyectos--------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------CREAR PROYECTO FOTOVOLTAICO-------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 #mostrar modal proyecto
 @app.route('/ver_modal_proyecto')
 def ver_modal_proyecto():   
@@ -1075,7 +1085,6 @@ def ver_modal_proyecto():
 def add_proyecto():
     nom_pro = request.form['nom_pro']
     cred_pro = request.form['cred_pro']
-    cbat_pro = request.form['cbat_pro']
     user_id = session.get('user_id')
 
     # Conectar a la base de datos y buscar si el proyecto ya existe
@@ -1089,8 +1098,8 @@ def add_proyecto():
                 return 'exist'
             else:
                 # Insertar el nuevo proyecto en la base de datos
-                cur.execute('INSERT INTO proyecto_fotovoltaica (nom_pro, cred_pro, cbat_pro, id_usu) VALUES (%s, %s, %s, %s) RETURNING id_pro;', 
-                            (nom_pro, cred_pro, cbat_pro, user_id))
+                cur.execute('INSERT INTO proyecto_fotovoltaica (nom_pro, cred_pro,  id_usu) VALUES (%s, %s,  %s) RETURNING id_pro;', 
+                            (nom_pro, cred_pro,  user_id))
 
                 # Guardar los cambios y obtener el id_pro del nuevo proyecto
                 id_pro = cur.fetchone()[0]
@@ -1121,7 +1130,7 @@ def inicio_proyecto_fotovoltaica():
             # Almacenar arreglos completos
             arreglos_completos = []
             for arr in proyecto_completo:
-                cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[43],))
+                cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[44],))
                 paralelo = cur.fetchall()
 
                 series_totales = []
@@ -1234,27 +1243,36 @@ def update_coordinates():
     y = data.get('y')            # Nueva coordenada Y del arreglo de paneles
     x_inv = data.get('x_inv')    # Nueva coordenada X del inversor
     y_inv = data.get('y_inv')    # Nueva coordenada Y del inversor
-
+    x_reg = data.get('x_reg')    # Nueva coordenada X del regulador
+    y_reg = data.get('y_reg')    # Nueva coordenada Y del regulador
+    x_ban = data.get('x_ban')    # Nueva coordenada X del banco de baterias
+    y_ban = data.get('y_ban')    # Nueva coordenada Y del banco de baterias
+    x_car = data.get('x_car')    # Nueva coordenada X de la carga
+    y_car = data.get('y_car')    # Nueva coordenada Y de la carga
+    x_red = data.get('x_red')    # Nueva coordenada X de la red
+    y_red = data.get('y_red')    # Nueva coordenada Y de la red
+    print('regulador: ',x_reg,y_reg,'banco: ',x_ban,y_ban,'carga: ',x_car,y_car,'red: ',x_red,y_red)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             # Validar que id_arr sea un valor válido antes de ejecutar la consulta
             if id_arr !='None':
                 print('ENTRO1')
                 cur.execute('''
-                    UPDATE arreglo_de_paneles 
-                    SET x_arr = %s, y_arr = %s 
-                    WHERE id_arr = %s;
+                    UPDATE arreglo_de_paneles SET x_arr = %s, y_arr = %s WHERE id_arr = %s;
                 ''', (x, y, id_arr))
                 conn.commit()
             # Validar que id_pro sea un valor válido antes de ejecutar la consulta
             if id_pro !='None':
                 print('ENTRO2')
                 cur.execute('''
-                    UPDATE proyecto_fotovoltaica 
-                    SET xinv_pro = %s, yinv_pro = %s 
-                    WHERE id_pro = %s;
-                ''', (x_inv, y_inv, id_pro))
+                    UPDATE proyecto_fotovoltaica SET xinv_pro = %s, yinv_pro = %s, xred_pro = %s, yred_pro = %s WHERE id_pro = %s;
+                ''', (x_inv, y_inv,  x_red, y_red, id_pro))
                 conn.commit()
+                if x_reg is not None or y_reg is not None:
+                    cur.execute('''
+                        UPDATE proyecto_fotovoltaica SET xreg_pro = %s, yreg_pro = %s WHERE id_pro = %s;
+                    ''', (x_reg, y_reg, id_pro))
+                    conn.commit()
 
     return jsonify(success=True)  # Respuesta de éxito
 

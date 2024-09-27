@@ -1,5 +1,5 @@
 {% block head %} {% include 'layouts/head.html' %} {% endblock %}
-
+{% set pro_com = proyecto_completo[0] %}
 
 <body  class="body-inicio">
     {% block navbar %} {% include 'layouts/navbar.html' %} {% endblock %}
@@ -7,7 +7,7 @@
         <div class="row">
             <div class="sidebar border border-right col-md-3 col-lg-2 p-3 bg-body-tertiary" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
                 <div class="offcanvas-header">
-                    <h4 class="offcanvas-title" id="offcanvasRightLabel" style="margin-bottom: 2rem;color:#13447c;font-size: 22px;"><b>{{ pro[1] }}</b></h4>
+                    <h4 class="offcanvas-title" id="offcanvasRightLabel" style="margin-bottom: 2rem;color:#13447c;font-size: 22px;"><b>{{ pro_com[1] }}</b></h4>
                 </div>
                 <div class="offcanvas-body">
                     <!-- Sección Fotovoltaico -->
@@ -35,7 +35,7 @@
                 <div class="container" data-aos="fade-up">
                     <div class="row" style="margin-bottom: 2rem; margin-top: 2rem;">
                         <div class="col ms-sm-auto">                            
-                            {% if pro %}
+                            {% if proyecto_completo %}
                                 {% block editar_panel %} {% include 'creacion_de_proyecto/inicio.html' %} {% endblock %}                                                            
                             {% endif %}
                         </div>
