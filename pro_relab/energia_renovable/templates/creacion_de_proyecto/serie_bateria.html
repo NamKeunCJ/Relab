@@ -21,18 +21,18 @@
         });
     });
 </script>
-<div class="modal fade" id="projectSerieBanco{{ sban.id_sban }}" tabindex="-1" role="dialog" aria-labelledby="ProjectBancoModalLabel" aria-hidden="true">
+<div class="modal fade" id="projectSerieBanco{{ sban[0] }}" tabindex="-1" role="dialog" aria-labelledby="ProjectBancoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Informacion de la bateria</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="form-ser-pan" method="POST" action="{{ url_for('edit_bateria') }}">
+            <form id="form-ser-pan" method="POST" action="/edit_bateria">
                 <div class="modal-body">
                     <h5 style="margin-bottom: 1rem;"><b> Informacion de la bateria:  </b></h5>
                     {%if info is not none %} {% if info.est_bat=='Deshabilitado'%}
-                    <div class="alert alert-danger">La Bateria {{info.ref_bat}} con identificacion {{info.idu_bat}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otra Bateria.</div>
+                    <div class="alert alert-danger">La Bateria {{info[1]}} con identificacion {{info.idu_bat}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otra Bateria.</div>
                     {% endif %}
                     <table class="table table-responsive">
                         <thead>
@@ -45,15 +45,15 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{info.ref_bat}}</td>
-                                <td>{{info.vol_bat}}</td>
-                                <td>{{info.cap_bat}}</td>
-                                <td>{{info.ene_bat}}</td>
+                                <td>{{info[1]}}</td>
+                                <td>{{info[2]}}</td>
+                                <td>{{info[3]}}</td>
+                                <td>{{info[4]}}</td>
                             </tr>
                         </tbody>
                     </table>
                     {% else %} No hay informacion para mostrar en este momento. {%endif%}
-                    <input type="hidden" name="id_sban" value="{{ sban.id_sban }}">
+                    <input type="hidden" name="id_sban" value="{{ sban[0] }}">
                     <h5 style="margin-top: 2rem; margin-bottom: 2rem;"><b> Escoge la bateria que se requiera:  </b></h5>
                     <table id="tabla" class="table table-responsive">
                         <thead>
@@ -68,11 +68,11 @@
                         <tbody>
                             {%for bat in bat%}
                             <tr>
-                                <td>{{bat.ref_bat}}</td>
-                                <td>{{bat.vol_bat}}</td>
-                                <td>{{bat.cap_bat}}</td>
-                                <td>{{bat.ene_bat}}</td>
-                                <td><input class="form-check-input" type="radio" name="id_bat" id="id_bat" value="{{bat.id_bat}}" required></td>
+                                <td>{{bat[1]}}</td>
+                                <td>{{bat[2]}}</td>
+                                <td>{{bat[3]}}</td>
+                                <td>{{bat[4]}}</td>
+                                <td><input class="form-check-input" type="radio" name="id_bat" id="id_bat" value="{{bat[0]}}" required></td>
                             </tr>
                             {%endfor%}
                         </tbody>

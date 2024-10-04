@@ -9,12 +9,9 @@
         {% if pro and pro[0] is not none %}             
             <ul class="nav list-unstyled" style="margin-top: 0.20cm;">  
                 {% set ent_inv = proyecto_completo[0] %}              
-                {% set is_disabled = ent_inv[18] == cant_componentes[2] %}
+                {% set is_disabled = ent_inv[19] == cant_componentes[2] %}
                 <li class="nav-item d-flex align-items-center mb-3" id="item_arreglo">
-                    <a class="icon nav-link d-flex align-items-center {{ 'disabled' if is_disabled else '' }}" 
-                    id="project_arreglo" 
-                    href="/modal_arreglo_project?id_pro={{pro[0]}}" 
-                    title="Añade un arreglo de paneles a tu proyecto">
+                    <a class="icon nav-link d-flex align-items-center {{ 'disabled' if is_disabled else '' }}" id="project_arreglo" href="/modal_arreglo_project?id_pro={{pro[0]}}" title="Añade un arreglo de paneles a tu proyecto">
                         <img src="/static/images/icon_arreglo.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
                         <span class="d-none d-md-inline">Añadir arreglo</span>
                     </a>
@@ -27,7 +24,7 @@
                     </a>
                 </li>
                 <li class="nav-item d-flex align-items-center mb-3" id="item_banco">
-                    <a class="icon nav-link d-flex align-items-center" id="project_banco" href="#" title="Añade un banco de baterías a tu proyecto">
+                    <a class="icon nav-link d-flex align-items-center" id="project_banco" href="/modal_banco_project?id_pro={{pro[0]}}" title="Añade un banco de baterías a tu proyecto">
                         <img src="/static/images/icon_banco.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
                         <span class="d-none d-md-inline">Añadir banco</span>
                     </a>

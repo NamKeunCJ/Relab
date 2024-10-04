@@ -30,6 +30,9 @@ def get_db_connection():
         password=app.config['DB_PASSWORD']
     )
     return conn  # Devolver la conexión a la base de datos
+################################################################################################################################################
+#--------------------------------------------------------AUTENTICACIONY LOGUEO------------------------------------------------------------------
+################################################################################################################################################
 
 # Ruta para la página de inicio de sesión
 @app.route('/')
@@ -102,7 +105,6 @@ def registro():
     # Si el método no es POST, renderizar el formulario de registro
     return render_template('autenticacion_y_registro/registro.html')
 
-
 # Página principal
 @app.route('/inicio_principal')
 def inicio_principal():
@@ -126,6 +128,8 @@ def logout():
     session.clear()
     # Redireccionar a la página de inicio o a donde prefieras
     return redirect(url_for('inicio_sesion'))  
+
+################################################################################################################################################
 
 # Ruta para editar el perfil del usuario
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -262,9 +266,9 @@ def update_user():
             else:
                 return redirect(url_for('inicio_principal'))  # Si el usuario no es Administrador, redirige a la página principal
             
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 #--------------------------------------------ESTACION DAVIS Y DATOS DE DEMANDA-------------------------------------------------------------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 
 #Conexion de la estacion meteorologica con el sistema de informacion
 def davis():
@@ -328,8 +332,6 @@ def get_previous_year_data(ts):
         with conn.cursor() as cursor:
             cursor.execute(query, (one_year_ago,))
             return cursor.fetchone()
-
-
         
 # Crear un hilo para la función davis
 data_fetch_thread = threading.Thread(target=davis)
@@ -427,6 +429,8 @@ def consultas_demanda():
                 else:
                     consult_neto.append((None, None))
     return db_dem, db_ana_dem,consult_promedio, consult_neto
+
+################################################################################################################################################
 
 @app.route('/demand_display', methods=['GET', 'POST'])
 def demand_display():
@@ -556,6 +560,8 @@ def demand_value_calculation():
         
         return render_template('informe_y_Estadistica/date_hioki.html', db_dem=db_dem, db_ana_dem=db_ana_dem, consult_promedio=consult_promedio, consult_neto=consult_neto, costo = costo)
 
+################################################################################################################################################
+
 #PREDICCION DE IRRADIANCIA
 @app.route('/irradiance_prediction')
 def irradiance_prediction():
@@ -563,9 +569,9 @@ def irradiance_prediction():
     print (prediction_g)
     return render_template('informe_y_Estadistica/date_davis.html',prediction_g = prediction_g)
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 #--------------------------------------------CREAR COMPONENTES Y EDITARLOS-------------------------------------------------------------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 
 #mostrar modal panel
 @app.route('/ver_modal_panel')
@@ -594,6 +600,8 @@ def ver_modal_bateria():
 @app.route('/ver_modal_regulador')
 def ver_modal_regulador():
     return render_template('creacion_de_componentes/crea_regulador.html')
+
+################################################################################################################################################
 
 # Crear panel modal       
 @app.route('/add_panel', methods=['POST'])
@@ -689,7 +697,6 @@ def add_inversor():
             else:
                 return 'error'
 
-
 # Crear bateria modal
 @app.route('/add_bateria', methods=['POST'])
 def add_bateria():
@@ -754,6 +761,7 @@ def add_regulador():
             else:
                 return 'error'
 
+################################################################################################################################################
 
 #Lista de componentes index
 @app.route('/component_list')
@@ -866,7 +874,6 @@ def update_panel():
             else:
                 return redirect(url_for('inicio_principal'))
 
-
 #list  baterias
 @app.route('/update_bateria', methods=['GET', 'POST'])
 def update_bateria():
@@ -924,8 +931,6 @@ def update_bateria():
                 return render_template('creacion_de_componentes/index.html', success=success, user_comp=user, bat_usu=bat_usu, num_comp=num_comp)
             else:
                 return redirect(url_for('inicio_principal'))
-
-
    
 @app.route('/update_inversor', methods=['GET', 'POST'])
 def update_inversor(): 
@@ -1001,7 +1006,6 @@ def update_inversor():
             else:
                 return redirect(url_for('inicio_principal'))
 
-
 @app.route('/update_regulador', methods=['GET', 'POST'])
 def update_regulador():  
     if request.method == 'POST':
@@ -1071,9 +1075,9 @@ def update_regulador():
             else:
                 return redirect(url_for('inicio_principal'))
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 #--------------------------------------------CREAR PROYECTO FOTOVOLTAICO-------------------------------------------------------------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 
 #mostrar modal proyecto
 @app.route('/ver_modal_proyecto')
@@ -1112,69 +1116,194 @@ def add_proyecto():
 def inicio_proyecto_fotovoltaica():  
     id_pro = request.args.get('id_pro')
     user_id = session.get('user_id')
-    
+
     # Obtener detalles del proyecto
     with get_db_connection() as conn:
         with conn.cursor() as cur:
+            print('pagina inicial')
+            # Hacemos una única consulta para obtener todos los datos relacionados
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
-                LEFT JOIN inversor i ON i.id_inv = p.id_inv
-                LEFT JOIN regulador r ON r.id_reg = p.id_reg
-                LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
-                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro
-                LEFT JOIN carga c ON c.id_pro = p.id_pro
-                WHERE p.id_pro = %s AND p.id_usu = %s 
-                ORDER BY ap.id_arr, c.id_car;
+                LEFT JOIN inversor i ON i.id_inv = p.id_inv LEFT JOIN regulador r ON r.id_reg = p.id_reg LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
+                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro LEFT JOIN carga c ON c.id_pro = p.id_pro
+                WHERE p.id_pro = %s AND p.id_usu = %s ORDER BY ap.id_arr, c.id_car;
             ''', (id_pro, user_id))
             proyecto_completo = cur.fetchall()
-            # Almacenar arreglos completos
+
+            # Evitamos duplicación en arreglos y bancos
+            arreglo_visto = set()  # Conjunto para evitar duplicaciones de arreglos
+            banco_visto = set()    # Conjunto para evitar duplicaciones de bancos
+
             arreglos_completos = []
+            bancos_completos = []
+
             for arr in proyecto_completo:
-                cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[44],))
-                paralelo = cur.fetchall()
+                # Evitamos que los arreglos se dupliquen
+                if arr[44] not in arreglo_visto:  # asumiendo que arr[44] es el ID del arreglo
+                    cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[44],))
+                    paralelo = cur.fetchall()
 
-                series_totales = []
-                for par in paralelo:
-                    cur.execute('SELECT * FROM serie_arreglo WHERE id_parr=%s ORDER BY id_sarr DESC;', (par[0],))
-                    serie = cur.fetchall()
+                    series_totales = []
+                    for par in paralelo:
+                        cur.execute('SELECT * FROM serie_arreglo WHERE id_parr=%s ORDER BY id_sarr DESC;', (par[0],))
+                        serie = cur.fetchall()
 
-                    paneles_totales = []
-                    for ser in serie:
-                        cur.execute('''
-                            select p.*, ser.* from serie_arreglo ser LEFT JOIN panel p on ser.id_pan=p.id_pan
-                            WHERE id_sarr=%s;
-                        ''', (ser[0],))
-                        panel = cur.fetchone()
-                        paneles_totales.append(panel)
+                        paneles_totales = []
+                        for ser in serie:
+                            cur.execute('''
+                                select p.*, ser.* from serie_arreglo ser LEFT JOIN panel p on ser.id_pan=p.id_pan
+                                WHERE id_sarr=%s;
+                            ''', (ser[0],))
+                            panel = cur.fetchone()
+                            paneles_totales.append(panel)
 
-                    series_totales.append({
-                        'paralelo': par,
-                        'series': serie,
-                        'paneles': paneles_totales
+                        series_totales.append({
+                            'paralelo': par,
+                            'series': serie,
+                            'paneles': paneles_totales
+                        })
+
+                    arreglos_completos.append({
+                        'arreglo': arr,
+                        'paralelos': paralelo,
+                        'series_totales': series_totales
                     })
+                    arreglo_visto.add(arr[44])  # Agregamos el arreglo al conjunto visto
 
-                arreglos_completos.append({
-                    'arreglo': arr,
-                    'paralelos': paralelo,
-                    'series_totales': series_totales
-                })
+                # Evitamos que los bancos se dupliquen
+                if arr[59] not in banco_visto:  # asumiendo que arr[59] es el ID del banco
+                    cur.execute('SELECT * FROM paralelo_banco WHERE id_ban=%s ORDER BY id_pban DESC;', (arr[59],))
+                    paralelo = cur.fetchall()
+
+                    series_totales = []
+                    for par in paralelo:
+                        cur.execute('SELECT * FROM serie_banco WHERE id_pban=%s ORDER BY id_sban DESC;', (par[0],))
+                        serie = cur.fetchall()
+
+                        baterias_totales = []
+                        for ser in serie:
+                            cur.execute('''
+                                select b.*, ser.* from serie_banco ser LEFT JOIN bateria b on ser.id_bat=b.id_bat
+                                WHERE id_sban=%s;
+                            ''', (ser[0],))
+                            bateria = cur.fetchone()
+                            baterias_totales.append(bateria)
+
+                        series_totales.append({
+                            'paralelo': par,
+                            'series': serie,
+                            'baterias': baterias_totales
+                        })
+
+                    bancos_completos.append({
+                        'banco': arr,
+                        'paralelos': paralelo,
+                        'series_totales': series_totales
+                    })
+                    banco_visto.add(arr[59])  # Agregamos el banco al conjunto visto
 
             # Obtenemos el proyecto principal
             cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
             pro = cur.fetchone()
+
             cur.execute('''SELECT COUNT(id_inv) AS cant_inv, COUNT(id_reg) AS cant_reg,
                 (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = %s) AS cant_arr,
                 (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = %s) AS cant_ban,
                 (SELECT COUNT(id_car) FROM carga WHERE id_pro = %s) AS cant_car
                 FROM proyecto_fotovoltaica 
                 WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,id_pro,))
-            cant_componentes = cur.fetchone()
+            cant_componentes = cur.fetchone()            
+            # Verificamos si hay inversor
+            if proyecto_completo[0][4] is not None :
+                cant_arr_del = cant_componentes[2]  
+                # Mientras haya arreglos por eliminar
+                while cant_arr_del > proyecto_completo[0][19]:                    
+                    # Si hay resultados, obtenemos el último registro
+                    ultimo_registro = proyecto_completo[-1]  
+                    if ultimo_registro[44] is not None:
+                        print('entro ultimo arr')
+                        # Ejecutamos la eliminación del arreglo de paneles
+                        cur.execute('''
+                        DELETE FROM serie_arreglo
+                        WHERE id_parr IN (SELECT id_parr FROM paralelo_arreglo WHERE id_arr = %s);
+                        DELETE FROM paralelo_arreglo
+                        WHERE id_arr = %s;
+                        DELETE FROM arreglo_de_paneles
+                        WHERE id_arr = %s;
+                        ''', (ultimo_registro[44],ultimo_registro[44],ultimo_registro[44],))
+                        # Contamos la cantidad de arreglos de paneles restantes
+                        cur.execute('SELECT COUNT(*) FROM arreglo_de_paneles WHERE id_pro = %s;', (id_pro,))
+                        cant_arr = cur.fetchone()[0]
+
+                        # Actualizamos la cantidad de arreglos que quedan por eliminar
+                        cant_arr_del = cant_arr - proyecto_completo[0][19]  # Posición 18 del inversor 
+                        # Redirigir después de la eliminación
+                        return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))       
+
+                    else:
+                        break                              
+                  
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', pro=pro,proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos,cant_componentes=cant_componentes,zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', pro=pro, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes, zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
 
+################################################################################################################################################
+
+#Modificar coordenadas de cada arreglo que muevo
+@app.route('/update-coordinates', methods=['POST'])
+def update_coordinates():
+    data = request.get_json()
+    # Recibir los datos del JSON
+    id_arr = data.get('arr_id')  # ID del arreglo de paneles
+    id_ban = data.get('ban_id')  # ID del banco de paneles
+    id_pro = data.get('pro_id')  # ID del proyecto
+    x = data.get('x')            # Nueva coordenada X del arreglo de paneles
+    y = data.get('y')            # Nueva coordenada Y del arreglo de paneles
+    x_inv = data.get('x_inv')    # Nueva coordenada X del inversor
+    y_inv = data.get('y_inv')    # Nueva coordenada Y del inversor
+    x_reg = data.get('x_reg')    # Nueva coordenada X del regulador
+    y_reg = data.get('y_reg')    # Nueva coordenada Y del regulador
+    x_ban = data.get('x_ban')    # Nueva coordenada X del banco de baterias
+    y_ban = data.get('y_ban')    # Nueva coordenada Y del banco de baterias
+    x_car = data.get('x_car')    # Nueva coordenada X de la carga
+    y_car = data.get('y_car')    # Nueva coordenada Y de la carga
+    x_red = data.get('x_red')    # Nueva coordenada X de la red
+    y_red = data.get('y_red')    # Nueva coordenada Y de la red
+    print('regulador: ',x_reg,y_reg,'banco: ',id_ban,x_ban,y_ban,'carga: ',x_car,y_car,'red: ',x_red,y_red)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Validar que id_arr sea un valor válido antes de ejecutar la consulta
+            if id_arr !='None':
+                print('ENTRO1')
+                cur.execute('''
+                    UPDATE arreglo_de_paneles SET x_arr = %s, y_arr = %s WHERE id_arr = %s;
+                ''', (x, y, id_arr))
+                conn.commit()
+            # Validar que id_pro sea un valor válido antes de ejecutar la consulta
+            if id_pro !='None':
+                print('ENTRO2')
+                cur.execute('''
+                    UPDATE proyecto_fotovoltaica SET xinv_pro = %s, yinv_pro = %s, xred_pro = %s, yred_pro = %s WHERE id_pro = %s;
+                ''', (x_inv, y_inv,  x_red, y_red, id_pro))
+                conn.commit()
+                if x_reg is not None or y_reg is not None:
+                    cur.execute('''
+                        UPDATE proyecto_fotovoltaica SET xreg_pro = %s, yreg_pro = %s WHERE id_pro = %s;
+                    ''', (x_reg, y_reg, id_pro))
+                    conn.commit()
+            # Validar que id_ban sea un valor válido antes de ejecutar la consulta
+            if id_ban !='None':
+                print('ENTRO3')
+                cur.execute('''
+                    UPDATE banco_de_baterias SET x_ban = %s, y_ban = %s WHERE id_ban = %s;
+                ''', (x_ban, y_ban, id_ban))
+                conn.commit()
+
+    return jsonify(success=True)  # Respuesta de éxito
+
+################################################################################################################################################
 
 #mostrar modal para agregar el arreglo alproyecto
 @app.route('/modal_arreglo_project')
@@ -1192,7 +1321,6 @@ def modal_arreglo_project():
 @app.route('/add_arreglo_project', methods=['POST'])
 def add_arreglo_project(): 
     id_pro = request.form['id_pro']
-    id_inv = request.form['id_inv']
     num_ser = int(request.form['num_ser'])
     num_pan_ser = int(request.form['num_pan_ser']) 
 
@@ -1231,86 +1359,6 @@ def add_arreglo_project():
             # Confirmar todas las transacciones
             conn.commit()
 
-    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
-
-#Modificar coordenadas de cada arreglo que muevo
-@app.route('/update-coordinates', methods=['POST'])
-def update_coordinates():
-    data = request.get_json()
-    # Recibir los datos del JSON
-    id_arr = data.get('arr_id')  # ID del arreglo de paneles
-    id_pro = data.get('pro_id')  # ID del proyecto
-    x = data.get('x')            # Nueva coordenada X del arreglo de paneles
-    y = data.get('y')            # Nueva coordenada Y del arreglo de paneles
-    x_inv = data.get('x_inv')    # Nueva coordenada X del inversor
-    y_inv = data.get('y_inv')    # Nueva coordenada Y del inversor
-    x_reg = data.get('x_reg')    # Nueva coordenada X del regulador
-    y_reg = data.get('y_reg')    # Nueva coordenada Y del regulador
-    x_ban = data.get('x_ban')    # Nueva coordenada X del banco de baterias
-    y_ban = data.get('y_ban')    # Nueva coordenada Y del banco de baterias
-    x_car = data.get('x_car')    # Nueva coordenada X de la carga
-    y_car = data.get('y_car')    # Nueva coordenada Y de la carga
-    x_red = data.get('x_red')    # Nueva coordenada X de la red
-    y_red = data.get('y_red')    # Nueva coordenada Y de la red
-    print('regulador: ',x_reg,y_reg,'banco: ',x_ban,y_ban,'carga: ',x_car,y_car,'red: ',x_red,y_red)
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            # Validar que id_arr sea un valor válido antes de ejecutar la consulta
-            if id_arr !='None':
-                print('ENTRO1')
-                cur.execute('''
-                    UPDATE arreglo_de_paneles SET x_arr = %s, y_arr = %s WHERE id_arr = %s;
-                ''', (x, y, id_arr))
-                conn.commit()
-            # Validar que id_pro sea un valor válido antes de ejecutar la consulta
-            if id_pro !='None':
-                print('ENTRO2')
-                cur.execute('''
-                    UPDATE proyecto_fotovoltaica SET xinv_pro = %s, yinv_pro = %s, xred_pro = %s, yred_pro = %s WHERE id_pro = %s;
-                ''', (x_inv, y_inv,  x_red, y_red, id_pro))
-                conn.commit()
-                if x_reg is not None or y_reg is not None:
-                    cur.execute('''
-                        UPDATE proyecto_fotovoltaica SET xreg_pro = %s, yreg_pro = %s WHERE id_pro = %s;
-                    ''', (x_reg, y_reg, id_pro))
-                    conn.commit()
-
-    return jsonify(success=True)  # Respuesta de éxito
-
-
-
-
-#mostrar modal para agregar el inversor alproyecto
-@app.route('/modal_inversor_project')
-def modal_inversor_project():    
-    id_pro = request.args.get('id_pro')
-    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute('select * from proyecto_fotovoltaica where id_pro= %s ;', (id_pro,))
-            pro = cur.fetchone() 
-            cur.execute('select * from arreglo_de_paneles where id_pro= %s ;', (id_pro,))
-            arr = cur.fetchall() 
-            cur.execute('select * from inversor where status= %s ;', (True,))
-            inv = cur.fetchall() 
-            cur.execute('select pro.*, inv.* from proyecto_fotovoltaica pro join inversor inv on pro.id_inv=inv.id_inv where pro.id_pro= %s ;', (id_pro,))
-            info = cur.fetchone() 
-            
-            
-    return render_template('creacion_de_proyecto/project_inversor.html', pro = pro, arr=arr , inv = inv, info=info)
-#agregar el inversor alproyecto
-@app.route('/add_inversor_project', methods=['POST'])
-def add_inversor_project():     
-    id_pro = request.form['id_pro']
-    id_inv = request.form['id_inv']
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute('''
-                UPDATE proyecto_fotovoltaica 
-                SET id_inv = %s 
-                WHERE id_pro = %s;
-            ''', (id_inv, id_pro))
-            conn.commit()
     return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
 
 # Mostrar modal para llenar los series
@@ -1410,6 +1458,240 @@ def edit_panel():
                     ''', (parr, vparr, iparr, area, efip, id_arr))
                     conn.commit()
                 return 'success'
+    return 'success'
+
+################################################################################################################################################
+
+#mostrar modal para agregar el inversor alproyecto
+@app.route('/modal_inversor_project')
+def modal_inversor_project():    
+    id_pro = request.args.get('id_pro')
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('select * from proyecto_fotovoltaica where id_pro= %s ;', (id_pro,))
+            pro = cur.fetchone() 
+            cur.execute('select * from arreglo_de_paneles where id_pro= %s ;', (id_pro,))
+            arr = cur.fetchall() 
+            cur.execute('select * from inversor where status= %s ;', (True,))
+            inv = cur.fetchall() 
+            cur.execute('select pro.*, inv.* from proyecto_fotovoltaica pro join inversor inv on pro.id_inv=inv.id_inv where pro.id_pro= %s ;', (id_pro,))
+            info = cur.fetchone()          
+            
+    return render_template('creacion_de_proyecto/project_inversor.html', pro = pro, arr=arr , inv = inv, info=info)
+
+#agregar el inversor alproyecto
+@app.route('/add_inversor_project', methods=['POST'])
+def add_inversor_project():     
+    id_pro = request.form['id_pro']
+    id_inv = request.form['id_inv']
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''
+                    UPDATE proyecto_fotovoltaica 
+                    SET id_inv = %s 
+                    WHERE id_pro = %s;
+                ''', (id_inv, id_pro))
+            conn.commit()
+            cur.execute('select inv.reg_inv from proyecto_fotovoltaica pro join inversor inv on pro.id_inv=inv.id_inv where pro.id_pro= %s ;', (id_pro,))
+            reg_inv = cur.fetchone() 
+            print(reg_inv[0])
+            if reg_inv[0] == 'Si' :
+                cur.execute('''
+                    UPDATE proyecto_fotovoltaica 
+                    SET id_reg = %s, id_inv = %s 
+                    WHERE id_pro = %s;
+                ''', (None, id_inv, id_pro))
+                conn.commit()
+            
+    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+
+################################################################################################################################################
+
+#mostrar modal para agregar el regulador alproyecto
+@app.route('/modal_regulador_project')
+def modal_regulador_project():    
+    id_pro = request.args.get('id_pro')
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('select * from proyecto_fotovoltaica where id_pro= %s ;', (id_pro,))
+            pro = cur.fetchone() 
+            cur.execute('select * from arreglo_de_paneles where id_pro= %s ;', (id_pro,))
+            arr = cur.fetchall() 
+            cur.execute('select * from regulador where status= %s ;', (True,))
+            reg = cur.fetchall() 
+            cur.execute('select pro.*, reg.* from proyecto_fotovoltaica pro join regulador reg on pro.id_reg=reg.id_reg where pro.id_pro= %s ;', (id_pro,))
+            info = cur.fetchone() 
+    return render_template('creacion_de_proyecto/project_regulador.html', pro = pro, arr=arr , reg = reg, info=info)
+
+#agregar el regulador alproyecto
+@app.route('/add_regulador_project', methods=['POST'])
+def add_regulador_project():     
+    id_pro = request.form['id_pro']
+    id_reg = request.form['id_reg']
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''
+                UPDATE proyecto_fotovoltaica 
+                SET id_reg = %s 
+                WHERE id_pro = %s;
+            ''', (id_reg, id_pro))
+            conn.commit()
+    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+
+################################################################################################################################################
+
+#mostrar modal para agregar el banco alproyecto
+@app.route('/modal_banco_project')
+def modal_banco_project(): 
+    id_pro = request.args.get('id_pro')
+    print(id_pro)
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s ;', (id_pro,))
+            pro = cur.fetchone()  
+    return render_template('creacion_de_proyecto/project_banco.html', pro = pro )
+
+#agregar el banco alproyecto
+@app.route('/add_banco_project', methods=['POST'])
+def add_banco_project(): 
+    id_pro = request.form['id_pro']
+    num_ser = int(request.form['num_ser'])
+    num_bat_ser = int(request.form['num_bat_ser']) 
+
+    # Usando la conexión manual a la base de datos
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Insertar nuevo banco de baterias
+            cur.execute('''
+                INSERT INTO banco_de_baterias (id_pro, fil_ban, col_ban) 
+                VALUES (%s, %s, %s) RETURNING id_ban;
+            ''', (id_pro, num_ser, num_bat_ser))
+            id_ban = cur.fetchone()[0]  # Obtener el ID del nuevo banco insertado
+            
+            paralelos_ids = []
+            series_ids = []    
+            
+            # Insertar cada paralelo y serie
+            for _ in range(num_ser):
+                # Insertar en paralelo_banco
+                cur.execute('''
+                    INSERT INTO paralelo_banco (id_ban) 
+                    VALUES (%s) RETURNING id_pban;
+                ''', (id_ban,))
+                id_pban = cur.fetchone()[0]  # Obtener el ID del paralelo recién insertado
+                paralelos_ids.append(id_pban) 
+                
+                for _ in range(num_bat_ser):        
+                    # Insertar en serie_banco
+                    cur.execute('''
+                        INSERT INTO serie_banco (id_pban) 
+                        VALUES (%s) RETURNING id_sban;
+                    ''', (id_pban,))
+                    id_sban = cur.fetchone()[0]  # Obtener el ID de la serie recién insertada
+                    series_ids.append(id_sban) 
+                    
+            # Confirmar todas las transacciones
+            conn.commit()
+
+    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+
+# Mostrar modal para llenar los series bancos
+@app.route('/modal_bateria_serie')
+def modal_bateria_serie(): 
+    id_sban = request.args.get('id_sban')
+    print(id_sban)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener la información de la serie banco
+            cur.execute('SELECT * FROM serie_banco WHERE id_sban = %s;', (id_sban,))
+            sban = cur.fetchone()
+            # Obtener los bateria habilitados y su tecnología
+            cur.execute('''
+                SELECT * FROM bateria WHERE status = %s;
+            ''', (True,))
+            bat = cur.fetchall()
+            # Obtener información del bateria actual en la serie
+            cur.execute('''
+                SELECT b.* FROM serie_banco sb JOIN bateria b ON sb.id_bat = b.id_bat WHERE sb.id_sban = %s;''', (id_sban,))
+            info = cur.fetchone()
+
+    # Renderizar la plantilla con los datos obtenidos
+    return render_template('creacion_de_proyecto/serie_bateria.html', sban=sban, bat=bat, info=info)
+
+@app.route('/edit_bateria', methods=['POST'])
+def edit_bateria():
+    # Obtiene los valores enviados en el formulario POST
+    id_sban = request.form['id_sban']
+    id_bat = request.form['id_bat']
+    
+    # Usando la conexión explícita a la base de datos
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Actualiza el valor de id_bat en el registro de SerieBanco con el id_sban dado
+            cur.execute('UPDATE serie_banco SET id_bat = %s WHERE id_sban = %s;', (id_bat, id_sban))
+            
+            # Obtener id_pban de la serie
+            cur.execute('SELECT id_pban FROM serie_banco WHERE id_sban = %s;', (id_sban,))
+            id_pban = cur.fetchone()[0]  # fetchone devuelve una tupla, obtenemos el primer valor
+            
+            # Obtener id_ban del paralelo
+            cur.execute('SELECT id_ban FROM paralelo_banco WHERE id_pban = %s;', (id_pban,))
+            id_ban = cur.fetchone()[0]
+            
+            # Consulta para el total de los paralelos
+            cur.execute('''
+                SELECT SUM(b.vol_bat), AVG(b.cap_bat), SUM(b.vol_bat) * AVG(b.cap_bat)
+                FROM bateria b
+                JOIN serie_banco s ON s.id_bat = b.id_bat
+                JOIN paralelo_banco p ON p.id_pban = s.id_pban
+                WHERE p.id_pban = %s AND b.cap_bat != 0
+                GROUP BY s.id_pban, p.id_ban;
+            ''', (id_pban,))
+            results = cur.fetchone()
+
+            if results:
+                vser = results[0]  # Primer valor calculado
+                cser = results[1]  # Segundo valor calculado
+                eser = results[2]  # Tercer valor calculado
+                
+                # Actualizar los valores en paralelo_banco
+                cur.execute('''
+                    UPDATE paralelo_banco
+                    SET vser_pban = %s, cser_pban = %s, eser_pban = %s
+                    WHERE id_pban = %s;
+                ''', (vser, cser, eser, id_pban))
+                
+                # Consulta para el total del banco
+                cur.execute('''
+                    SELECT MIN(p.vser_pban), SUM(p.cser_pban),
+                           MIN(p.vser_pban) * SUM(p.cser_pban), p.id_ban
+                    FROM paralelo_banco p
+                    JOIN banco_de_baterias b ON b.id_ban = p.id_ban
+                    WHERE p.id_ban = %s AND p.vser_pban != 0
+                    GROUP BY p.id_ban;
+                ''', (id_ban,))
+                result_par = cur.fetchone()
+
+                if result_par:
+                    vpban = result_par[0]  # Tensión mínima
+                    cpban = result_par[1]  # Capacidad total
+                    epban = result_par[2]  # Energía total
+                    id_ban = result_par[3]  # id del banco de baterías
+
+                    # Actualizar los valores en banco_de_baterias
+                    cur.execute('''
+                        UPDATE banco_de_baterias
+                        SET vol_ban = %s, cap_ban = %s, ene_ban = %s
+                        WHERE id_ban = %s;
+                    ''', (vpban, cpban, epban, id_ban))
+                    
+                    conn.commit()  # Confirmar todas las transacciones
+
+                    return 'success'
+
     return 'success'
 
 

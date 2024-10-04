@@ -163,7 +163,7 @@ $(document).ready(function() {
     $('.project_inversor').off('click').on('click', function(event) {
         event.preventDefault();
         // Abre el modal si no está ya visible
-        if (!$('#project_inversor').hasClass('show')) {
+        if (!$('.project_inversor').hasClass('show')) {
             $.get($(this).attr('href'), function(data) {
                 $('#modalContent').html(data);
                 $('#projectInversor').modal('show');
@@ -172,15 +172,15 @@ $(document).ready(function() {
     });
 });
 
-//modal proyecto inversor card
+//modal proyecto regulador
 $(document).ready(function() {
-    $('#project_inversor_card').off('click').on('click', function(event) {
+    $('#project_regulador').off('click').on('click', function(event) {
         event.preventDefault();
         // Abre el modal si no está ya visible
-        if (!$('#project_inversor_card').hasClass('show')) {
+        if (!$('#project_regulador').hasClass('show')) {
             $.get($(this).attr('href'), function(data) {
                 $('#modalContent').html(data);
-                $('#projectInversorCard').modal('show');
+                $('#projectRegulador').modal('show');
             });
         }
     });
@@ -281,8 +281,9 @@ $(document).ready(function() {
         // Abre el modal si no está ya visible
         if (!$('[id^="projectSerieBanco_"]').hasClass('show')) {
             $.get($(this).attr('href'), function(data) {
-                $('#modalContent').html(data);
+                $('#modalContent').html(data);                
                 $('#projectSerieBanco' + modalId).modal('show');
+                console.log('#projectSerieBanco' + modalId);
             });
         }
     });
