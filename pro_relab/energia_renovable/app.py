@@ -6,14 +6,19 @@ import threading
 import time
 import requests # elementos para datos davis
 import pandas as pd #Extrer los datos del archivo plano
+import os
 
 
 # Crear una instancia de la aplicación Flask
 app = Flask(__name__)
-
 # Configurar la clave secreta de la aplicación, utilizada para gestionar sesiones y cookies seguras
 app.config['SECRET_KEY'] = 'unicesmag'
+# Establecer la duración de la sesión a 120 minutos
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
 
+# Asegurar que las cookies solo se envíen por HTTPS y no accesibles por JavaScript
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 # Configurar los parámetros de la base de datos
 app.config['DB_HOST'] = 'localhost'  # El host donde se encuentra la base de datos
 app.config['DB_NAME'] = 'relab'  # El nombre de la base de datos
@@ -1116,11 +1121,13 @@ def add_proyecto():
 def inicio_proyecto_fotovoltaica():  
     id_pro = request.args.get('id_pro')
     user_id = session.get('user_id')
+    if user_id is None:
+        # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+        return redirect(url_for('inicio_sesion')) 
 
     # Obtener detalles del proyecto
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            print('pagina inicial')
             # Hacemos una única consulta para obtener todos los datos relacionados
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
@@ -1136,7 +1143,10 @@ def inicio_proyecto_fotovoltaica():
 
             arreglos_completos = []
             bancos_completos = []
-
+            
+            num_arr = 0 #numero del arreglo proyecto
+            error_cap_inv = None
+            error_inv_arr = None
             for arr in proyecto_completo:
                 # Evitamos que los arreglos se dupliquen
                 if arr[44] not in arreglo_visto:  # asumiendo que arr[44] es el ID del arreglo
@@ -1201,7 +1211,13 @@ def inicio_proyecto_fotovoltaica():
                         'series_totales': series_totales
                     })
                     banco_visto.add(arr[59])  # Agregamos el banco al conjunto visto
-
+                num_arr=num_arr+1               
+                if arr[45] is not None:
+                    ptot_arreglo = arr[45] * 1.2  # Multiplicamos por 1.2 para obtener el valor ajustado
+                    
+                    if ptot_arreglo > arr[20]:
+                        error_cap_inv = f'Error: la capacidad del inversor no soporta el arreglo {num_arr}.'
+                        error_inv_arr = f'{ptot_arreglo} Potencia del arreglo > {arr[20]} Potencia máxima por entrada del inversor'                        
             # Obtenemos el proyecto principal
             cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
             pro = cur.fetchone()
@@ -1214,7 +1230,7 @@ def inicio_proyecto_fotovoltaica():
                 WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,id_pro,))
             cant_componentes = cur.fetchone()            
             # Verificamos si hay inversor
-            if proyecto_completo[0][4] is not None :
+            if pro and  proyecto_completo[0][4] is not None :
                 cant_arr_del = cant_componentes[2]  
                 # Mientras haya arreglos por eliminar
                 while cant_arr_del > proyecto_completo[0][19]:                    
@@ -1242,10 +1258,11 @@ def inicio_proyecto_fotovoltaica():
 
                     else:
                         break                              
-                  
+            
+              
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', pro=pro, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes, zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', pro=pro, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr, zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
 

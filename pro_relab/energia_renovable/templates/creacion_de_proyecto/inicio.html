@@ -25,6 +25,9 @@
 <div class="col-sm-4">
     <h5 class="title-subpro"> • {{ pro_com[1] }}</h5>
 </div>
+{% if error_cap_inv is not none %}
+    <div class="alert alert-danger" style="margin: 1rem;">{{error_cap_inv}}</div>
+{% endif %} 
 <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
     <div id="scrollContainer" class="card-body" style="overflow-x: auto; overflow-y: auto; position: relative; height: 100%;">
         <style>
