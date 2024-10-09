@@ -145,7 +145,7 @@ $(document).ready(function() {
 // ----------------CREACION DE PROYECTOS FOTOVOLTAICOS----------------
 //modal del proyecto
 $(document).ready(function() {
-    $('#modal_proyecto').off('click').on('click', function(event) {
+    $('.modal_proyecto').off('click').on('click', function(event) {
         event.preventDefault();
         
         // Abre el modal si no está ya visible
