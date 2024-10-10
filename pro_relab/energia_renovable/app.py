@@ -1133,7 +1133,7 @@ def inicio_proyecto_fotovoltaica():
                 SELECT * FROM proyecto_fotovoltaica p
                 LEFT JOIN inversor i ON i.id_inv = p.id_inv LEFT JOIN regulador r ON r.id_reg = p.id_reg LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
                 LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro LEFT JOIN carga c ON c.id_pro = p.id_pro
-                WHERE p.id_pro = %s AND p.id_usu = %s ORDER BY ap.id_arr, c.id_car;
+                WHERE p.id_pro = %s AND p.id_usu = %s AND p.status = true ORDER BY ap.id_arr, c.id_car;
             ''', (id_pro, user_id))
             proyecto_completo = cur.fetchall()
 
@@ -1218,7 +1218,7 @@ def inicio_proyecto_fotovoltaica():
                         error_inv_arr = f'{ptot_arreglo} Potencia del arreglo > {arr[20]} Potencia máxima por entrada del inversor' 
                                                
             # Obtenemos el proyecto principal
-            cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s;', (id_pro, user_id))
+            cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s AND status = true;', (id_pro, user_id))
             pro = cur.fetchone()
 
             cur.execute('''SELECT COUNT(id_inv) AS cant_inv, COUNT(id_reg) AS cant_reg,
@@ -1710,6 +1710,143 @@ def edit_bateria():
 
     return 'success'
 
+################################################################################################################################################
+#--------------------------------------------EDITAR PROYECTO FOTOVOLTAICO-------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
+
+#Lista de proyectos fotovoltaicos creados
+@app.route('/list_project')
+def list_project():
+    buscar = request.args.get('buscar')
+    success = request.args.get('success')
+    error = request.args.get('error')
+    user_id = session.get('user_id')
+
+    # Verificar si el usuario ha iniciado sesión
+    if user_id is None:
+        return redirect(url_for('redirigir'))
+
+    # Obtener información del usuario
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT * FROM usuario WHERE id_usu = %s;', (user_id,))
+            user = cur.fetchone()
+
+            # Consulta SQL base para proyectos
+            sql_query = '''
+                SELECT p.id_pro, p.nom_pro, p.id_inv, p.created_at, AVG(ap.ptot_arr) AS arr, AVG(bb.ene_ban) AS ban
+                FROM proyecto_fotovoltaica p
+                LEFT JOIN arreglo_de_paneles ap ON p.id_pro = ap.id_pro
+                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro
+                WHERE p.id_usu = %s AND p.status = true
+            '''
+            params = [user_id]
+
+            # Modificar consulta si hay búsqueda
+            if buscar:
+                sql_query += " AND p.nom_pro ILIKE %s"
+                params.append(f"%{buscar}%")
+
+            sql_query += '''
+                GROUP BY p.id_pro, p.nom_pro, p.id_inv, p.created_at, bb.ene_ban
+                ORDER BY p.created_at DESC;
+            '''
+
+            # Ejecutar la consulta con o sin filtro de búsqueda
+            cur.execute(sql_query, tuple(params))
+            pro_list = cur.fetchall()
+
+    # Renderizar la plantilla con los resultados y notificaciones si existen
+    return render_template(
+        'creacion_de_proyecto/list_project.html' if not buscar else 'creacion_de_proyecto/search_project.html',
+        user=user, pro_list=pro_list, success=success, error=error
+    )
+    
+#Eliminar un proyecto
+@app.route('/delete_project')
+def delete_project():
+    id_pro = request.args.get('id_pro')
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Ejecutar la consulta para actualizar el estado del proyecto a "false"
+            cur.execute('''
+                UPDATE proyecto_fotovoltaica SET status = false WHERE id_pro = %s
+            ''', (id_pro,))
+            
+            # Confirmar los cambios en la base de datos
+            conn.commit()
+    
+    # Redirigir de vuelta a la lista de proyectos
+    return redirect(url_for('list_project'))
+
+#Eliminar arreglo
+@app.route('/ver_modal_del_arr')
+def ver_modal_del_arr():
+    id_arr = request.args.get('id_arr')
+    id_pro = request.args.get('id_pro')
+    id_del_arr = request.args.get('id_arr_del')
+    if id_del_arr is not None:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Ejecutamos la eliminación del arreglo de paneles
+                cur.execute('''
+                DELETE FROM serie_arreglo
+                WHERE id_parr IN (SELECT id_parr FROM paralelo_arreglo WHERE id_arr = %s);
+                DELETE FROM paralelo_arreglo
+                WHERE id_arr = %s;
+                DELETE FROM arreglo_de_paneles
+                WHERE id_arr = %s;
+                ''', (id_del_arr,id_del_arr,id_del_arr,))
+                
+                conn.commit()
+        
+        # Redirigir al inicio del proyecto
+        return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+    
+    else:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles del arreglo
+                cur.execute('SELECT * FROM arreglo_de_paneles WHERE id_arr = %s;', (id_arr,))
+                arr = cur.fetchone()
+        
+        # Renderizar la plantilla para mostrar el modal de eliminación
+        return render_template('creacion_de_proyecto/delete_arreglo_project.html', arr=arr)
+
+#Eliminar banco
+@app.route('/ver_modal_del_ban')
+def ver_modal_del_ban():
+    id_ban = request.args.get('id_ban')
+    id_pro = request.args.get('id_pro')
+    id_del_ban = request.args.get('id_ban_del')
+    if id_del_ban is not None:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Ejecutamos la eliminación del banco de paneles
+                cur.execute('''
+                DELETE FROM serie_banco
+                WHERE id_pban IN (SELECT id_pban FROM paralelo_banco WHERE id_ban = %s);
+                DELETE FROM paralelo_banco
+                WHERE id_ban = %s;
+                DELETE FROM banco_de_baterias
+                WHERE id_ban = %s;
+                ''', (id_del_ban,id_del_ban,id_del_ban,))
+                
+                conn.commit()
+        
+        # Redirigir al inicio del proyecto
+        return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+    
+    else:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles del banco
+                cur.execute('SELECT * FROM banco_de_baterias WHERE id_ban = %s;', (id_ban,))
+                ban = cur.fetchone()
+        
+        # Renderizar la plantilla para mostrar el modal de eliminación
+        return render_template('creacion_de_proyecto/delete_banco_project.html', ban=ban)
 
 if __name__ == '__main__':
     app.run(debug=True)

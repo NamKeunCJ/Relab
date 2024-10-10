@@ -438,6 +438,16 @@
     transition: transform 10s;
 }
 
+.imagen-iluminada {
+    width: 100px; /* Ajusta según el tamaño que desees */
+    transition: filter 0.3s ease-in-out;
+}
+
+.imagen-iluminada:hover {
+    filter: drop-shadow(0 0 10px rgba(0, 123, 255, 0.8));
+}
+
+
 .img-zoom-project:hover {
     transform: scale(1.1);
 }

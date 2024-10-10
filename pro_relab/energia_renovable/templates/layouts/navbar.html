@@ -66,6 +66,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="/edit_profile">Editar Perfil</a></li>
+                    <li><a class="dropdown-item" href="/list_project">Proyectos Fotovoltaicos</a></li>
                     {% if 'user_rol' in session and session['user_rol'] == 'Administrador' %}
                     <li></li>
                         <a class="dropdown-item" href="/component_list">Componentes</a>

@@ -54,10 +54,17 @@
             }
         </style>
         {% if cant_componentes[2]!=0 %}
-            {% for arr_completo in arreglos_completos %}   
-                <table class="arreglo_{{ arr_completo.arreglo[44] }} icon_table " draggable="true" style="height: 3cm;width: 3cm; text-align: center;">
-                    {% if arr_completo.arreglo[50] is not none %}
-                        {% for par_data in arr_completo.series_totales %}
+            {% for arr_completo in arreglos_completos %}                   
+                <table class="arreglo_{{ arr_completo.arreglo[44] }} icon_table " draggable="true" style="text-align: center;">
+                    {% if arr_completo.arreglo[50] is not none %}   
+                        <tr>
+                            <td>
+                                <a class="enlace-link" id="delArr_{{  arr_completo.arreglo[44] }}" href="/ver_modal_del_arr?id_arr={{ arr_completo.arreglo[44] }}" title="{{  arr_completo.arreglo[44]  }}">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </td>
+                        </tr>                     
+                        {% for par_data in arr_completo.series_totales %}                            
                             <tr>
                                 {% for ser, panel in zip(par_data.series, par_data.paneles) %}
                                     {% if ser[1] is not none %}
@@ -71,12 +78,14 @@
                                         {% endif %}
                                     {% else %}
                                         {% set panel_image = 'panel-none.png' %}
-                                    {% endif %}
+                                    {% endif %}                         
                                     
                                     <td>
-                                        <a class="img-zoom-project nav-link" id="projectSerie_{{ ser[0] }}" href="/modal_panel_serie?id_sarr={{ ser[0] }}" title="{{ panel[13] }}">
-                                            <img src="{{ url_for('static', filename='images/' + panel_image) }}" style="width: 3.8rem;">
-                                        </a>
+                                        <div class="col d-flex align-items-end justify-content-center ">   
+                                            <a class="nav-link" id="projectSerie_{{ ser[0] }}" href="/modal_panel_serie?id_sarr={{ ser[0] }}" title="{{ panel[13] }}">
+                                                <img src="{{ url_for('static', filename='images/' + panel_image) }}" class="imagen-iluminada" style="width: 3.8rem;">
+                                            </a>
+                                        </div>
                                     </td>
 
                                     {% if loop.index0 < arr_completo.arreglo[51] - 1 %}
@@ -109,8 +118,8 @@
                 <table class="inversor icon_table" draggable="true">
                     <tr><td>
                         <div class="col d-flex align-items-end justify-content-center ">                        
-                            <a class="img-zoom-project nav-link project_inversor" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
-                                <img src="{{ url_for('static', filename='images/inversor.png') }}" class="esquina-inversor" style="width: 2.7rem;">
+                            <a class="nav-link project_inversor" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
+                                <img src="{{ url_for('static', filename='images/inversor.png') }}" class="imagen-iluminada" style="width: 2.7rem;">
                             </a>
                         </div>
                     </td></tr>
@@ -125,8 +134,8 @@
             <table class="regulador icon_table" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
-                        <a id="project_regulador" class="img-zoom-project nav-link" href="/modal_regulador_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
-                            <img src="{{ url_for('static', filename='images/' + regulador_image) }}" style="width: 3.8rem;">
+                        <a id="project_regulador" class="nav-link" href="/modal_regulador_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[34] }}">
+                            <img src="{{ url_for('static', filename='images/' + regulador_image) }}" class="imagen-iluminada" style="width: 3.8rem;">
                         </a>
                     </div>
                 </td></tr>
@@ -134,10 +143,17 @@
         {% endif %}
         {% if cant_componentes[3]!=0 %}
         {% for arr_completo in bancos_completos %}   
-        <table class="banco_{{ arr_completo.banco[59] }} icon_table " draggable="true" style="height: 3cm;width: 3cm; text-align: center;">
+        <table class="banco_{{ arr_completo.banco[59] }} icon_table " draggable="true" style="text-align: center;">
             {% if arr_completo.banco[64] is not none %}
+                <tr>
+                    <td>
+                        <a class="enlace-link" id="delBan_{{  arr_completo.banco[59] }}" href="/ver_modal_del_ban?id_ban={{ arr_completo.banco[59] }}" title="{{  arr_completo.banco[59]  }}">
+                            <i class="bi bi-trash3-fill"></i>
+                        </a>
+                    </td>
+                </tr>
                 {% for par_data in arr_completo.series_totales %}
-                    <tr>
+                    <tr>                        
                         {% for ser, bateria in zip(par_data.series, par_data.baterias) %}
                             {% if ser[1] is not none %}
                                 {% set bateria_image = 'bateria.png' %}
@@ -146,9 +162,11 @@
                             {% endif %}
                             
                             <td>
-                                <a class="img-zoom-project nav-link" id="projectSerieBanco_{{ ser[0] }}" href="/modal_bateria_serie?id_sban={{ser[0]}}" title="{{ bateria[13] }}">
-                                    <img src="{{ url_for('static', filename='images/' + bateria_image) }}" style="width: 3.8rem;">
-                                </a>
+                                <div class="col d-flex align-items-end justify-content-center ">  
+                                    <a class="nav-link" id="projectSerieBanco_{{ ser[0] }}" href="/modal_bateria_serie?id_sban={{ser[0]}}" title="{{ bateria[13] }}">
+                                        <img src="{{ url_for('static', filename='images/' + bateria_image) }}" class="imagen-iluminada" style="width: 3.8rem;">
+                                    </a>
+                                </div>
                             </td>
 
                             {% if loop.index0 < arr_completo.banco[65] - 1 %}
@@ -181,7 +199,7 @@
             <table class="carga icon_table" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
-                        <a class="img-zoom-project nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
+                        <a class="nav-link project_inversor" style="background-color: black;" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[18] }}">
                             carga 
                         </a>
                     </div>
@@ -192,8 +210,8 @@
             <table class="red icon_table" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
-                        <a class="img-zoom-project nav-link project_inversor"  href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[17] }}">
-                            <img src="/static/images/red.png" style="width: 2.7rem;" class="img-zoom-project" title="Red">
+                        <a class="nav-link project_inversor"  href="/modal_inversor_project?id_pro={{ pro_com[0] }}" title="{{ pro_com[17] }}">
+                            <img src="/static/images/red.png" style="width: 2.7rem;" class="imagen-iluminada" title="Red">
                         </a>
                     </div>
                 </td></tr>

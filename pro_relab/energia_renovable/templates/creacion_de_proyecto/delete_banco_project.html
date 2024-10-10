@@ -1,4 +1,4 @@
-<div class="modal fade" id="delBan{{ ban.id_ban }}" tabindex="-1" role="dialog" aria-labelledby="ProjectDelArregloModalLabel" aria-hidden="true">
+<div class="modal fade" id="delBan{{ ban[0] }}" tabindex="-1" role="dialog" aria-labelledby="ProjectDelArregloModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class='modal-footer'>
-                <a href="{{ url_for('ver_modal_del_ban', id_ban_del=ban.id_ban)}}" class='btn btn-danger'>Eliminar</a>
+                <a href="/ver_modal_del_ban?id_ban_del={{ ban[0] }}&id_pro={{ ban[4] }}" class='btn btn-danger'>Eliminar</a>
                 <button type='button' class='btn btn btn-secondary' data-bs-dismiss='modal' aria-label='Close' title='Cancelar Actualizacion'>Cancelar</button>
             </div>         
         </div>
