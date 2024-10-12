@@ -1118,13 +1118,14 @@ def add_proyecto():
 
 #Iniciar Proyecto
 @app.route('/inicio_proyecto_fotovoltaica')
-def inicio_proyecto_fotovoltaica():  
+def inicio_proyecto_fotovoltaica(): 
+    num_info = request.args.get('num_info') 
     id_pro = request.args.get('id_pro')
     user_id = session.get('user_id')
+    print(num_info)
     if user_id is None:
         # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
         return redirect(url_for('inicio_sesion')) 
-
     # Obtener detalles del proyecto
     with get_db_connection() as conn:
         with conn.cursor() as cur:
@@ -1149,6 +1150,7 @@ def inicio_proyecto_fotovoltaica():
             for arr in proyecto_completo:
                 # Evitamos que los arreglos se dupliquen
                 if arr[44] not in arreglo_visto:  # asumiendo que arr[44] es el ID del arreglo
+                    print('id_arreglo', arr[44])
                     cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[44],))
                     paralelo = cur.fetchall()
 
@@ -1261,7 +1263,7 @@ def inicio_proyecto_fotovoltaica():
               
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', pro=pro, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr, zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr, zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
 
@@ -1847,6 +1849,9 @@ def ver_modal_del_ban():
         
         # Renderizar la plantilla para mostrar el modal de eliminación
         return render_template('creacion_de_proyecto/delete_banco_project.html', ban=ban)
+
+
+            
 
 if __name__ == '__main__':
     app.run(debug=True)

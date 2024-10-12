@@ -38,20 +38,20 @@
                         <div>
                             <label for="file" class="form-label"><b>Subir Archivo .xlxs</b></label>
                             <input type="file" class="form-control form-control-sm" id="file" name="file" accept=".xlsx" required>
-                            <button type="submit" id="file-button" class="btn btn-primary mt-2 " 
+                            <button type="submit" class="tooltip_btn btn btn-primary mt-2 " 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
                             data-bs-title="Asegurate que el archivo Excel, tenga la columna AvePSum.">Subir</button>
                         </div>
                     </form>
-                    <hr>
+                    <hr class="border border-dark border-1 opacity-75">
                     <form action="/demand_value_calculation" method="post" >
                         <label for="file" class="form-label"><b>Costo de Energia</b></label>
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1">$</span>
                             <input type="number" class="form-control form-control-sm" id="costo_energia" name="costo_energia" placeholder="Costo Energia" min="100" step="0.001" required>
                         </div>                            
-                        <button type="submit" id="agregar-costo" class="btn btn-primary  mt-2" 
+                        <button type="submit" class="tooltip_btn btn btn-primary  mt-2" 
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         data-bs-custom-class="custom-tooltip"
                         data-bs-title="Asegurate que el costo de energia sea correcto.">Agregar</button>

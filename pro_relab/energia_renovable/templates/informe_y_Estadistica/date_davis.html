@@ -8,7 +8,7 @@
             <div class="sidebar border border-right col-md-3 col-lg-2 p-3  bg-body-tertiary" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
                 <div class="offcanvas-header">
                     <h4 class="offcanvas-title" id="offcanvasRightLabel" style="margin-bottom: 2rem;color:#13447c;font-size: 22px;"><b>Irradiancia (W/m²)</b>
-                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill"> <span class="small"><a id="datos_actuales" class="nav-span nav-link" href="/irradiance_display" 
+                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill"> <span class="small"><a class="tooltip_btn nav-span nav-link" href="/irradiance_display" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
                             data-bs-title="Ingresar a datos actuales.">Actuales</a></span></span>                        
@@ -27,12 +27,12 @@
                             <span class="input-group-text" id="basic-addon1"><i class="bi bi-calendar3"></i></span>
                             <input type="date" class="form-control form-control-sm" id="end_date" name="end_date" required>
                         </div>                           
-                        <button type="submit" id="busar_G" class="btn btn-primary mt-2" 
+                        <button type="submit" class="tooltip_btn btn btn-primary mt-2" 
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         data-bs-custom-class="custom-tooltip"
                         data-bs-title="Asegurate de buscar los dias correctamente.">Buscar</button>
                     </form>
-                    <hr>
+                    <hr class="border border-dark border-1 opacity-75">
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>GENERAR PREDICCION</b></label>
                     <a class="btn btn-primary"  href="/irradiance_prediction" >Generar</a>                  
                 </div>

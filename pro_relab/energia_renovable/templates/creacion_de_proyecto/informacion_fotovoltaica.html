@@ -1,0 +1,85 @@
+{% block head %} {% include 'layouts/head.html' %} {% endblock %}
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
+    <div id="scrollContainer" class="card-body" style="overflow: auto; position: relative; height: 100%;">
+        {% if num_info == '1' %}
+            {% if cant_componentes[2] != 0 %}
+                <div class="card mx-3 mb-3" style="background-color: rgba(176, 201, 248, 0.477);">
+                    <div class="card-body">
+                        <small>
+                            <p class="card-title"><b>Pasos</b></p>
+                            <p><b>1)</b> Sumamos los voltajes y escogemos la corriente mínima de cada serie.</p>
+                            <p><b>2)</b> El resultado formará una columna, con paneles conectados en paralelo, sumamos las corrientes y escogemos el voltaje mínimo.</p>
+                            <p><b>3)</b> Multiplicamos el resultado para obtener la potencia total del arreglo.</p>
+                        </small>
+                    </div>
+                </div>
+            
+                {% for arr_completo in arreglos_completos %}
+                <div class="row mt-4">
+                    <div class="col">
+                        <table class="table table-bordered table-primary">
+                            <h5><b>Arreglo {{ loop.index }}</b></h5>
+                            <tbody>
+                                {% set serie_pro = arr_completo.series_totales %}
+                                {% set paralelo = arr_completo.paralelos %}
+
+                                {% for i in range(arr_completo.arreglo[50]) %}
+                                <tr>
+                                    {% for j in range(arr_completo.arreglo[51]) %}
+                                        {% set panel = serie_pro[i].paneles[j] %}
+                                        {% if panel[3] is not none %}
+                                            <td class="text-center align-middle">
+                                                <small>{{ panel[3] }} V<br>{{ panel[4] }} A</small>
+                                            </td>
+                                        {% else %}
+                                            <td class="text-center align-middle">
+                                                <small>0.0 V<br>0.0 A</small>
+                                            </td>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if loop.index == 1 %}
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <h1 style="font-size: 50px;">}</h1>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if paralelo %}
+                                        <td class="text-center align-middle">
+                                            <small>{{ paralelo[i][2] }} V<br>{{ paralelo[i][3] }} A</small>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if loop.index == 1 %}
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <h1 style="font-size: 50px;">}</h1>
+                                        </td>
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <small>{{ arr_completo.arreglo[46] }} V<br>{{ arr_completo.arreglo[47] }} A</small>
+                                        </td>
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <h1 style="font-size: 50px;">}</h1>
+                                        </td>
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <small>{{ arr_completo.arreglo[45] }} W</small>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br>
+                {% endfor %}
+            {% else %}
+                <h6 class="text-center">No hay Arreglos de paneles registrados en este proyecto.</h6>
+            {% endif %}
+
+        {% elif num_info == '2' %}
+            2
+        {% elif num_info == '3' %}
+            3
+        {% endif %}
+    </div>
+</div>

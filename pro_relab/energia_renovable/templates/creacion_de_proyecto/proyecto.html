@@ -14,17 +14,22 @@
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Información</b></label>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Información Arreglos">
+                            <a href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Arreglos">
+                                Proyecto
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="/inicio_proyecto_fotovoltaica?num_info=1&id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Arreglos">
                                 Información Arreglos
                             </a>
                         </li>
                         <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Información Inversor">
+                            <a href="/inicio_proyecto_fotovoltaica?num_info=2&id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Inversor">
                                 Información Inversor
                             </a>
                         </li>
                         <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Información Banco de Baterias">
+                            <a href="/inicio_proyecto_fotovoltaica?num_info=3&id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Banco de Baterias">
                                 Información Banco de Baterias
                             </a>
                         </li>
@@ -35,8 +40,10 @@
                 <div class="container" data-aos="fade-up">
                     <div class="row" style="margin-bottom: 2rem; margin-top: 2rem;">
                         <div class="col ms-sm-auto">                            
-                            {% if proyecto_completo %}
-                                {% block editar_panel %} {% include 'creacion_de_proyecto/inicio.html' %} {% endblock %}                                                            
+                            {% if proyecto_completo and num_info is none%}
+                                {% block inicio %} {% include 'creacion_de_proyecto/inicio.html' %} {% endblock %}                                                            
+                            {% else %}
+                                {% block informacion_fotovoltaica %} {% include 'creacion_de_proyecto/informacion_fotovoltaica.html' %} {% endblock %}                                                            
                             {% endif %}
                         </div>
                         
