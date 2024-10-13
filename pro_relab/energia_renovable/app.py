@@ -1217,7 +1217,7 @@ def inicio_proyecto_fotovoltaica():
                     ptot_arreglo = arr[45] * 1.2  # Multiplicamos por 1.2 para obtener el valor ajustado
                     if arr[20] is not None and ptot_arreglo > arr[20]:
                         error_cap_inv = f'Error: la capacidad del inversor no soporta algun arreglo que realizaste.'
-                        error_inv_arr = f'{ptot_arreglo} Potencia del arreglo > {arr[20]} Potencia máxima por entrada del inversor' 
+                        error_inv_arr = f'{arr[45]} * 1.2 = {ptot_arreglo} Potencia del arreglo > {arr[20]} Potencia máxima por entrada del inversor' 
                                                
             # Obtenemos el proyecto principal
             cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s AND status = true;', (id_pro, user_id))

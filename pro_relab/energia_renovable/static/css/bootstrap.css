@@ -191,6 +191,18 @@
         scroll-behavior: smooth;
     }
 }
+/*Color proyecto*/
+
+.color-primario{
+    background-color: #13447c;
+    color: white;
+}
+
+.color-secundario{
+    background-color: #8db0d8;
+    color: white;
+}
+
 .custom-card {
     background: linear-gradient(120deg, #8db0d8, #13447c, #000000);
     color: white;
@@ -209,6 +221,20 @@
 .tabla_de_proyecto {
     width: 70%;
 }
+
+.rounded-table {
+    border-radius: 0.5rem; /* Ajusta el tamaño de la esquina redondeada según tu preferencia */
+    overflow: hidden; /* Asegúrate de que los bordes redondeados se apliquen correctamente */
+}
+
+.rounded-table th, .rounded-table td {
+    border: 1px solid #dee2e6; /* Personaliza el color del borde si lo deseas */
+}
+
+.rounded-table thead {
+    border-bottom: 2px solid #dee2e6; /* Mantiene el borde inferior del encabezado más marcado */
+}
+
 /*hacer que una tabla tenga borde redondo*/
 .clase_table {
     border-collapse: separate;

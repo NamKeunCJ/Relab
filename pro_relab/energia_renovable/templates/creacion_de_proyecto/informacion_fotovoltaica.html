@@ -3,21 +3,23 @@
     <div id="scrollContainer" class="card-body" style="overflow: auto; position: relative; height: 100%;">
         {% if num_info == '1' %}
             {% if cant_componentes[2] != 0 %}
-                <div class="card mx-3 mb-3" style="background-color: rgba(176, 201, 248, 0.477);">
-                    <div class="card-body">
-                        <small>
-                            <p class="card-title"><b>Pasos</b></p>
-                            <p><b>1)</b> Sumamos los voltajes y escogemos la corriente mínima de cada serie.</p>
-                            <p><b>2)</b> El resultado formará una columna, con paneles conectados en paralelo, sumamos las corrientes y escogemos el voltaje mínimo.</p>
-                            <p><b>3)</b> Multiplicamos el resultado para obtener la potencia total del arreglo.</p>
-                        </small>
+                <div class="card mx-3 mb-3 border-0 shadow" style="background-color: #f0f8ff;">
+                    <div class="card-header text-white text-center" style="background-color: #13447c;">
+                        <h5 class="card-title mb-0"><b>Pasos</b></h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <ol class="pl-3" style="font-size: 1.1rem; line-height: 1.7;">
+                            <li>Sumamos los voltajes y escogemos la corriente mínima de cada serie.</li>
+                            <li>El resultado formará una columna, con paneles conectados en paralelo, sumamos las corrientes y escogemos el voltaje mínimo.</li>
+                            <li>Multiplicamos el resultado para obtener la potencia total del arreglo.</li>
+                        </ol>
                     </div>
                 </div>
-            
+                        
                 {% for arr_completo in arreglos_completos %}
                 <div class="row mt-4">
                     <div class="col">
-                        <table class="table table-bordered table-primary">
+                        <table class="table table-bordered table-primary rounded-table">
                             <h5><b>Arreglo {{ loop.index }}</b></h5>
                             <tbody>
                                 {% set serie_pro = arr_completo.series_totales %}
@@ -73,28 +75,140 @@
                 <br>
                 {% endfor %}
             {% else %}
-                <h6 class="text-center">No hay Arreglos de paneles registrados en este proyecto.</h6>
+                <div class="alert alert-warning text-center mt-4">
+                    No hay Arreglos de Paneles registrados en este proyecto.
+                </div>
             {% endif %}
 
         {% elif num_info == '2' %}
-            2
+            {% if pro_com[0] is not none %} 
+                {% if error_cap_inv is not none %}
+                    <div class="alert alert-danger text-center">
+                        <small>{{error_cap_inv}}<br>{{error_inv_arr}}</small>
+                    </div>
+                {% endif %}
+                <div class="container mt-4">
+                    <div class="card shadow border-0 rounded-3 mt-4">
+                        <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                            <h5 class="mb-0">Datos del Inversor</h5>
+                        </div>
+                        <div class="card-body bg-light p-4 rounded-bottom">
+                            <table class="table table-hover table-bordered rounded">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col">Inversor</th>
+                                        <th scope="col">Datos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Referencia Inversor</th>
+                                        <td>{{pro_com[18]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Número de Entradas</th>
+                                        <td>{{pro_com[19]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Voltaje Máximo de Entrada (Vme)</th>
+                                        <td>{{pro_com[21]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Corriente Máxima de Entrada (Ime)</th>
+                                        <td>{{pro_com[22]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Potencia Máxima (Pmax)</th>
+                                        <td>{{pro_com[20]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Voltaje de Salida (Vout)</th>
+                                        <td>{{pro_com[23]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Eficiencia (%)</th>
+                                        <td>{{pro_com[25]}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Onda de Salida</th>
+                                        <td>{{pro_com[24]}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    
+            
+                    {% if pro_com[32] == 'No' %}
+                        {% if pro_com[10] is not none %}
+                            <div class="card shadow border-0 rounded-3 mt-4">
+                                <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                                    <h5 class="mb-0">Datos del Regulador</h5>
+                                </div>
+                                <div class="card-body bg-light p-4 rounded-bottom">
+                                    <table class="table table-hover table-bordered rounded">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th scope="col">Regulador</th>
+                                                <th scope="col">Datos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">Referencia Regulador</th>
+                                                <td>{{pro_com[34]}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Voltaje (V)</th>
+                                                <td>{{pro_com[36]}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Corriente (A)</th>
+                                                <td>{{pro_com[37]}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Potencia (W)</th>
+                                                <td>{{pro_com[35]}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        
+                        
+                        {% else %}
+                            <div class="alert alert-warning text-center mt-4">
+                                No hay Reguladores registrados en este proyecto.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning text-center mt-4">
+                    No hay Inversores registrados en este proyecto.
+                </div>
+            {% endif %}
+    
         {% elif num_info == '3' %}
             {% if cant_componentes[3] != 0 %}
-                <div class="card mx-3 mb-3" style="background-color: rgba(176, 201, 248, 0.477);">
-                    <div class="card-body">
-                        <small>                    
-                            <p class="card-title"><b>Pasos</b></p>
-                            <p class="card-text"><b>1) </b> Sumamos los voltajes y realizamos promedio de las capacidades, de cada serie.</p>
-                            <p class="card-text"><b>2) </b> El resultado formará una columna, con baterias conectados en paralelo, sumamos las capacidades y verificamos que el voltaje debe ser el mismo.</p>
-                            <p class="card-text"><b>3) </b> El resultado lo multiplicamos, dándonos la energia total del banco.</p>
-                        </small>
+                <div class="card mx-3 mb-3 border-0 shadow" style="background-color: #f0f8ff;">
+                    <div class="card-header text-white text-center" style="background-color: #13447c;">
+                        <h5 class="card-title mb-0"><b>Pasos</b></h5>
                     </div>
-                </div>
+                    <div class="card-body p-4">
+                        <ol class="pl-3" style="font-size: 1.1rem; line-height: 1.7;">
+                            <li>Sumamos los voltajes y realizamos promedio de las capacidades, de cada serie.</li>
+                            <li>El resultado formará una columna, con baterías conectadas en paralelo; sumamos las capacidades y verificamos que el voltaje sea el mismo.</li>
+                            <li>Multiplicamos el resultado, obteniendo la energía total del banco.</li>
+                        </ol>
+                    </div>
+                </div>            
             
                 {% for ban_completo in bancos_completos %}
                 <div class="row mt-4">
                     <div class="col">
-                        <table class="table table-bordered table-primary">
+                        <table class="table table-bordered table-primary rounded-table">
                             <h5><b>Banco {{ loop.index }}</b></h5>
                             <tbody>
                                 {% set serie_pro = ban_completo.series_totales %}
@@ -105,11 +219,11 @@
                                         {% set bateria = serie_pro[i].baterias[j] %}
                                         {% if bateria[3] is not none %}
                                             <td class="text-center align-middle">
-                                                <small>{{ bateria[2] }} V<br>{{ bateria[3] }} A</small>
+                                                <small>{{ bateria[2] }} V<br>{{ bateria[3] }} Ah</small>
                                             </td>
                                         {% else %}
                                             <td class="text-center align-middle">
-                                                <small>0.0 V<br>0.0 A</small>
+                                                <small>0.0 V<br>0.0 Ah</small>
                                             </td>
                                         {% endif %}
                                     {% endfor %}
@@ -122,7 +236,7 @@
 
                                     {% if paralelo %}
                                         <td class="text-center align-middle">
-                                            <small>{{ paralelo[i][1] }} V<br>{{ paralelo[i][2] }} A</small>
+                                            <small>{{ paralelo[i][1] }} V<br>{{ paralelo[i][2] }} Ah</small>
                                         </td>
                                     {% endif %}
 
@@ -149,7 +263,9 @@
                 <br>
                 {% endfor %}
             {% else %}
-                <h6 class="text-center">No hay Arreglos de paneles registrados en este proyecto.</h6>
+                <div class="alert alert-warning text-center mt-4">
+                    No hay Banco de Baterias registrados en este proyecto.
+                </div>
             {% endif %}
         {% endif %}
     </div>
