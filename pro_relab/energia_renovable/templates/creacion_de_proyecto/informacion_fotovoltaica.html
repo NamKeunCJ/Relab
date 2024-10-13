@@ -79,7 +79,78 @@
         {% elif num_info == '2' %}
             2
         {% elif num_info == '3' %}
-            3
+            {% if cant_componentes[3] != 0 %}
+                <div class="card mx-3 mb-3" style="background-color: rgba(176, 201, 248, 0.477);">
+                    <div class="card-body">
+                        <small>                    
+                            <p class="card-title"><b>Pasos</b></p>
+                            <p class="card-text"><b>1) </b> Sumamos los voltajes y realizamos promedio de las capacidades, de cada serie.</p>
+                            <p class="card-text"><b>2) </b> El resultado formará una columna, con baterias conectados en paralelo, sumamos las capacidades y verificamos que el voltaje debe ser el mismo.</p>
+                            <p class="card-text"><b>3) </b> El resultado lo multiplicamos, dándonos la energia total del banco.</p>
+                        </small>
+                    </div>
+                </div>
+            
+                {% for ban_completo in bancos_completos %}
+                <div class="row mt-4">
+                    <div class="col">
+                        <table class="table table-bordered table-primary">
+                            <h5><b>Banco {{ loop.index }}</b></h5>
+                            <tbody>
+                                {% set serie_pro = ban_completo.series_totales %}
+                                {% set paralelo = ban_completo.paralelos %}
+                                {% for i in range(ban_completo.banco[64]) %}
+                                <tr>
+                                    {% for j in range(ban_completo.banco[65]) %}
+                                        {% set bateria = serie_pro[i].baterias[j] %}
+                                        {% if bateria[3] is not none %}
+                                            <td class="text-center align-middle">
+                                                <small>{{ bateria[2] }} V<br>{{ bateria[3] }} A</small>
+                                            </td>
+                                        {% else %}
+                                            <td class="text-center align-middle">
+                                                <small>0.0 V<br>0.0 A</small>
+                                            </td>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if loop.index == 1 %}
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <h1 style="font-size: 50px;">}</h1>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if paralelo %}
+                                        <td class="text-center align-middle">
+                                            <small>{{ paralelo[i][1] }} V<br>{{ paralelo[i][2] }} A</small>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if loop.index == 1 %}
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <h1 style="font-size: 50px;">}</h1>
+                                        </td>
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <small>{{ ban_completo.banco[60] }} V<br>{{ ban_completo.banco[61] }} Ah</small>
+                                        </td>
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <h1 style="font-size: 50px;">}</h1>
+                                        </td>
+                                        <td rowspan="0" class="text-center align-middle">
+                                            <small>{{ ban_completo.banco[62] }} Wh</small>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br>
+                {% endfor %}
+            {% else %}
+                <h6 class="text-center">No hay Arreglos de paneles registrados en este proyecto.</h6>
+            {% endif %}
         {% endif %}
     </div>
 </div>

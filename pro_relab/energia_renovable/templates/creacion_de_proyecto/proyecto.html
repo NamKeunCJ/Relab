@@ -12,12 +12,7 @@
                 <div class="offcanvas-body">
                     <!-- Sección Fotovoltaico -->
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Información</b></label>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <a href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Arreglos">
-                                Proyecto
-                            </a>
-                        </li>
+                    <ul class="list-group list-group-flush">                        
                         <li class="list-group-item">
                             <a href="/inicio_proyecto_fotovoltaica?num_info=1&id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Arreglos">
                                 Información Arreglos
@@ -33,6 +28,13 @@
                                 Información Banco de Baterias
                             </a>
                         </li>
+                        {% if num_info is not none%}
+                            <li class="list-group-item">
+                                <a href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Proyecto Fotovoltaico">
+                                    Regresar al Proyecto
+                                </a>
+                            </li>
+                        {% endif%}
                     </ul>
                 </div>
             </div>  
