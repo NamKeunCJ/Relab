@@ -1133,7 +1133,7 @@ def inicio_proyecto_fotovoltaica():
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
                 LEFT JOIN inversor i ON i.id_inv = p.id_inv LEFT JOIN regulador r ON r.id_reg = p.id_reg LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
-                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro LEFT JOIN carga c ON c.id_pro = p.id_pro
+                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro LEFT JOIN proyecto_carga c ON c.id_pro = p.id_pro
                 WHERE p.id_pro = %s AND p.id_usu = %s AND p.status = true ORDER BY ap.id_arr, bb.id_ban, c.id_car;
             ''', (id_pro, user_id))
             proyecto_completo = cur.fetchall()
@@ -1226,7 +1226,7 @@ def inicio_proyecto_fotovoltaica():
             cur.execute('''SELECT COUNT(id_inv) AS cant_inv, COUNT(id_reg) AS cant_reg,
                 (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = %s) AS cant_arr,
                 (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = %s) AS cant_ban,
-                (SELECT COUNT(id_car) FROM carga WHERE id_pro = %s) AS cant_car
+                (SELECT COUNT(id_car) FROM proyecto_carga WHERE id_pro = %s) AS cant_car
                 FROM proyecto_fotovoltaica 
                 WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,id_pro,))
             cant_componentes = cur.fetchone()            
