@@ -1133,8 +1133,7 @@ def inicio_proyecto_fotovoltaica():
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
                 LEFT JOIN inversor i ON i.id_inv = p.id_inv LEFT JOIN regulador r ON r.id_reg = p.id_reg LEFT JOIN arreglo_de_paneles ap ON ap.id_pro = p.id_pro
-                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro LEFT JOIN proyecto_carga c ON c.id_pro = p.id_pro
-                WHERE p.id_pro = %s AND p.id_usu = %s AND p.status = true ORDER BY ap.id_arr, bb.id_ban, c.id_car;
+                LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro WHERE p.id_pro = %s AND p.id_usu = %s AND p.status = true ORDER BY ap.id_arr, bb.id_ban;
             ''', (id_pro, user_id))
             proyecto_completo = cur.fetchall()
 
@@ -1144,6 +1143,7 @@ def inicio_proyecto_fotovoltaica():
 
             arreglos_completos = []
             bancos_completos = []
+            cargas_completas = []
             
             error_cap_inv = None
             error_inv_arr = None
@@ -1212,13 +1212,19 @@ def inicio_proyecto_fotovoltaica():
                         'series_totales': series_totales
                     })
                     banco_visto.add(arr[59])  # Agregamos el banco al conjunto visto
-                            
+                    
                 if arr[45] is not None and  arr[45] != 0.0:
                     ptot_arreglo = arr[45] * 1.2  # Multiplicamos por 1.2 para obtener el valor ajustado
                     if arr[20] is not None and ptot_arreglo > arr[20]:
                         error_cap_inv = f'Error: la capacidad del inversor no soporta algun arreglo que realizaste.'
                         error_inv_arr = f'{arr[45]} * 1.2 = {ptot_arreglo} Potencia del arreglo > {arr[20]} Potencia máxima por entrada del inversor' 
-                                               
+            
+            # Evitamos que las cargas se dupliquen
+            cur.execute('''select c.id_car,c.tip_car, pc.pot_pcar, pc.x_pcar, pc.y_pcar, pc.id_pcar from proyecto_fotovoltaica p 
+                    left join proyecto_carga pc on p.id_pro=pc.id_pro
+                    left join carga c on c.id_car= pc.id_car where p.id_pro=%s;''', (id_pro,))
+            cargas_completas = cur.fetchall()
+            
             # Obtenemos el proyecto principal
             cur.execute('SELECT * FROM proyecto_fotovoltaica WHERE id_pro = %s AND id_usu = %s AND status = true;', (id_pro, user_id))
             pro = cur.fetchone()
@@ -1226,9 +1232,10 @@ def inicio_proyecto_fotovoltaica():
             cur.execute('''SELECT COUNT(id_inv) AS cant_inv, COUNT(id_reg) AS cant_reg,
                 (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = %s) AS cant_arr,
                 (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = %s) AS cant_ban,
-                (SELECT COUNT(id_car) FROM proyecto_carga WHERE id_pro = %s) AS cant_car
+				(SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = %s) AS cant_car,
+                (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE pot_pcar!=0 and id_pro = %s) AS cant_pcar
                 FROM proyecto_fotovoltaica 
-                WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,id_pro,))
+                WHERE id_pro = %s;''', (id_pro,id_pro,id_pro,id_pro,id_pro,))
             cant_componentes = cur.fetchone()            
             # Verificamos si hay inversor
             if pro and  proyecto_completo[0][4] is not None :
@@ -1260,10 +1267,9 @@ def inicio_proyecto_fotovoltaica():
                     else:
                         break                              
             
-              
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr, zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro,cargas_completas=cargas_completas, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr, zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
 
@@ -1277,6 +1283,7 @@ def update_coordinates():
     id_arr = data.get('arr_id')  # ID del arreglo de paneles
     id_ban = data.get('ban_id')  # ID del banco de paneles
     id_pro = data.get('pro_id')  # ID del proyecto
+    id_pcar = data.get('pcar_id')  # ID del proyecto
     x = data.get('x')            # Nueva coordenada X del arreglo de paneles
     y = data.get('y')            # Nueva coordenada Y del arreglo de paneles
     x_inv = data.get('x_inv')    # Nueva coordenada X del inversor
@@ -1285,11 +1292,11 @@ def update_coordinates():
     y_reg = data.get('y_reg')    # Nueva coordenada Y del regulador
     x_ban = data.get('x_ban')    # Nueva coordenada X del banco de baterias
     y_ban = data.get('y_ban')    # Nueva coordenada Y del banco de baterias
-    x_car = data.get('x_car')    # Nueva coordenada X de la carga
-    y_car = data.get('y_car')    # Nueva coordenada Y de la carga
+    x_pcar = data.get('x_pcar')    # Nueva coordenada X de la carga
+    y_pcar = data.get('y_pcar')    # Nueva coordenada Y de la carga
     x_red = data.get('x_red')    # Nueva coordenada X de la red
     y_red = data.get('y_red')    # Nueva coordenada Y de la red
-    print('regulador: ',x_reg,y_reg,'banco: ',id_ban,x_ban,y_ban,'carga: ',x_car,y_car,'red: ',x_red,y_red)
+    print('regulador: ',x_reg,y_reg,'banco: ',id_ban,x_ban,y_ban,'carga: ',x_pcar,y_pcar,'red: ',x_red,y_red)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             # Validar que id_arr sea un valor válido antes de ejecutar la consulta
@@ -1317,6 +1324,13 @@ def update_coordinates():
                 cur.execute('''
                     UPDATE banco_de_baterias SET x_ban = %s, y_ban = %s WHERE id_ban = %s;
                 ''', (x_ban, y_ban, id_ban))
+                conn.commit()
+            # Validar que id_car sea un valor válido antes de ejecutar la consulta
+            if id_pcar !='None':
+                print('ENTRO1')
+                cur.execute('''
+                    UPDATE proyecto_carga SET x_pcar = %s, y_pcar = %s WHERE id_pcar = %s;
+                ''', (x_pcar, y_pcar, id_pcar))
                 conn.commit()
 
     return jsonify(success=True)  # Respuesta de éxito
@@ -1522,6 +1536,60 @@ def add_inversor_project():
                 ''', (None, id_inv, id_pro))
                 conn.commit()
             
+    return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+
+################################################################################################################################################
+#mostrar modal para agregar cargas alproyecto
+@app.route('/modal_carga_project')
+def modal_carga_project(): 
+    id_pro = request.args.get('id_pro')
+    cargas = []  # Inicializar lista vacía para almacenar los tipos de carga
+    
+    # Obtener detalles del proyecto y las cargas asociadas
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''
+                SELECT c.tip_car FROM proyecto_fotovoltaica p JOIN proyecto_carga pc ON p.id_pro = pc.id_pro
+                JOIN carga c ON c.id_car = pc.id_car WHERE p.id_pro = %s;
+            ''', (id_pro,))
+            
+            # Iterar sobre los resultados y agregar los tipos de carga a la lista 'cargas'
+            for row in cur.fetchall():
+                cargas.append(row[0])  # row[0] contiene el valor de tipo_carga
+                
+    return render_template('creacion_de_proyecto/project_carga.html', cargas=cargas, id_pro=id_pro)
+
+# Agregar la carga al proyecto
+@app.route('/add_carga_project', methods=['POST'])
+def add_carga_project():     
+    id_pro = request.form['id_pro']
+    cargas = {
+        'Lineal': request.form.get('car_lineal'),
+        'Inductiva': request.form.get('car_inductiva'),
+        'No Lineal': request.form.get('car_no_lineal')
+    }
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener todos los tipos de carga disponibles y mapear a un diccionario
+            cur.execute('SELECT id_car, tip_car FROM carga;')
+            cargas_dict = {c[1]: c[0] for c in cur.fetchall()}
+
+            # Iterar sobre cada tipo de carga (Lineal, Inductiva, No Lineal)
+            for tipo, valor in cargas.items():
+                id_car = cargas_dict.get(tipo)
+                if valor:  # Si la carga está marcada
+                    cur.execute('''
+                        INSERT INTO proyecto_carga (id_car, id_pro)
+                        SELECT %s, %s WHERE NOT EXISTS (
+                            SELECT 1 FROM proyecto_carga WHERE id_car = %s AND id_pro = %s
+                        );
+                    ''', (id_car, id_pro, id_car, id_pro))
+                else:  # Si la carga no está marcada, eliminar
+                    cur.execute('DELETE FROM proyecto_carga WHERE id_car = %s AND id_pro = %s;', (id_car, id_pro))
+
+            conn.commit()
+
     return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
 
 ################################################################################################################################################
@@ -1850,6 +1918,36 @@ def ver_modal_del_ban():
         # Renderizar la plantilla para mostrar el modal de eliminación
         return render_template('creacion_de_proyecto/delete_banco_project.html', ban=ban)
 
+#Modal para agregar potencia a la carga
+@app.route('/modal_carga_pot', methods=['GET', 'POST'])
+def modal_carga_pot():
+    if request.method == 'POST':
+        # Si es una solicitud POST, significa que se está enviando el formulario para actualizar la potencia
+        id_pcar = request.form['id_pcar']
+        pot_pcar = request.form['pot_pcar']
+        
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Actualizar el valor de la potencia de la carga
+                cur.execute('UPDATE proyecto_carga SET pot_pcar = %s WHERE id_pcar = %s;', (pot_pcar, id_pcar))
+                # Obtener el id_pro relacionado con la carga
+                cur.execute('SELECT id_pro FROM proyecto_carga WHERE id_pcar = %s;', (id_pcar,))
+                id_pro = cur.fetchone()[0]  # Obtener el id_pro de la carga
+        
+        return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+    
+    else:
+        # Si es una solicitud GET, significa que se está mostrando el modal
+        id_pcar = request.args.get('id_pcar')
+        print(id_pcar)
+        
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles de la carga con el id_pcar dado
+                cur.execute('SELECT pc.id_pcar, pc.pot_pcar, c.tip_car FROM proyecto_carga pc LEFT JOIN carga c ON pc.id_car = c.id_car WHERE id_pcar = %s;', (id_pcar,))
+                pcar = cur.fetchone()  # Obtener el resultado de la consulta
+        
+        return render_template('creacion_de_proyecto/pot_car.html', pcar=pcar)
 
             
 

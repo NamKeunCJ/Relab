@@ -81,7 +81,7 @@
             {% endif %}
 
         {% elif num_info == '2' %}
-            {% if pro_com[0] is not none %} 
+            {% if cant_componentes[0] != 0 %} 
                 {% if error_cap_inv is not none %}
                     <div class="alert alert-danger text-center">
                         <small>{{error_cap_inv}}<br>{{error_inv_arr}}</small>
@@ -267,6 +267,10 @@
                     No hay Banco de Baterias registrados en este proyecto.
                 </div>
             {% endif %}
+        {% elif num_info == '4' %}
+            Datos generados por la estructura
+        {% elif num_info == '5' %}
+            Comparacion con estructura fisica
         {% endif %}
     </div>
 </div>
