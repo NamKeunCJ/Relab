@@ -36,22 +36,29 @@
                             </li>
                         {% endif%}                        
                     </ul>
-                    {% if cant_componentes[0] != 0 and cant_componentes[2] != 0 and cant_componentes[3] != 0 
-                        and cant_componentes[4] != 0 and cant_componentes[5] != 0 
-                        and ((pro_com[32] == 'No' and cant_componentes[1] != 0) or pro_com[32] == 'Si') %}
-                     
-                        <hr class="border border-dark border-1 opacity-75">
-                        <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>EJECUTAR PROYECTO</b></label>
-                        <a class="btn btn-primary tooltip_btn"  href="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                        data-bs-custom-class="custom-tooltip"
-                        data-bs-title="Ejecuta la estructura y recolecta datos.">Ejecutar</a>  
-                        
-                        <hr class="border border-dark border-1 opacity-75">
-                        <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>CONECTAR A ESTRUCTURA FISICA</b></label>
-                        <a class="btn btn-primary tooltip_btn"  href="/inicio_proyecto_fotovoltaica?num_info=5&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                        data-bs-custom-class="custom-tooltip"
-                        data-bs-title="Compara datos con una estructura física.">Conectar</a>
-                    {% endif %}
+                    {% set mostrar_contenido = False %}
+                    {% for proyecto in proyecto_completo %}
+                        {% if proyecto[20] !=0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 
+                            and ((pro_com[32] == 'No' and proyecto[35] is not none) or pro_com[32] == 'Si') and proyecto[45] !=0.0 and proyecto[62] !=0.0 and proyecto[45] is not none and proyecto[62] is not none %}
+
+                            {% set mostrar_contenido = True %}
+                        {% endif %}
+                        {% if mostrar_contenido %}
+                            <hr class="border border-dark border-1 opacity-75">
+                            <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>EJECUTAR PROYECTO</b></label>
+                            <a class="btn btn-primary tooltip_btn" href="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Ejecuta la estructura y recolecta datos.">Ejecutar</a>
+
+                            <hr class="border border-dark border-1 opacity-75">
+                            <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>CONECTAR A ESTRUCTURA FISICA</b></label>
+                            <a class="btn btn-primary tooltip_btn" href="/inicio_proyecto_fotovoltaica?num_info=5&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Compara datos con una estructura física.">Conectar</a>
+
+                        {% endif %}
+                    {% endfor %}
+
                 </div>
             </div>              
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
