@@ -1791,10 +1791,9 @@ def list_project():
     success = request.args.get('success')
     error = request.args.get('error')
     user_id = session.get('user_id')
-
-    # Verificar si el usuario ha iniciado sesión
     if user_id is None:
-        return redirect(url_for('redirigir'))
+        # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+        return redirect(url_for('inicio_sesion')) 
 
     # Obtener información del usuario
     with get_db_connection() as conn:
@@ -1808,7 +1807,7 @@ def list_project():
                 FROM proyecto_fotovoltaica p
                 LEFT JOIN arreglo_de_paneles ap ON p.id_pro = ap.id_pro
                 LEFT JOIN banco_de_baterias bb ON bb.id_pro = p.id_pro
-                WHERE p.id_usu = %s AND p.status = true
+                WHERE p.id_usu = %s AND p.status = true 
             '''
             params = [user_id]
 
@@ -1818,14 +1817,15 @@ def list_project():
                 params.append(f"%{buscar}%")
 
             sql_query += '''
-                GROUP BY p.id_pro, p.nom_pro, p.id_inv, p.created_at, bb.ene_ban
+                GROUP BY p.id_pro
                 ORDER BY p.created_at DESC;
             '''
 
             # Ejecutar la consulta con o sin filtro de búsqueda
             cur.execute(sql_query, tuple(params))
             pro_list = cur.fetchall()
-
+            print(pro_list)
+            
     # Renderizar la plantilla con los resultados y notificaciones si existen
     return render_template(
         'creacion_de_proyecto/list_project.html' if not buscar else 'creacion_de_proyecto/search_project.html',

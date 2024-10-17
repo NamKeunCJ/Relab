@@ -23,24 +23,29 @@
                 
                 searchButton.addEventListener('click', function(event) {
                     event.preventDefault(); 
-                    var searchTerm = searchInput.value.trim();
-                    
-                    if (searchTerm!=='' || searchTerm==='' ) {
-                        // Realizar la acción de búsqueda mediante AJAX
-                        $.ajax({
-                            type: 'GET',
-                            url: '/list_project',
-                            data: { buscar: searchTerm },
-                            success: function(response) {
-                                $('#contenido').html(response);
-                            },
-                            error: function() {
-                                console.error('Error en la solicitud AJAX');
-                            }
-                        });
+                    var searchTerm = searchInput.value.trim();  // Eliminar espacios en blanco
+            
+                    // Verificar si el campo de búsqueda está vacío
+                    if (searchTerm === '') {
+                        console.log('Campo de búsqueda vacío. No se realizará ninguna búsqueda.');
+                        return;  // No realizar la solicitud AJAX si no hay término de búsqueda
                     }
+                    
+                    // Realizar la acción de búsqueda mediante AJAX si hay un término válido
+                    $.ajax({
+                        type: 'GET',
+                        url: '/list_project',
+                        data: { buscar: searchTerm },
+                        success: function(response) {
+                            $('#contenido').html(response);
+                        },
+                        error: function() {
+                            console.error('Error en la solicitud AJAX');
+                        }
+                    });
                 });
-            </script>                    
+            </script>
+                            
             <div id="contenido">{% block search_project %} {% include 'creacion_de_proyecto/search_project.html' %} {% endblock %}</div> 
         </div>
     </section>
