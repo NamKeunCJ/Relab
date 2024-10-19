@@ -21,7 +21,6 @@ iso8601==2.1.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
 joblib==1.4.2
-keras==3.5.0
 libclang==18.1.1
 Markdown==3.7
 markdown-it-py==3.0.0
@@ -35,7 +34,6 @@ opt-einsum==3.3.0
 optree==0.12.1
 packaging==24.1
 pandas==2.2.2
-plotly==5.23.0
 protobuf==4.25.4
 psycopg2==2.9.9
 Pygments==2.18.0

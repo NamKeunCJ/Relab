@@ -7,7 +7,7 @@ import time
 import requests # elementos para datos davis
 import pandas as pd #Extrer los datos del archivo plano
 import os
-
+#import tensorflow as tf
 
 # Crear una instancia de la aplicación Flask
 app = Flask(__name__)
@@ -572,7 +572,21 @@ def demand_value_calculation():
 def irradiance_prediction():
     prediction_g = 1
     print (prediction_g)
-    return render_template('informe_y_Estadistica/date_davis.html',prediction_g = prediction_g)
+    #ruta_modelo = 'C:/www/Relab/pro_relab/energia_renovable/modelo/50U1L128B_model.keras'
+    # Cargar el modelo
+    #modelo = tf.keras.models.load_model(ruta_modelo)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT prom_irr, max_irr, created_at 
+                FROM ( SELECT prom_irr, max_irr, created_at 
+                    FROM dato_irradiancia 
+                    WHERE created_at::time >= '06:00:00' AND created_at::time < '19:00:00' AND created_at::date < current_date 
+                    ORDER BY created_at desc LIMIT 156) as consulta
+                ORDER BY created_at asc;
+            """)
+            db_irr = cur.fetchall()
+    return render_template('informe_y_Estadistica/date_davis.html',prediction_g = prediction_g, db_irr=db_irr)
 
 ################################################################################################################################################
 #--------------------------------------------CREAR COMPONENTES Y EDITARLOS-------------------------------------------------------------------------------------------------------------------------------------------------
