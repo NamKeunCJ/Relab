@@ -193,6 +193,12 @@
 }
 /*Color proyecto*/
 
+.spinner-grow {
+    width: 5rem; /* Ajusta el tamaño según tus necesidades */
+    height: 5rem; /* Ajusta el tamaño según tus necesidades */
+}
+
+
 .color-primario{
     background-color: #13447c;
     color: white;

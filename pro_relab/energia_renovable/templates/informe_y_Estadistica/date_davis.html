@@ -33,8 +33,28 @@
                         data-bs-title="Asegurate de buscar los dias correctamente.">Buscar</button>
                     </form>
                     <hr class="border border-dark border-1 opacity-75">
+                     
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>GENERAR PREDICCION</b></label>
-                    <a class="btn btn-primary"  href="/irradiance_prediction" >Generar</a>                  
+                    <form id="prediction-form" action="/irradiance_prediction" method="get">
+                        <button type="submit" class="btn btn-primary" id="generate-button">
+                            Generar
+                        </button>
+                    </form>
+
+                    
+
+                    <script>
+                        $(document).ready(function() {
+                            $('#prediction-form').on('submit', function() {
+                                // Muestra el spinner
+                                $('#loading').show();
+
+                                // Desactiva el botón para evitar múltiples envíos
+                                $('#generate-button').prop('disabled', true);
+                            });
+                        });
+                    </script>
+                 
                 </div>
             </div>             
             
@@ -42,7 +62,19 @@
                 <div class="container" data-aos="fade-up">
                     <div class="row" style="margin-bottom: 2rem; margin-top: 2rem;">
                         <div class="col ms-sm-auto">
-                            
+                            <div class="d-flex justify-content-center">
+                                <div id="loading" style="display:none;margin-bottom: 2rem;">
+                                    <div class="spinner-grow text-primary"  style="width: 3rem; height: 3rem;" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <div class="spinner-grow text-primary"  style="width: 3rem; height: 3rem;" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <div class="spinner-grow text-primary"  style="width: 3rem; height: 3rem;" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </div>
+                            </div>
                             {% if prediction_g and prediction_g == 1 %}
                                 {% block prediction_g %} {% include 'informe_y_Estadistica/prediction_g.html' %} {% endblock %}                              
                             {% else %} 
