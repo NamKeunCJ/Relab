@@ -399,7 +399,7 @@ def consultas_demanda(start_date, end_date):
                 cur.execute("SELECT MAX(created_at) FROM dato_demanda")
                 last_date = cur.fetchone()[0]  # Obtener la última fecha
                 if last_date:
-                    start_date = (last_date - timedelta(days=10)).strftime('%Y-%m-%d')
+                    start_date = (last_date - timedelta(days=19)).strftime('%Y-%m-%d')
                     end_date = last_date.strftime('%Y-%m-%d')
 
             # Parámetros de fecha
@@ -620,9 +620,9 @@ def irradiance_prediction():
         modelo = tf.keras.models.load_model(ruta + '5U1L64B.keras')
 
         # Reentrenar el modelo con los nuevos datos
-        EPOCHS = 20
-        BATCH_SIZE = 64
-        historial = modelo.fit(X_train_nuevos, Y_train_nuevos, batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1)
+        #EPOCHS = 20
+        #BATCH_SIZE = 64
+        #historial = modelo.fit(X_train_nuevos, Y_train_nuevos, batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1)
 
         # Predicción multistep para días futuros
         # Usar el último segmento de datos escalados para predecir los días futuros

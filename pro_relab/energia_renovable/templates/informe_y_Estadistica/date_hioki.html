@@ -19,7 +19,10 @@
                     "next": "Siguiente",
                     "previous": "Anterior"
                 }
-            }
+            },
+            "order": [
+                [0, "desc"]
+            ]
         });
     });
 </script>
@@ -67,7 +70,7 @@
                         <button type="submit" class="tooltip_btn btn btn-primary mt-2" 
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         data-bs-custom-class="custom-tooltip"
-                        data-bs-title="Asegurate de buscar los días correctamente y añadir el costo de energía.">Buscar y Calcular</button>
+                        data-bs-title="Asegurate de buscar los días correctamente y añadir el valor de energía actual.">Buscar y Calcular</button>
                     </form>
                     
                      
@@ -84,7 +87,7 @@
                                     <table id="tabla" class="table table-responsive table table-hover" >
                                         <thead class="table-primary">
                                             <tr>
-                                                <th>Fecha y Hora</th>
+                                                <th>Fecha y Hora Ultimo Dato</th>
                                                 <th>Demanda Energetica</th>
                                             </tr>
                                         </thead>
