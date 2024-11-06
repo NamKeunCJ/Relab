@@ -21,7 +21,7 @@ app = Flask(__name__)
 # Configurar la clave secreta de la aplicación, utilizada para gestionar sesiones y cookies seguras
 app.config['SECRET_KEY'] = 'unicesmag'
 # Establecer la duración de la sesión a 120 minutos
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
+#app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
 
 # Asegurar que las cookies solo se envíen por HTTPS y no accesibles por JavaScript
 app.config['SESSION_COOKIE_SECURE'] = True
@@ -284,66 +284,114 @@ def update_user():
 
 #Conexion de la estacion meteorologica con el sistema de informacion
 def davis():
+    # Inicia una función llamada `davis` que se ejecutará indefinidamente.
     while True:
+        # Un bucle infinito para mantener la función en ejecución.
         print("Dato recibido")
+        
+        # Llaves de la API (se usan para autenticar y acceder a los datos). Estas claves deben ser protegidas.
         API_KEY = "jxhpskyfalmhlegx9mwqnwplcpmoltc0"
         STATION_ID = "181874"
         headers = {"X-Api-Secret": "sxchcxmtchcydblvcgbknst9mumap1cq"}
 
-        end_timestamp = int(time.time())
-        start_timestamp = end_timestamp - (30 * 24 * 3600)
+        # Obtiene el timestamp actual (tiempo actual en segundos desde 1970-01-01) y define el rango de tiempo de 30 días hacia atrás.
+        end_timestamp = int(time.time())  # Fin del intervalo (tiempo actual).
+        start_timestamp = end_timestamp - (30 * 24 * 3600)  # Comienzo del intervalo, 30 días antes.
+
+        # Duración máxima permitida para cada consulta (86400 segundos = 1 día).
         max_duration_seconds = 86400
 
+        # Bucle que continuará mientras el `end_timestamp` sea mayor que el `start_timestamp`, procesando datos en bloques.
         while end_timestamp > start_timestamp:
+            # Calcula el inicio de cada "bloque" de tiempo, pero no menor que el `start_timestamp`.
             current_start = max(end_timestamp - max_duration_seconds, start_timestamp)
+
+            # Construye la URL de la solicitud a la API con los parámetros de la estación, la clave API y los timestamps.
             url = f"https://api.weatherlink.com/v2/historic/{STATION_ID}?api-key={API_KEY}&start-timestamp={current_start}&end-timestamp={end_timestamp}"
             
             try:
+                # Envía una solicitud GET a la API para obtener los datos históricos de esa estación meteorológica.
                 response = requests.get(url, headers=headers)
+
+                # Si la solicitud es exitosa (código 200), procesa los datos.
                 if response.status_code == 200:
+                    # Extrae los datos de los sensores (si existen) del JSON devuelto por la API.
                     data = response.json().get('sensors', [])
+                    
+                    # Prepara una lista vacía para almacenar los datos que se insertarán en la base de datos.
                     db_data = []
 
+                    # Recorre cada sensor en los datos obtenidos.
                     for sensor in data:
-                        last_timestamp = None
+                        last_timestamp = None  # Variable para almacenar el timestamp anterior procesado.
+
+                        # Recorre los datos internos del sensor (mediciones registradas).
                         for inner_data in sensor.get('data', []):
-                            ts = inner_data.get('ts')
+                            ts = inner_data.get('ts')  # Obtiene el timestamp actual del dato.
+                            
+                            # Si existe un timestamp previo (para llenar datos faltantes entre el actual y el anterior).
                             if last_timestamp:
+                                # Calcula cuántos intervalos de 5 minutos (300 segundos) faltan entre dos timestamps.
                                 for i in range((ts - last_timestamp) // 300 - 1):
+                                    # Calcula el timestamp de los datos faltantes en incrementos de 5 minutos.
                                     missing_ts = last_timestamp + (i + 1) * 300
+
+                                    # Intenta obtener datos del mismo timestamp del año anterior.
                                     previous_year_data = get_previous_year_data(missing_ts)
+
+                                    # Si hay datos del año pasado, los agrega a la lista de datos para insertar.
                                     db_data.append((previous_year_data or (None, None), datetime.fromtimestamp(missing_ts).strftime('%Y-%m-%d %H:%M:%S')))
                             
+                            # Obtiene los datos de radiación solar promedio y máxima del dato actual.
                             avg, hi = inner_data.get('solar_rad_avg'), inner_data.get('solar_rad_hi')
+
+                            # Agrega los datos actuales (promedio y máximo) a la lista para insertar.
                             db_data.append(((avg, hi), datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')))
+                            
+                            # Actualiza `last_timestamp` con el valor actual para futuras comparaciones.
                             last_timestamp = ts
 
+                    # Abre una conexión a la base de datos para insertar los datos procesados.
                     with get_db_connection() as conn:
                         with conn.cursor() as cursor:
+                            # Inserta los datos de irradiancia en la base de datos, evitando duplicados por timestamp.
                             cursor.executemany("""
                                 INSERT INTO dato_irradiancia (prom_irr, max_irr, created_at)
                                 VALUES (%s, %s, %s)
                                 ON CONFLICT (created_at) DO NOTHING
                             """, [(prom, max_, created_at) for (prom, max_), created_at in db_data])
 
+                # Si la respuesta de la API es un error 400 (solicitud incorrecta), imprime el error.
                 elif response.status_code == 400:
                     print("Error 400: Solicitud incorrecta", response.json())
 
+            # Captura y maneja cualquier excepción que ocurra durante la solicitud a la API.
             except requests.RequestException as e:
                 print(f"Error en la API: {e}")
 
+            # Actualiza el `end_timestamp` para continuar con el siguiente bloque de tiempo.
             end_timestamp = current_start - 1
 
+        # Pausa la ejecución durante 300 segundos (5 minutos) antes de volver a ejecutar el bucle principal.
         time.sleep(300)
 
+# Función para obtener los datos del año anterior para un timestamp específico.
 def get_previous_year_data(ts):
+    # Consulta SQL para buscar los datos de irradiancia del mismo día y hora, pero del año anterior.
     query = "SELECT prom_irr, max_irr FROM dato_irradiancia WHERE created_at = %s"
+    
+    # Calcula la fecha y hora exacta de un año antes del timestamp dado.
     one_year_ago = (datetime.fromtimestamp(ts) - timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
 
+    # Abre una conexión a la base de datos para ejecutar la consulta.
     with get_db_connection() as conn:
         with conn.cursor() as cursor:
+            # Ejecuta la consulta con la fecha y hora calculada.
             cursor.execute(query, (one_year_ago,))
+            
+            # Devuelve el resultado de la consulta (promedio y máxima irradiancia) o None si no hay datos.
             return cursor.fetchone()
+
         
 # Crear un hilo para la función davis
 data_fetch_thread = threading.Thread(target=davis)
