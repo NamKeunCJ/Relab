@@ -1,0 +1,322 @@
+<script>
+    var lastData = null;
+    var table;
+    var id_pro = '{{ result_proyect_ene[0][0] }}'; // Suponiendo que id_pro se pasa desde el backend
+
+    $(document).ready(function() {
+        // Inicializa DataTable y guarda la referencia
+        table = $('#tablaP').DataTable({
+            "language": {
+                "emptyTable": "No hay datos disponibles en la tabla",
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                "lengthMenu": "Mostrar _MENU_ entradas",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                }
+            },
+            "order": [
+                [0, "desc"]
+            ]
+        });
+
+        // Inicia la actualización periódica de la tabla
+        setInterval(updateTable, 10000); // Intervalo de actualización en milisegundos
+    });
+
+    function updateTable() {
+        $.ajax({
+            url: '/get_latest_proyecto_data/' + id_pro,
+            type: 'GET',
+            success: function(data) {
+                if (data && !areObjectsEqual(data, lastData)) {
+                    data.forEach(function(item) {
+                        // Verifica si el 'created_at' ya está en la tabla
+                        if (!isRowInTable(item.created_at)) {
+                            var newRow = [
+                                item.created_at,   // Fecha y Hora
+                                item.parr_ene,     // Potencia total (W)
+                                item.prom_irr,     // Radiación Alta (W/m²)
+                                item.efi_ene,      // Eficiencia Energía
+                                item.w_ene,        // Energía (W)
+                                item.kw_ene        // Energía (KW)
+                            ];
+                            table.row.add(newRow).draw(false); // Agrega la nueva fila
+                        }
+                    });
+                    lastData = data; // Actualiza lastData
+                }
+            },
+            error: function() {
+                console.error("Error al obtener los datos.");
+            }
+        });
+    }
+
+    function areObjectsEqual(obj1, obj2) {
+        // Compara los objetos para verificar si son iguales
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    }
+
+    function isRowInTable(createdAt) {
+        // Recorre las filas de la tabla y verifica si 'created_at' ya existe
+        var rows = table.rows().data().toArray();
+        return rows.some(function(row) {
+            return row[0] === createdAt; // Compara el campo 'Fecha y Hora'
+        });
+    }
+</script>
+
+
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
+    <div class="card-body" style="overflow-x: auto;">
+        <h3>Sistema Fotovoltaico Ejecutandose</h3>
+        {% if result_proyect_ene is not none %}
+        <table id="tablaP" class="table table-responsive">
+            <thead>
+                <tr>
+                    <th style="width: 12rem;">Fecha y Hora</th>
+                    <th>Potencia total (W)</th>
+                    <th>Radiacion Alta (W/m²)</th>
+                    <th>Eficiencia Energia</th>
+                    <th>Energia (W)</th>
+                    <th>Energia (KW)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eje_pro in result_proyect_ene %}
+                <tr>
+                    <td class="time_irradiance">{{eje_pro[6]}}</td>
+                    <td class="parr_ene">{{eje_pro[1]}}</td>
+                    <td class="avg_irradiance">{{eje_pro[2]}}</td>
+                    <td class="efi_ene">{{eje_pro[3]}}</td>
+                    <td class="w_ene">{{eje_pro[4]}}</td>
+                    <td class="kw_ene">{{eje_pro[5]}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Formulario centrado -->
+    <form id="irradiance-form" action="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ result_proyect_ene[0][0] }}" method="post" class="d-flex justify-content-center" style="margin-top: 2rem;">
+        <div class="d-flex align-items-end gap-3">
+            <div class="col-auto">
+                <label for="start_date" class="form-label"><b>Fecha Inicio</b></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <input type="date" class="form-control form-control-sm" id="start_date" name="start_date" required>
+                </div>
+            </div>
+            <div class="col-auto">
+                <label for="end_date" class="form-label"><b>Fecha Final</b></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <input type="date" class="form-control form-control-sm" id="end_date" name="end_date" required>
+                </div>
+            </div>
+            <div class="col-auto" style="padding-top: 1.8rem;">
+                <button type="submit" class="tooltip_btn btn btn-primary" 
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-custom-class="custom-tooltip"
+                data-bs-title="Asegurate de buscar los dias correctamente;">Buscar</button>
+            </div>
+        </div>
+    </form>
+    
+</div>
+
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
+    <div id="myChartPro"></div>
+    <button id="exportCSVButton" class="btn btn-secondary mt-3" style="opacity: 0.5;">Exportar a CSV</button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var energiaW = []; // Almacenará toda la información para el tooltip
+
+        document.querySelectorAll('#tablaP tbody tr').forEach(function(row) {
+            var timeElement = row.querySelector('.time_irradiance');
+            var potenciaElement = row.querySelector('.parr_ene');
+            var radiancionElement = row.querySelector('.avg_irradiance');
+            var eficienciaElement = row.querySelector('.efi_ene');
+            var energiaWElement = row.querySelector('.w_ene');
+            var energiaKWElement = row.querySelector('.kw_ene');
+
+            if (timeElement && potenciaElement && radiancionElement && eficienciaElement && energiaWElement && energiaKWElement) {
+                var timeText = timeElement.innerText;
+                var time = new Date(timeText).getTime();
+
+                var potencia = parseFloat(potenciaElement.innerText.replace(/,/g, ''));
+                var radiancion = parseFloat(radiancionElement.innerText.replace(/,/g, ''));
+                var eficiencia = parseFloat(eficienciaElement.innerText.replace(/,/g, ''));
+                var energia_W = parseFloat(energiaWElement.innerText.replace(/,/g, ''));
+                var energia_KW = parseFloat(energiaKWElement.innerText.replace(/,/g, ''));
+
+                if (!isNaN(time) && !isNaN(potencia) && !isNaN(radiancion) && !isNaN(eficiencia) && !isNaN(energia_W) && !isNaN(energia_KW)) {
+                    energiaW.push({ 
+                        x: time, 
+                        y: energia_W, 
+                        potencia: potencia,
+                        irradiance: radiancion, 
+                        eficiencia: eficiencia, 
+                        energiaKW: energia_KW 
+                    });
+                }
+            }
+        });
+
+        console.log(energiaW); // Verificar los datos extraídos
+
+        // Función para exportar datos a CSV
+        function exportToCSV(data, filename) {
+            var csvContent = "data:text/csv;charset=utf-8,";
+
+            // Añadir encabezados
+            csvContent += "Fecha y Hora,Potencia Total (W),Irradiancia,Eficiencia (%),Energia (W),Energia (KW)\n";
+
+            // Añadir cada fila de datos
+            data.forEach(function(row) {
+                csvContent += `${new Date(row.x).toLocaleString()},${row.potencia},${row.irradiance},${row.eficiencia},${row.y},${row.energiaKW}\n`;
+            });
+
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Asociar el evento de clic al botón para exportar a CSV
+        document.getElementById("exportCSVButton").addEventListener("click", function() {
+            exportToCSV(energiaW, "energia_generada_completo.csv");
+        });
+
+        // Configuración del gráfico
+        var options = {
+            tooltip: {
+                shared: false,
+                custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                    var data = w.config.series[seriesIndex].data[dataPointIndex];
+                    var date = new Date(data.x).toLocaleString();
+                    
+                    return `
+                        <small><div class="card-header bg-secundary p-2 bg-opacity-55"">
+                                ${date}
+                            </div>
+                        <div class="card-body">  
+                            Detalles de Generación                          
+                            <ul class="text-dark">
+                                <li>Potencia Total de los Arreglos:<b> ${data.potencia.toFixed(0)} W</b></li>
+                                <li>Eficiencia Energía:<b> ${data.eficiencia.toFixed(2)}%</b></li>
+                                <li>Generación en (W):<b> ${data.y.toFixed(0)} W</b></li>
+                                <li>Generación en (KW):<b> ${data.energiaKW.toFixed(2)} kW</b></li>
+                                <li>Irradiancia:<b> ${data.irradiance.toFixed(0)} W/m²</b></li>
+                            </ul>
+                        </div></small>
+
+                    `;
+                },
+                x: {
+                    formatter: function (val) {
+                        return new Date(val).toLocaleString();
+                    }
+                }
+            },
+
+            series: [
+                {
+                    name: 'Energía Generada',
+                    data: energiaW
+                }
+            ],
+            chart: {
+                type: 'line',
+                height: 300,
+                zoom: {
+                    type: 'x',
+                    enabled: true,
+                    autoScaleYaxis: true
+                },
+                toolbar: {
+                    autoSelected: 'zoom',
+                    export: {
+                        csv: {
+                            filename: 'energia_generada',
+                            columnDelimiter: ',',
+                            headerCategory: 'Fecha y Hora',
+                            headerValue: 'Energía Generada',
+                            categoryFormatter(x) {
+                                return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+                            },
+                            valueFormatter(y) {
+                                return y.toFixed(2);
+                            }
+                        },
+                        svg: { filename: 'grafico_energia_generada' },
+                        png: { filename: 'grafico_energia_generada' }
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            markers: {
+                size: 0,
+            },
+            title: {
+                text: 'Energía generada por el proyecto',
+                align: 'left'
+            },
+            fill: {
+                type: 'solid',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100]
+                },
+            },
+            stroke: {
+                width: 2,
+                curve: 'straight'
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val) {
+                        return val.toFixed(0);
+                    },
+                },
+                title: {
+                    text: 'Energía Generada'
+                },
+            },
+            xaxis: {
+                type: 'datetime',
+                labels: {
+                    formatter: function (value) {
+                        return new Date(value).toLocaleDateString();
+                    }
+                }
+            },            
+        };
+
+        // Crear y renderizar el gráfico
+        var chart = new ApexCharts(document.querySelector("#myChartPro"), options);
+        chart.render();
+    });
+</script>

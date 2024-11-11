@@ -279,119 +279,134 @@ def update_user():
                 return redirect(url_for('inicio_principal'))  # Si el usuario no es Administrador, redirige a la página principal
             
 ################################################################################################################################################
-#--------------------------------------------ESTACION DAVIS Y DATOS DE DEMANDA-------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------ESTACION DAVIS --------------------------------------------------------------------------------------------------------------------------------------------------------
 ################################################################################################################################################
 
-#Conexion de la estacion meteorologica con el sistema de informacion
+
+# Conexión de la estación meteorológica con el sistema de información
 def davis():
     # Inicia una función llamada `davis` que se ejecutará indefinidamente.
     while True:
-        # Un bucle infinito para mantener la función en ejecución.
         print("Dato recibido")
         
-        # Llaves de la API (se usan para autenticar y acceder a los datos). Estas claves deben ser protegidas.
+        # Llaves de la API (se usan para autenticar y acceder a los datos).
         API_KEY = "jxhpskyfalmhlegx9mwqnwplcpmoltc0"
         STATION_ID = "181874"
         headers = {"X-Api-Secret": "sxchcxmtchcydblvcgbknst9mumap1cq"}
 
-        # Obtiene el timestamp actual (tiempo actual en segundos desde 1970-01-01) y define el rango de tiempo de 30 días hacia atrás.
-        end_timestamp = int(time.time())  # Fin del intervalo (tiempo actual).
-        start_timestamp = end_timestamp - (30 * 24 * 3600)  # Comienzo del intervalo, 30 días antes.
+        # Obtiene el timestamp actual y define el rango de tiempo de 30 días hacia atrás.
+        end_timestamp = int(time.time())
+        start_timestamp = end_timestamp - (30 * 24 * 3600)
 
         # Duración máxima permitida para cada consulta (86400 segundos = 1 día).
         max_duration_seconds = 86400
 
-        # Bucle que continuará mientras el `end_timestamp` sea mayor que el `start_timestamp`, procesando datos en bloques.
+        # Bucle para procesar datos en bloques de tiempo.
         while end_timestamp > start_timestamp:
-            # Calcula el inicio de cada "bloque" de tiempo, pero no menor que el `start_timestamp`.
             current_start = max(end_timestamp - max_duration_seconds, start_timestamp)
-
-            # Construye la URL de la solicitud a la API con los parámetros de la estación, la clave API y los timestamps.
             url = f"https://api.weatherlink.com/v2/historic/{STATION_ID}?api-key={API_KEY}&start-timestamp={current_start}&end-timestamp={end_timestamp}"
             
             try:
-                # Envía una solicitud GET a la API para obtener los datos históricos de esa estación meteorológica.
                 response = requests.get(url, headers=headers)
 
-                # Si la solicitud es exitosa (código 200), procesa los datos.
                 if response.status_code == 200:
-                    # Extrae los datos de los sensores (si existen) del JSON devuelto por la API.
                     data = response.json().get('sensors', [])
-                    
-                    # Prepara una lista vacía para almacenar los datos que se insertarán en la base de datos.
                     db_data = []
 
-                    # Recorre cada sensor en los datos obtenidos.
                     for sensor in data:
-                        last_timestamp = None  # Variable para almacenar el timestamp anterior procesado.
-
-                        # Recorre los datos internos del sensor (mediciones registradas).
                         for inner_data in sensor.get('data', []):
-                            ts = inner_data.get('ts')  # Obtiene el timestamp actual del dato.
-                            
-                            # Si existe un timestamp previo (para llenar datos faltantes entre el actual y el anterior).
-                            if last_timestamp:
-                                # Calcula cuántos intervalos de 5 minutos (300 segundos) faltan entre dos timestamps.
-                                for i in range((ts - last_timestamp) // 300 - 1):
-                                    # Calcula el timestamp de los datos faltantes en incrementos de 5 minutos.
-                                    missing_ts = last_timestamp + (i + 1) * 300
-
-                                    # Intenta obtener datos del mismo timestamp del año anterior.
-                                    previous_year_data = get_previous_year_data(missing_ts)
-
-                                    # Si hay datos del año pasado, los agrega a la lista de datos para insertar.
-                                    db_data.append((previous_year_data or (None, None), datetime.fromtimestamp(missing_ts).strftime('%Y-%m-%d %H:%M:%S')))
-                            
-                            # Obtiene los datos de radiación solar promedio y máxima del dato actual.
+                            ts = inner_data.get('ts')
                             avg, hi = inner_data.get('solar_rad_avg'), inner_data.get('solar_rad_hi')
-
-                            # Agrega los datos actuales (promedio y máximo) a la lista para insertar.
                             db_data.append(((avg, hi), datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')))
-                            
-                            # Actualiza `last_timestamp` con el valor actual para futuras comparaciones.
-                            last_timestamp = ts
 
-                    # Abre una conexión a la base de datos para insertar los datos procesados.
+                    # Guardar los datos en la base de datos
                     with get_db_connection() as conn:
                         with conn.cursor() as cursor:
-                            # Inserta los datos de irradiancia en la base de datos, evitando duplicados por timestamp.
                             cursor.executemany("""
                                 INSERT INTO dato_irradiancia (prom_irr, max_irr, created_at)
                                 VALUES (%s, %s, %s)
                                 ON CONFLICT (created_at) DO NOTHING
                             """, [(prom, max_, created_at) for (prom, max_), created_at in db_data])
 
-                # Si la respuesta de la API es un error 400 (solicitud incorrecta), imprime el error.
+                    #print("Datos guardados en la base de datos.")
+                    # Revisar y completar datos faltantes en los últimos 30 días
+                    revisar_completar_datos_faltantes()
+                    ejecutar_proyecto() 
                 elif response.status_code == 400:
                     print("Error 400: Solicitud incorrecta", response.json())
 
-            # Captura y maneja cualquier excepción que ocurra durante la solicitud a la API.
             except requests.RequestException as e:
                 print(f"Error en la API: {e}")
 
-            # Actualiza el `end_timestamp` para continuar con el siguiente bloque de tiempo.
             end_timestamp = current_start - 1
-
-        # Pausa la ejecución durante 300 segundos (5 minutos) antes de volver a ejecutar el bucle principal.
         time.sleep(300)
 
-# Función para obtener los datos del año anterior para un timestamp específico.
-def get_previous_year_data(ts):
-    # Consulta SQL para buscar los datos de irradiancia del mismo día y hora, pero del año anterior.
-    query = "SELECT prom_irr, max_irr FROM dato_irradiancia WHERE created_at = %s"
-    
-    # Calcula la fecha y hora exacta de un año antes del timestamp dado.
-    one_year_ago = (datetime.fromtimestamp(ts) - timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
+# Función para revisar y completar datos faltantes en los últimos 30 días
+def revisar_completar_datos_faltantes():
+    # Definir el rango de 30 días
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
 
-    # Abre una conexión a la base de datos para ejecutar la consulta.
+    # Recuperar todos los datos de los últimos 30 días desde la base de datos
     with get_db_connection() as conn:
         with conn.cursor() as cursor:
-            # Ejecuta la consulta con la fecha y hora calculada.
-            cursor.execute(query, (one_year_ago,))
-            
-            # Devuelve el resultado de la consulta (promedio y máxima irradiancia) o None si no hay datos.
-            return cursor.fetchone()
+            cursor.execute("""
+                SELECT prom_irr, max_irr, created_at
+                FROM dato_irradiancia
+                WHERE created_at >= %s AND created_at <= %s
+                ORDER BY created_at ASC
+            """, (start_date.strftime('%Y-%m-%d %H:%M:%S'), end_date.strftime('%Y-%m-%d %H:%M:%S')))
+            records = cursor.fetchall()
 
+    # Verificar intervalos de tiempo faltantes en los datos obtenidos
+    interpolated_data = []
+    last_timestamp = None
+
+    for row in records:
+        prom_irr, max_irr, created_at = row
+        ts = int(created_at.timestamp())  # Utilizar directamente `created_at.timestamp()` en lugar de `strptime`
+
+        if last_timestamp and ts - last_timestamp > 300:
+            # Interpolación para intervalos de 5 minutos faltantes
+            missing_intervals = (ts - last_timestamp) // 300
+            for i in range(1, missing_intervals):
+                missing_ts = last_timestamp + i * 300
+                previous_year_data = get_previous_year_data(missing_ts)
+
+                if previous_year_data and previous_year_data[0] is not None:
+                    interpolated_entry = (previous_year_data[0], previous_year_data[1], datetime.fromtimestamp(missing_ts).strftime('%Y-%m-%d %H:%M:%S'))
+                    print("Dato interpolado IF:", interpolated_entry)
+                else:
+                    interpolated_entry = (0, 0, datetime.fromtimestamp(missing_ts).strftime('%Y-%m-%d %H:%M:%S'))
+
+                    print("Dato interpolado ELSE :", interpolated_entry)
+                interpolated_data.append(interpolated_entry)
+
+        last_timestamp = ts
+
+    # Insertar los datos interpolados en la base de datos
+    if interpolated_data:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.executemany("""
+                    INSERT INTO dato_irradiancia (prom_irr, max_irr, created_at)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (created_at) DO NOTHING
+                """, interpolated_data)
+        #print("Datos interpolados añadidos a la base de datos.")
+    #else:
+        #print("No se encontraron datos faltantes para interpolar.")
+
+# Función para obtener datos del año anterior para un timestamp específico
+def get_previous_year_data(ts):
+    query = "SELECT prom_irr, max_irr FROM dato_irradiancia WHERE created_at = %s"
+    one_year_ago = (datetime.fromtimestamp(ts) - timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, (one_year_ago,))
+            result = cursor.fetchone()
+            return result if result else (None, None)
         
 # Crear un hilo para la función davis
 data_fetch_thread = threading.Thread(target=davis)
@@ -411,6 +426,9 @@ def irradiance_display():
     if request.method == 'POST':
         start_date = request.form.get('start_date')
         end_date = request.form.get('end_date')
+        start_date = f"{start_date} 06:00:00"  # Agrega hora 06:00:00 a la fecha de inicio
+        end_date = f"{end_date} 19:00:00"      # Agrega hora 19:00:00 a la fecha final
+
         # Redirige a la misma ruta con parámetros en la URL para evitar el reenvío del formulario
         return redirect(url_for('irradiance_display', start_date=start_date, end_date=end_date))
 
@@ -418,9 +436,9 @@ def irradiance_display():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date and end_date:
-                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE (created_at >= %s and created_at <= %s) and prom_irr!=0 ORDER BY created_at desc;', (start_date, end_date))
+                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE (created_at >= %s and created_at <= %s) ORDER BY created_at desc;', (start_date, end_date))
             else:
-                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia ORDER BY created_at desc LIMIT 144;')
+                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
             db_irr = cur.fetchall()
             
     return render_template('informe_y_Estadistica/date_davis.html', db_irr=db_irr)
@@ -438,6 +456,10 @@ def get_latest_irradiance_data():
     data = [{'prom_irr': f"{float(row[0]):.1f}", 'max_irr': f"{float(row[1]):.1f}", 'created_at': row[2].strftime('%Y-%m-%d %H:%M:%S')} for row in db_irr]
     
     return jsonify(data)  # Devuelve los datos en formato JSON
+
+################################################################################################################################################
+#---------------------------------------------------DATOS DE DEMANDA-------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 
 def consultas_demanda(start_date, end_date):
     # Obtener más información de los datos tomados con el HIOKI
@@ -1259,18 +1281,34 @@ def add_proyecto():
                 return jsonify({'id_pro': id_pro})
 
 #Iniciar Proyecto
-@app.route('/inicio_proyecto_fotovoltaica')
+@app.route('/inicio_proyecto_fotovoltaica', methods=['GET', 'POST'])
 def inicio_proyecto_fotovoltaica(): 
     num_info = request.args.get('num_info') 
     id_pro = request.args.get('id_pro')
     user_id = session.get('user_id')
-    print(num_info)
+    
     if user_id is None:
         # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
         return redirect(url_for('inicio_sesion')) 
+    
     # Obtener detalles del proyecto
     with get_db_connection() as conn:
         with conn.cursor() as cur:
+            result_proyect_ene=[]
+            if num_info=='4':
+                start_date,end_date=None,None
+                if request.method == 'POST':
+                    start_date = request.form['start_date']
+                    end_date = request.form['end_date'] 
+                    start_date = f"{start_date} 06:00:00"  # Agrega hora 06:00:00 a la fecha de inicio
+                    end_date = f"{end_date} 19:00:00"      # Agrega hora 19:00:00 a la fecha final               
+                cur.execute('''
+                    UPDATE proyecto_fotovoltaica SET eje_pro = %s WHERE id_pro = %s;
+                ''', (True, id_pro))
+                conn.commit()
+                ejecutar_proyecto()
+                result_proyect_ene = mostrar_ejecucion_proyecto(id_pro,start_date,end_date)
+
             # Hacemos una única consulta para obtener todos los datos relacionados
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
@@ -1293,6 +1331,8 @@ def inicio_proyecto_fotovoltaica():
                 # Evitamos que los arreglos se dupliquen
                 if arr[44] not in arreglo_visto:  # asumiendo que arr[44] es el ID del arreglo
                     print('id_arreglo', arr[44])
+                    print('Arreglo Pot', arr[45])                    
+
                     cur.execute('SELECT * FROM paralelo_arreglo WHERE id_arr=%s ORDER BY id_parr DESC;', (arr[44],))
                     paralelo = cur.fetchall()
 
@@ -1411,7 +1451,7 @@ def inicio_proyecto_fotovoltaica():
             
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro,cargas_completas=cargas_completas, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr, zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro,cargas_completas=cargas_completas, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr,result_proyect_ene =result_proyect_ene,  zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
 
@@ -2090,8 +2130,165 @@ def modal_carga_pot():
                 pcar = cur.fetchone()  # Obtener el resultado de la consulta
         
         return render_template('creacion_de_proyecto/pot_car.html', pcar=pcar)
+    
+################################################################################################################################################
+#--------------------------------------------EJECUTAR PROYECTO FOTOVOLTAICO-------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
 
+def ejecutar_proyecto():
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''SELECT sum(a.ptot_arr) as tot_arr, avg(a.efi_arr) as tot_efi, a.id_pro  
+                           FROM arreglo_de_paneles a 
+                           JOIN proyecto_fotovoltaica p ON a.id_pro = p.id_pro 
+                           WHERE p.eje_pro = %s 
+                           GROUP BY a.id_pro;''', (True,))
+            w_tot_rows = cur.fetchall()  # Obtener todas las filas
+            cur.execute('SELECT id_irr, prom_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
+            irr = cur.fetchall()
             
+            for w_tot in w_tot_rows:
+                # Acceder a los valores individuales dentro de la tupla w_tot
+                tot_arr = w_tot[0]
+                tot_efi = w_tot[1]
+                id_pro = w_tot[2]
+                
+                for row in irr:
+                    prom_irr = row[1]
+                    id_irr = row[0]
+                    created_at = row[2]
+                    resultadoW = (tot_arr * prom_irr) / 1000
+                    resultadoWh = resultadoW / 1000
+                    cur.executemany("""
+                        INSERT INTO energia_arreglo (id_pro, parr_ene, id_irr, efi_ene, w_ene, kw_ene, created_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (id_pro, created_at) DO NOTHING
+                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadoWh, created_at)]) 
+
+@app.route('/guardar_estado_proyecto', methods=['POST'])
+def guardar_estado_proyecto():
+    # Obtén los datos enviados desde el frontend
+    data = request.get_json()
+    eje_pro = data.get('eje_pro')  # False en este caso
+    id_proyecto = data.get('id_proyecto')
+    with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Actualiza el estado de 'eje_pro' para el proyecto específico
+                cur.execute('''UPDATE proyecto_fotovoltaica 
+                               SET eje_pro = %s 
+                               WHERE id_pro = %s;''', (eje_pro, id_proyecto))
+                
+                # Commit para guardar los cambios en la base de datos
+                conn.commit()
+    print('SE GUARDO',eje_pro,'---',id_proyecto)
+    return jsonify({'status': 'success', 'message': 'Estado guardado correctamente'})     
+          
+#Mostrar datos de proyecto generacion de energia
+def mostrar_ejecucion_proyecto(id_pro,start_date,end_date):
+    print(start_date,'-',end_date)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            if start_date is None and end_date is None:
+                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr where e.created_at::date = CURRENT_DATE and e.id_pro=%s ORDER BY e.created_at;''', (id_pro,))
+            else:
+                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr  WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
+            result_proyect_ene = cur.fetchall()# Obtener el id_pro de la carga
+            print( result_proyect_ene[0][0] )
+
+            return result_proyect_ene
+
+
+# Ruta para obtener los últimos datos del proyecto en formato JSON
+@app.route('/get_latest_proyecto_data/<int:id_pro>', methods=['GET'])
+def get_latest_proyecto_data(id_pro):
+    # Suponiendo que tienes una función para obtener la conexión a la base de datos
+    with get_db_connection() as conn:  
+        with conn.cursor() as cur:  
+            # Ejecuta la consulta usando id_pro como parámetro
+            cur.execute('''
+                SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at  
+                FROM energia_arreglo e 
+                JOIN dato_irradiancia irr ON e.id_irr = irr.id_irr 
+                WHERE e.id_pro = %s 
+                ORDER BY e.created_at DESC 
+                LIMIT 1
+            ''', (id_pro,))
+            db_irr = cur.fetchall()  # Obtiene todos los resultados de la consulta
+
+    # Estructura los datos en una lista de diccionarios con formato ajustado
+    data = [{
+        'parr_ene': f"{float(row[1]):.15f}",
+        'prom_irr': f"{float(row[2]):.1f}",
+        'efi_ene': f"{float(row[3]):.1f}",
+        'w_ene': f"{float(row[4]):.1f}",
+        'kw_ene': f"{float(row[5]):.2f}",
+        'created_at': row[6].strftime('%Y-%m-%d %H:%M:%S')
+    } for row in db_irr]
+    
+    print("Datos enviados:", data)
+
+    return jsonify(data)  # Devuelve los datos en formato JSON
+
+################################################################################################################################################
+#---------------------------------------------------------INFORMES------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
+@app.route('/informes',methods=['GET', 'POST'])
+def informes():
+    user_id = session.get('user_id')
+    user_rol = session.get('user_rol')
+    
+    if user_id is None:
+        # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+        return redirect(url_for('inicio_sesion'))
+    start_date,end_date=None,None     
+    # Suponiendo que tienes una función para obtener la conexión a la base de datos
+    if user_rol=='Administrador':
+        with get_db_connection() as conn:  
+            with conn.cursor() as cur:  
+                # Ejecuta la consulta usando id_pro como parámetro
+                cur.execute('''
+                    select p.created_at, p.nom_pro, avg(e.w_ene)as w_ene, avg(e.efi_ene)as efi_ene
+                    from energia_arreglo e join proyecto_fotovoltaica p
+                    on e.id_pro=p.id_pro where p.eje_pro=true group by p.created_at, p.nom_pro order by avg(e.w_ene) desc limit 30;
+
+                ''')
+                sist_optima = cur.fetchall()  # Obtiene todos los resultados de la consulta
+                if request.method == 'POST':
+                    start_date = request.form['start_date']
+                    end_date = request.form['end_date'] 
+                    start_date = f"{start_date} 00:00:00"  # Agrega hora 06:00:00 a la fecha de inicio
+                    end_date = f"{end_date} 23:59:59"
+                    print('DAMOS INFORMES',start_date,'-',end_date)
+                    # Ejecuta la consulta usando id_pro como parámetro
+                    cur.execute('''
+                        SELECT id_pro, created_at, nom_pro, 
+                            COUNT(id_inv) AS cant_inv, 
+                            COUNT(id_reg) AS cant_reg,
+                            (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = p.id_pro) AS cant_arr,
+                            (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = p.id_pro) AS cant_ban,
+                            (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = p.id_pro) AS cant_pcar
+                        FROM proyecto_fotovoltaica p 
+                        WHERE p.created_at >= %s AND p.created_at <= %s
+                        GROUP BY p.id_pro, p.nom_pro 
+                        ORDER BY created_at DESC;
+                    ''', (start_date, end_date,))
+                else:
+                    print('DAMOS INFORMES',start_date,'-',end_date)
+                    # Ejecuta la consulta usando id_pro como parámetro
+                    cur.execute('''
+                        SELECT id_pro, created_at,  nom_pro, 
+                        COUNT(id_inv) AS cant_inv, 
+                        COUNT(id_reg) AS cant_reg,
+                        (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = p.id_pro) AS cant_arr,
+                        (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = p.id_pro) AS cant_ban,
+                        (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = p.id_pro) AS cant_pcar
+                        FROM proyecto_fotovoltaica p GROUP BY p.id_pro, p.created_at, p.nom_pro order by created_at desc limit 30;
+                    ''')
+                estructuras = cur.fetchall()  # Obtiene todos los resultados de la consulta
+        return render_template('informe_y_Estadistica/informes.html',sist_optima=sist_optima,estructuras=estructuras)
+    else:
+        return redirect(url_for('inicio_principal'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
