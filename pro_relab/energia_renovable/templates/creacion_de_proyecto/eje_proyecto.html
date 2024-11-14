@@ -1,7 +1,7 @@
 <script>
     var lastData = null;
     var table;
-    var id_pro = '{{ result_proyect_ene[0][0] }}'; // Suponiendo que id_pro se pasa desde el backend
+    var id_pro = '{{ pro_com[0] }}'; // Suponiendo que id_pro se pasa desde el backend
 
     $(document).ready(function() {
         // Inicializa DataTable y guarda la referencia
@@ -108,9 +108,8 @@
         <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
         {% endif %}
     </div>
-    
     <!-- Formulario centrado -->
-    <form id="irradiance-form" action="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ result_proyect_ene[0][0] }}" method="post" class="d-flex justify-content-center" style="margin-top: 2rem;">
+    <form id="irradiance-form" action="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro_com[0] }}" method="post" class="d-flex justify-content-center" style="margin-top: 2rem;">
         <div class="d-flex align-items-end gap-3">
             <div class="col-auto">
                 <label for="start_date" class="form-label"><b>Fecha Inicio</b></label>

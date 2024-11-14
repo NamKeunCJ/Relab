@@ -12,11 +12,6 @@
                         <b>{{ pro_com[1][:30] }}{% if pro_com[1]|length > 30 %}...{% endif %}</b>
                     </h4>
                 </div>
-                
-                <!-- Alerta que se muestra por 5 segundos debajo del nombre del proyecto -->
-                <div id="alerta-proyecto" class="alert alert-info custom-alert" style="display: none;">
-                    <small>¡El proyecto está listo para ser ejecutado con éxito! Presiona <strong>EJECUTAR PROYECTO</strong> y comienza a levantar los datos en tiempo real.</small>
-                </div>
                 <div class="offcanvas-body">
                     <!-- Sección Fotovoltaico -->
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Información</b></label>
@@ -43,7 +38,7 @@
                                 </a>
                             </li>
                         {% endif%}                        
-                    </ul>
+                    </ul>                    
                     {% for proyecto in proyecto_completo %}
                         {% if loop.index == 1 and proyecto[20] !=0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 
                             and ((pro_com[32] == 'No' and proyecto[35] is not none) or pro_com[32] == 'Si') and proyecto[45] !=0.0 and proyecto[62] !=0.0 and proyecto[45] is not none and proyecto[62] is not none %}
@@ -59,7 +54,10 @@
                             <a class="btn btn-primary tooltip_btn" href="/inicio_proyecto_fotovoltaica?num_info=5&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
                             data-bs-title="Compara datos con una estructura física.">Conectar</a>  
-                            
+                            <!-- Alerta que se muestra por 5 segundos debajo del nombre del proyecto -->
+                            <div id="alerta-proyecto" class="alert alert-info custom-alert" style="display: none;margin-top: 2rem;">
+                                <small>¡Proyecto listo para ejecutar! Presiona <strong>EJECUTAR PROYECTO</strong> para iniciar la recolección de datos en tiempo real.</small>
+                            </div>
                             <script>
                                 // Mostrar la alerta
                                 document.getElementById("alerta-proyecto").style.display = "block";
@@ -68,10 +66,10 @@
                                 setTimeout(function() {
                                     document.getElementById("alerta-proyecto").style.display = "none";
                                 }, 5000);
-                            </script>
+                            </script>                        
                         {% endif %}
                     {% endfor %}
-
+                    
                 </div>
             </div>              
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">

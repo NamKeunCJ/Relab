@@ -1279,7 +1279,34 @@ def add_proyecto():
                 conn.commit()
 
                 return jsonify({'id_pro': id_pro})
-
+#Cambiar el estado del proyecto cuando no existe algun componente
+def estado_proyecto(proyecto_completo, cant_componentes):
+    for index, proyecto in enumerate(proyecto_completo, start=1):
+        if not((index == 1 and 
+            proyecto[20] != 0.0 and 
+            cant_componentes[4] != 0 and 
+            cant_componentes[5] != 0 and
+            ((proyecto[32] == 'No' and proyecto[35] is not None) or proyecto[32] == 'Si') and 
+            proyecto[45] != 0.0 and 
+            proyecto[62] != 0.0 and 
+            proyecto[45] is not None and 
+            proyecto[62] is not None)):
+            print('id del proyecto: ',proyecto[0])
+            # Obtener detalles del proyecto
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    # Actualiza el estado de 'eje_pro' para el proyecto específico
+                    cur.execute('''UPDATE proyecto_fotovoltaica 
+                                    SET eje_pro = %s 
+                                    WHERE id_pro = %s;''', (False, proyecto[0]))
+                    
+                    # Commit para guardar los cambios en la base de datos
+                    conn.commit()
+            eje_pro=False
+        else:
+            eje_pro=None
+    
+    return eje_pro
 #Iniciar Proyecto
 @app.route('/inicio_proyecto_fotovoltaica', methods=['GET', 'POST'])
 def inicio_proyecto_fotovoltaica(): 
@@ -1307,8 +1334,7 @@ def inicio_proyecto_fotovoltaica():
                 ''', (True, id_pro))
                 conn.commit()
                 ejecutar_proyecto()
-                result_proyect_ene = mostrar_ejecucion_proyecto(id_pro,start_date,end_date)
-
+                result_proyect_ene = mostrar_ejecucion_proyecto(id_pro,start_date,end_date)            
             # Hacemos una única consulta para obtener todos los datos relacionados
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
@@ -1448,13 +1474,14 @@ def inicio_proyecto_fotovoltaica():
 
                     else:
                         break                              
-            
+            eje_pro=estado_proyecto(proyecto_completo, cant_componentes)
+            cur.execute('select eje_pro from proyecto_fotovoltaica where id_pro=%s',(id_pro,))
+            eje_pro=cur.fetchone()[0]
             if pro:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro,cargas_completas=cargas_completas, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr,result_proyect_ene =result_proyect_ene,  zip=zip)
+                return render_template('creacion_de_proyecto/proyecto.html', num_info=num_info, pro=pro,cargas_completas=cargas_completas, bancos_completos=bancos_completos,  proyecto_completo=proyecto_completo, arreglos_completos=arreglos_completos, cant_componentes=cant_componentes,error_cap_inv=error_cap_inv,error_inv_arr=error_inv_arr,result_proyect_ene =result_proyect_ene,eje_pro=eje_pro,  zip=zip)
             else:
                 return redirect(url_for('inicio_principal'))
-
 ################################################################################################################################################
 
 #Modificar coordenadas de cada arreglo que muevo
@@ -2164,36 +2191,17 @@ def ejecutar_proyecto():
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (id_pro, created_at) DO NOTHING
                     """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadoWh, created_at)]) 
-
-@app.route('/guardar_estado_proyecto', methods=['POST'])
-def guardar_estado_proyecto():
-    # Obtén los datos enviados desde el frontend
-    data = request.get_json()
-    eje_pro = data.get('eje_pro')  # False en este caso
-    id_proyecto = data.get('id_proyecto')
-    with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                # Actualiza el estado de 'eje_pro' para el proyecto específico
-                cur.execute('''UPDATE proyecto_fotovoltaica 
-                               SET eje_pro = %s 
-                               WHERE id_pro = %s;''', (eje_pro, id_proyecto))
-                
-                # Commit para guardar los cambios en la base de datos
-                conn.commit()
-    print('SE GUARDO',eje_pro,'---',id_proyecto)
-    return jsonify({'status': 'success', 'message': 'Estado guardado correctamente'})     
-          
+         
 #Mostrar datos de proyecto generacion de energia
 def mostrar_ejecucion_proyecto(id_pro,start_date,end_date):
     print(start_date,'-',end_date)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date is None and end_date is None:
-                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr where e.created_at::date = CURRENT_DATE and e.id_pro=%s ORDER BY e.created_at;''', (id_pro,))
+                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro   FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro where e.created_at::date = CURRENT_DATE and e.id_pro=%s ORDER BY e.created_at;''', (id_pro,))
             else:
-                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr  WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
+                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro   WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
             result_proyect_ene = cur.fetchall()# Obtener el id_pro de la carga
-            print( result_proyect_ene[0][0] )
 
             return result_proyect_ene
 

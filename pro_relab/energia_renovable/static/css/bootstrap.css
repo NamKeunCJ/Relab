@@ -192,7 +192,11 @@
     }
 }
 /*Color proyecto*/
-
+.btn-primary:hover {
+    background-color: #0088cc;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
 .spinner-grow {
     width: 5rem; /* Ajusta el tamaño según tus necesidades */
     height: 5rem; /* Ajusta el tamaño según tus necesidades */
