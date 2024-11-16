@@ -328,10 +328,7 @@ def davis():
                                 ON CONFLICT (created_at) DO NOTHING
                             """, [(prom, max_, created_at) for (prom, max_), created_at in db_data])
 
-                    #print("Datos guardados en la base de datos.")
-                    # Revisar y completar datos faltantes en los últimos 30 días
-                    revisar_completar_datos_faltantes()
-                    ejecutar_proyecto() 
+                    
                 elif response.status_code == 400:
                     print("Error 400: Solicitud incorrecta", response.json())
 
@@ -339,6 +336,10 @@ def davis():
                 print(f"Error en la API: {e}")
 
             end_timestamp = current_start - 1
+        print("Datos guardados en la base de datos.")
+        # Revisar y completar datos faltantes en los últimos 30 días
+        revisar_completar_datos_faltantes()
+        ejecutar_proyecto() 
         time.sleep(300)
 
 # Función para revisar y completar datos faltantes en los últimos 30 días
@@ -436,7 +437,7 @@ def irradiance_display():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date and end_date:
-                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE (created_at >= %s and created_at <= %s) ORDER BY created_at desc;', (start_date, end_date))
+                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE (created_at >= %s and created_at <= %s) ORDER BY created_at;', (start_date, end_date))
             else:
                 cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
             db_irr = cur.fetchall()
@@ -1279,19 +1280,14 @@ def add_proyecto():
                 conn.commit()
 
                 return jsonify({'id_pro': id_pro})
+            
 #Cambiar el estado del proyecto cuando no existe algun componente
 def estado_proyecto(proyecto_completo, cant_componentes):
-    for index, proyecto in enumerate(proyecto_completo, start=1):
-        if not((index == 1 and 
-            proyecto[20] != 0.0 and 
-            cant_componentes[4] != 0 and 
-            cant_componentes[5] != 0 and
-            ((proyecto[32] == 'No' and proyecto[35] is not None) or proyecto[32] == 'Si') and 
-            proyecto[45] != 0.0 and 
-            proyecto[62] != 0.0 and 
-            proyecto[45] is not None and 
-            proyecto[62] is not None)):
-            print('id del proyecto: ',proyecto[0])
+    for proyecto in proyecto_completo:
+        if (proyecto[20] != 0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 and ((proyecto[32] == 'No' and proyecto[35] is not None) or proyecto[32] == 'Si') and proyecto[45] != 0.0 and proyecto[62] != 0.0 and proyecto[45] is not None and proyecto[62] is not None):
+            eje_pro=None
+            break
+        else:
             # Obtener detalles del proyecto
             with get_db_connection() as conn:
                 with conn.cursor() as cur:
@@ -1303,8 +1299,7 @@ def estado_proyecto(proyecto_completo, cant_componentes):
                     # Commit para guardar los cambios en la base de datos
                     conn.commit()
             eje_pro=False
-        else:
-            eje_pro=None
+            
     
     return eje_pro
 #Iniciar Proyecto

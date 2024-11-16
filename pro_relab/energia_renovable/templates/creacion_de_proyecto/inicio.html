@@ -207,6 +207,9 @@
             {% for car_completo in cargas_completas %}
                 <table class="carga_{{ car_completo[5] }} icon_table" draggable="true" style="text-align: center;">
                     <tr>
+                        {{car_completo[1]}}
+                        {{car_completo[2]}}
+                        {{eje_pro}}
                         {% if car_completo[1] == "Lineal" and car_completo[2]==0.0 %} 
                             {% set carga_img='bombillo-none.png' %}
                         {% elif car_completo[1] == "Lineal" and car_completo[2]!=0.0 and eje_pro==False %} 
