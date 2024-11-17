@@ -235,7 +235,7 @@
         // Exportar los datos de las series de la gráfica (radiancionData y radiacionAltaData)
         radiancionData.forEach(function (item, index) {
             // Usamos los mismos valores de la serie del gráfico
-            const time = new Date(item.x).toLocaleString();  // Formatear la fecha
+            const time = new Date(item.x).toLocaleDateString() + ' ' + new Date(item.x).toLocaleTimeString(); // Formatear la fecha
             const radiacion = item.y.toFixed(2);  // Ajuste de los valores numéricos
             const radiacionAlta = radiacionAltaData[index] ? radiacionAltaData[index].y.toFixed(2) : '';  // Aseguramos que haya datos para 'Radiación Alta'
 
