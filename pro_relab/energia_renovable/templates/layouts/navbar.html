@@ -44,7 +44,7 @@
                             Crear Proyecto
                         </a>
                         <ul class="dropdown-menu">
-                            <!--<li><a class="dropdown-item" href="#">Estructura Hídrica</a></li>-->
+                            <li><a class="dropdown-item" href="#">Estructura Hídrica</a></li>
                             <li><a class="dropdown-item modal_proyecto" href="/ver_modal_proyecto" data-toggle="modal" data-target="#modalProyecto" data-dismiss="modal" title="Crea un nuevo proyecto" >Estructura Fotovoltaica</a></li>
                         </ul>
                     </li>
@@ -67,6 +67,7 @@
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="/edit_profile">Editar Perfil</a></li>
                     <li><a class="dropdown-item" href="/list_project">Proyectos Fotovoltaicos</a></li>
+                    <li><a class="dropdown-item" href="#">Proyectos Hidricos</a></li>
                     {% if 'user_rol' in session and session['user_rol'] == 'Administrador' %}
                     <li>
                         <a class="dropdown-item" href="/component_list">Componentes</a>

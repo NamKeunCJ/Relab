@@ -35,32 +35,22 @@
                         </li>
                     </ul>
             
-                    <!-- <hr class="border border-dark border-1 opacity-75">
+                    <hr class="border border-dark border-1 opacity-75">
             
-                     Sección Hídrico 
+                    <!-- Sección Hídrico -->
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Hidrico</b></label>
-                    <ul class="list-group list-group-flush">
+                    <ul class="list-group list-group-flush">                        
                         <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Tanques agregados">
-                                Ver Tanques
-                            </a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Motobombas agregadas">
+                            <a href="/hidrica/update_motobomba" class="nav-link text-dark nav-color" title="Motobombas agregadas">
                                 Ver Motobombas
                             </a>
-                        </li>
+                        </li>                        
                         <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Turbinas agregados">
-                                Ver Turbinas
-                            </a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="#" class="nav-link text-dark nav-color" title="Generadores Electricos agregados">
+                            <a href="/hidrica/update_generador" class="nav-link text-dark nav-color" title="Generadores Electricos agregados">
                                 Ver Generadores Electricos
                             </a>
                         </li>
-                    </ul>-->
+                    </ul>
                 </div>
             </div>
                         
@@ -77,6 +67,10 @@
                                 {% block editar_inversor %} {% include 'creacion_de_componentes/editar_inversor.html' %} {% endblock %}  
                             {% elif num_comp==4 %}
                                 {% block editar_regulador %} {% include 'creacion_de_componentes/editar_regulador.html' %} {% endblock %}                               
+                            {% elif num_comp==5 %}
+                                {% block editar_motobomba %} {% include 'creacion_de_componentes/editar_motobomba.html' %} {% endblock %}                               
+                            {% elif num_comp==6 %}
+                                {% block editar_generador %} {% include 'creacion_de_componentes/editar_generador.html' %} {% endblock %}                               
                             {% endif %}
                         </div>
                         

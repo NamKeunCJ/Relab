@@ -1,0 +1,92 @@
+<div class="modal fade" id="modalMotobomba" tabindex="-1" role="dialog" aria-labelledby="agregarMotobombaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Crea una Motobomba</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="motobomba-form" method="POST" action="/hidrica/add_motobomba">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="ref_mot">Referencia de la Motobomba:</label>
+                        <input type="text" class="form-control" id="ref_mot" name="ref_mot" maxlength="100" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="idu_mot">Identificacion Codigo Universidad:</label>
+                        <input type="text" class="form-control" id="idu_mot" name="idu_mot" pattern="[0-9]*" inputmode="numeric" minlength="9" maxlength="9" required>
+                    </div>
+                    <label for="pot_mot">Potencia Motobomba (kW):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="pot_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="pot_mot" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">Kw</span>
+                    </div>                    
+                    <label for="vol_mot">Voltaje Motobomba (V):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="vol_mot" aria-describedby="basic-addon2"  min="110" max="220" maxlength="5" value="110" name="vol_mot" required>
+                        <span class="input-group-text" id="basic-addon2">V</span>
+                    </div>
+                    <label for="fre_mot">Frecuencua Motobomba (Hz):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="fre_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="fre_mot" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">Hz</span>
+                    </div>
+                    <label for="pre_mot">Presion Motobomba (Bar):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="pre_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="pre_mot" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">bar</span>
+                    </div>
+                    <label for="dent_mot">Diametro de Entrada:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="dent_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="dent_mot" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">mm</span>
+                    </div>
+                    <label for="dsal_mot">Diametro de Salida:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="dsal_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="dsal_mot" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">mm</span>
+                    </div>
+                    <label for="cau_mot">Caudal Motobomba:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="cau_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="cau_mot" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">L/m</span>
+                    </div>                    
+                    <div id="alertContainer" style="margin-top:1rem"></div>
+                </div>
+                <script>
+                    //alerta danger panel
+                    $(document).ready(function() {
+                        $('#motobomba-form').submit(function(e) {
+                            e.preventDefault();
+
+                            $.ajax({
+                                type: 'POST',
+                                url: $(this).attr('action'),
+                                data: $(this).serialize(),
+                                success: function(response) {
+                                    if (response === 'success') {
+                                        // Éxito: redirigir a la página de inicio de sesión
+                                        $('#alertContainer').html('<div class="alert alert-success">motobomba se ha creado exitosamente.</div>');
+                                    } else if (response === 'exist') {
+                                        // Los datos ya existen: mostrar alerta
+                                        $('#alertContainer').html('<div class="alert alert-danger">El motobomba que intentas agregar ya existe.</div>');
+                                    } else if (response === 'error') {
+                                        // Los datos ya existen: mostrar alerta
+                                        $('#alertContainer').html('<div class="alert alert-danger">El motobomba no cumple con el margen de error.</div>');
+                                    }
+                                },
+                                error: function() {
+                                    // Error en la solicitud AJAX
+                                    $('#alertContainer').html('<div class="alert alert-danger">Error en la solicitud.</div>');
+                                }
+                            });
+                        });
+                    });
+                </script>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

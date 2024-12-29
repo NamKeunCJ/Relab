@@ -1,0 +1,77 @@
+<div class="modal fade" id="modalGenerador" tabindex="-1" role="dialog" aria-labelledby="agregarGeneradorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Crea una Generador</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="generador-form" method="POST" action="/hidrica/add_generador">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="ref_gen">Referencia de la generador:</label>
+                        <input type="text" class="form-control" id="ref_gen" name="ref_gen" maxlength="100" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="idu_gen">Identificacion Codigo Universidad:</label>
+                        <input type="text" class="form-control" id="idu_gen" name="idu_gen" pattern="[0-9]*" inputmode="numeric" minlength="9" maxlength="9" required>
+                    </div>
+                    <label for="pot_gen">Potencia Generador (W):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="pot_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="pot_gen" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">W</span>
+                    </div>                    
+                    <label for="vol_gen">Voltaje Generador (V):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="vol_gen" aria-describedby="basic-addon2"  min="110" max="220" maxlength="5" value="110" name="vol_gen" required>
+                        <span class="input-group-text" id="basic-addon2">V</span>
+                    </div>
+                    <label for="vel_gen">Velocidad generador (rpm):</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="vel_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="vel_gen" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">rpm</span>
+                    </div>
+                    <label for="dia_gen">Diametro del Tubo:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="dia_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="dia_gen" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2">mm</span>
+                    </div>                   
+                    <div id="alertContainer" style="margin-top:1rem"></div>
+                </div>
+                <script>
+                    //alerta danger panel
+                    $(document).ready(function() {
+                        $('#generador-form').submit(function(e) {
+                            e.preventDefault();
+
+                            $.ajax({
+                                type: 'POST',
+                                url: $(this).attr('action'),
+                                data: $(this).serialize(),
+                                success: function(response) {
+                                    if (response === 'success') {
+                                        // Éxito: redirigir a la página de inicio de sesión
+                                        $('#alertContainer').html('<div class="alert alert-success">generador se ha creado exitosamente.</div>');
+                                    } else if (response === 'exist') {
+                                        // Los datos ya existen: mostrar alerta
+                                        $('#alertContainer').html('<div class="alert alert-danger">El generador que intentas agregar ya existe.</div>');
+                                    } else if (response === 'error') {
+                                        // Los datos ya existen: mostrar alerta
+                                        $('#alertContainer').html('<div class="alert alert-danger">El generador no cumple con el margen de error.</div>');
+                                    }
+                                },
+                                error: function() {
+                                    // Error en la solicitud AJAX
+                                    $('#alertContainer').html('<div class="alert alert-danger">Error en la solicitud.</div>');
+                                }
+                            });
+                        });
+                    });
+                </script>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,132 @@
+{% block head %} {% include 'layouts/head.html' %} {% endblock %}
+<script>
+    $(function() {
+        $('#tabla').DataTable({
+            "language": {
+                "emptyTable": "No hay datos disponibles en la tabla",
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                "lengthMenu": "Mostrar _MENU_ entradas",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                }
+            }
+        });
+    });
+</script>
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;height: 80vh;">
+    <div class="card-body" style="overflow-x: auto;">
+        <h5 class="title-components " style="margin-bottom: 3rem;"><b> GENERADORES AGREGADOS </b></h5>
+        {% if success=="1" %}
+        <div id="successMessage" class="alert alert-success">Los datos del generador se han guardado exitosamente.</div>
+        {% elif error=="2" %}
+        <div id="errorMessage" class="alert alert-danger">Los datos del generador no se han podido guardar, revisa el margen de error.</div>
+        {% endif %}
+        <script>
+            // Función para ocultar el mensaje de éxito después de 5 segundos
+            setTimeout(function() {
+                document.getElementById("successMessage").style.display = "none";
+            }, 5000); // 5000 milisegundos (5 segundos)
+        </script>
+        <table id="tabla" class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Identificacion Inventario</th>
+                    <th>Referencia de la Generador</th>
+                    <th>Voltaje Generador (V)</th>                    
+                    <th>Potencia Generador(W)</th>
+                    <th>Velocidad Generador (rpm)</th> 
+                    <th>Estado de la Generador</th>
+                    <th>Editar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for generador in gen_usu%}
+                <tr>
+                    <td>{{generador[7]}}</td>
+                    <td>{{generador[1]}}</td>
+                    <td>{{generador[3]}}</td>
+                    <td>{{generador[2]}}</td>
+                    <td>{{generador[4]}}</td>
+                    {% if generador[8] == true %}
+                        <td>Habilitado</td>
+                    {% else %}
+                        <td>Deshabilitado</td>
+                    {% endif %}
+                    <td><button type="button" style="color: rgb(47, 133, 204);" id="edit{{generador[0]}}" class="btn icon" data-bs-toggle="modal" data-bs-target="#editar_generador_{{generador[0]}}"><i class="bi bi-pencil-square"></i></button></td>
+                </tr>                    
+                <div class="modal fade" id="editar_generador_{{generador[0]}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">¿Desea editar esta generador?</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="POST" action="/hidrica/update_generador">
+                                <div class="modal-body">
+                                    <input type="hidden" id="id_gen" name="id_gen" value="{{generador[0]}}">
+                                    <div class="form-group mb-3">
+                                        <label for="ref_gen">Referencia de la generador:</label>
+                                        <input type="text" class="form-control" id="ref_gen" name="ref_gen" maxlength="100" value="{{generador[1]}}" required>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="idu_gen">Identificacion Codigo Universidad:</label>
+                                        <input type="text" class="form-control" id="idu_gen" name="idu_gen" pattern="[0-9]*" inputmode="numeric" minlength="9" maxlength="9" value="{{generador[7]}}" disabled>
+                                    </div>
+                                    <label for="pot_gen">Potencia generador (W):</label>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="pot_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="pot_gen" step="0.01" value="{{generador[2]}}" required>
+                                        <span class="input-group-text" id="basic-addon2">W</span>
+                                    </div>
+                                    <label for="vol_gen">Voltaje generador (V):</label>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="vol_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="vol_gen" step="0.01" value="{{generador[3]}}" required>
+                                        <span class="input-group-text" id="basic-addon2">V</span>
+                                    </div>
+                                    <label for="vel_gen">Velocidad generador (rpm):</label>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="vel_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="vel_gen" step="0.01" value="{{generador[4]}}" required>
+                                        <span class="input-group-text" id="basic-addon2">rpm</span>
+                                    </div>
+                                    <label for="dia_gen">Diametro del Tubo:</label>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="dia_gen" aria-describedby="basic-addon2" min="0.1" max="9999" name="dia_gen" step="0.01" value="{{generador[5]}}" required>
+                                        <span class="input-group-text" id="basic-addon2">mm</span>
+                                    </div>                  
+                                    <div class="form-group" style="margin-top: 1rem;">
+                                        <label for="est_gen">Estado de la generador:</label>
+                                        <select class="form-control" id="est_gen" name="est_gen" required>                                              
+                                            {% if generador[8] == true %}
+                                                <option value="{{ generador[8] }}" selected>Habilitado</option>
+                                            {% else %}
+                                                <option value="{{ generador[8] }}" selected>Deshabilitado</option>
+                                            {% endif %}
+                                            <option value="True">Habilitado</option>
+                                            <option value="False">Deshabilitado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-text" id="basic-addon4">Si el componente no se encuentra en ningún proyecto, será eliminado si es deshabilitado.</div>
+                                    <div id="alerta"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary" id="guardarPanel">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+<a class="btn btn-primary" style="width: 20rem;" id="modal_generador" href="/hidrica/ver_modal_generador" data-toggle="modal" data-target="#modalGenerador" title="Agrega una generador">Crear generador</a>

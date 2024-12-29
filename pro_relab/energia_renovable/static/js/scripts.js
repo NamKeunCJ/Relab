@@ -142,6 +142,34 @@ $(document).ready(function() {
     });
 });
 
+//modal del motobomba
+$(document).ready(function() {
+    $('#modal_motobomba').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#modal_motobomba').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalMotobomba').modal('show');
+            });
+        }
+    });
+});
+
+//modal del generador
+$(document).ready(function() {
+    $('#modal_generador').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#modal_generador').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalGenerador').modal('show');
+            });
+        }
+    });
+});
+
 // ----------------CREACION DE PROYECTOS FOTOVOLTAICOS----------------
 //modal del proyecto
 $(document).ready(function() {

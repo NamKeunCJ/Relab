@@ -6,7 +6,6 @@ import threading
 import time
 import requests # elementos para datos davis
 import pandas as pd #Extrer los datos del archivo plano
-import os
 #import tensorflow as tf
 ###############################################################################
 #LIBRERIAS PARA EL MODELO DE PREDICCION
@@ -14,15 +13,20 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-###############################################################################
+
+#########################################################################################################################
+###### IR A hidrica.py ##### 
+from hidrica import hidrica_bp  # Importa el Blueprint
+#########################################################################################################################
+
+
 # Crear una instancia de la aplicación Flask
 app = Flask(__name__)
 # Configurar la clave secreta de la aplicación, utilizada para gestionar sesiones y cookies seguras
 app.config['SECRET_KEY'] = 'unicesmag'
 # Establecer la duración de la sesión a 120 minutos
 #app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
-
+app.register_blueprint(hidrica_bp, url_prefix='/hidrica')
 # Asegurar que las cookies solo se envíen por HTTPS y no accesibles por JavaScript
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -2296,6 +2300,7 @@ def informes():
         return render_template('informe_y_Estadistica/informes.html',sist_optima=sist_optima,estructuras=estructuras)
     else:
         return redirect(url_for('inicio_principal'))
+
 
 
 if __name__ == '__main__':
