@@ -186,6 +186,21 @@ $(document).ready(function() {
     });
 });
 
+//modal del proyecto_h
+$(document).ready(function() {
+    $('.modal_proyecto_h').off('click').on('click', function(event) {
+        event.preventDefault();
+        
+        // Abre el modal si no está ya visible
+        if (!$('#modalProyecto_h').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#modalProyecto_h').modal('show');
+            });
+        }
+    });
+});
+
 //modal proyecto inversor
 $(document).ready(function() {
     $('.project_inversor').off('click').on('click', function(event) {
@@ -342,6 +357,119 @@ $(document).ready(function() {
             $.get($(this).attr('href'), function(data) {
                 $('#modalContent').html(data);
                 $('#delBan' + modalId).modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto motobomba
+$(document).ready(function() {
+    $('.project_motobomba').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_motobomba').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectMotobomba').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto tanque
+$(document).ready(function() {
+    $('.project_tanque').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_tanque').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectTanque').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto generador
+$(document).ready(function() {
+    $('.project_generador').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_generador').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectGenerador').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto turbina
+$(document).ready(function() {
+    $('.project_turbina').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_turbina').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectTurbina').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto turbina cantidad de cucharas
+$(document).ready(function() {
+    $('.project_turbina_alabes').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_turbina_alabes').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectTurbinaAlabes').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto caudalimetro cantidad de cucharas
+$(document).ready(function() {
+    $('.project_caudalimetro').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_caudalimetro').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectCaudalimetro').modal('show');
+            });
+        }
+    });
+});
+
+//modal proyecto cargah
+$(document).ready(function() {
+    $('#project_carga_h').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('#project_carga_h').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectCargah').modal('show');
+            });
+        }
+    });
+});
+
+//modal escribit potencia carga del projecto
+$(document).ready(function() {
+    $('[id^="projectCargah_"]').off('click').on('click', function(event) {
+        event.preventDefault();
+        var modalId = $(this).attr('id').split("_")[1];
+        // Abre el modal si no está ya visible
+        if (!$('[id^="projectCargah_"]').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectCargah' + modalId).modal('show');
             });
         }
     });

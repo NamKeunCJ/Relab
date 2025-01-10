@@ -1,0 +1,90 @@
+{% macro icon(img_name, condition, title) %}
+    <td>
+        <img src="{{ url_for('static', filename='images/' + img_name + ('-list-project.png' if condition else '-list-project-na.png')) }}" title="{{ title }}">
+    </td>
+{% endmacro %}
+
+{% for pro_list in pro_list %}
+    <div class="row justify-content-center">
+        <div class="clase_table" style="margin-right: 5rem; margin-left: 5rem; margin-bottom: 2rem; padding: 2rem;height: 3cm;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title">
+                            {{ pro_list[1][:30] + '...' if pro_list[1]|length > 30 else pro_list[1] }}
+                        </h5>
+                        <small class="form-text text-muted">({{pro_list[2]}})</small>
+                    </div>
+                    
+                    <div class="col-sm-3 text-end">
+                        {% if pro_list[24] is none and pro_list[3] is none and pro_list[52] is none and pro_list[39] ==0 %}
+                            <small class="form-text text-muted">(Vacío)</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-sm-3 text-end">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    {{ icon('generador', pro_list[24] is not none, 'Generador') }}
+                                    {{ icon('motobomba', pro_list[3] is not none, 'motobomba') }}
+                                    {{ icon('tanque', pro_list[39] !=0, 'Tanque') }}
+                                    {{ icon('turbina', pro_list[52] is not none, 'Turbina') }}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-sm-3 text-end">
+                        <a href="/hidrica/inicio_proyecto_hidrica?id_pro={{ pro_list[0] }}" class="btn btn-primary">Ingresa al proyecto</a>
+                        <a id="{{pro_list[0]}}" data-bs-toggle="modal" data-bs-target="#eliminar{{pro_list[0]}}">
+                            <i class="bi bi-trash3-fill" style="color: rgb(255, 95, 95); margin-left: 4rem; font-size: 1.4rem;"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Modal Eliminar -->
+                <div class="modal fade" id="eliminar{{pro_list[0]}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" style="width: 20rem;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title fuente" id="exampleModalLabel">¿Desea eliminar este proyecto?</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" style="height: 10rem;">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="card-title">{{pro_list[1]}}</h5>
+                                    </div>
+                                    <div class="col-sm-3 text-end">
+                                        {% if pro_list[24] is none and pro_list[3] is none and pro_list[52] is none and pro_list[39] ==0 %}
+                                            <small class="form-text text-muted">(Vacío)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">({{pro_list[3]}})</small>
+                                <table class="table" style="width: 10rem;">
+                                    <tbody>
+                                        <tr>
+                                            {{ icon('generador', pro_list[24] is not none, 'Generador') }}
+                                            {{ icon('motobomba', pro_list[3] is not none, 'motobomba') }}
+                                            {{ icon('tanque', pro_list[39] !=0, 'Tanque') }}
+                                            {{ icon('turbina', pro_list[52] is not none, 'Turbina') }}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="/delete_project?id_pro={{ pro_list[0] }}" class="btn btn-danger">Eliminar</a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Fin Modal Eliminar -->
+
+            </div>
+        </div>
+    </div>
+{% endfor %}
+   

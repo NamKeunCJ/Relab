@@ -475,6 +475,7 @@
 }
 
 .imagen-iluminada {
+    position: relative;
     width: 100px; /* Ajusta según el tamaño que desees */
     transition: filter 0.3s ease-in-out;
 }

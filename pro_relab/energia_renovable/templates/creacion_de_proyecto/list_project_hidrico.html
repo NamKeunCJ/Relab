@@ -1,0 +1,56 @@
+{% block head %} {% include 'layouts/head.html' %} {% endblock %}
+
+<body class="body-inicio" style="background-color: #9bb4cf;">
+    {% block navbar %} {% include 'layouts/navbar.html' %} {% endblock %}
+    <section class="align-items-center justify-content-center">
+        <div class="container">
+            <div class="row" style="margin: 3rem;"> 
+                <div class="col-sm-5 title-components ">Busca tu proyecto</div>
+                <div class="col-sm-5 justify-content-center">
+                    <form id="searchForm">
+                        <div class="input-group">                                    
+                            <input type="text" class="form-control" id="searchInput_h" placeholder="Buscar tu proyecto aquí">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit" id="searchButton_h">Buscar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <script>
+                var searchInput_h = document.getElementById('searchInput_h');
+                var searchButton_h = document.getElementById('searchButton_h');
+                
+                searchButton_h.addEventListener('click', function(event) {
+                    event.preventDefault(); 
+                    var searchTerm = searchInput_h.value.trim();  // Eliminar espacios en blanco
+            
+                    // Verificar si el campo de búsqueda está vacío
+                    if (searchTerm === '') {
+                        console.log('Campo de búsqueda vacío. No se realizará ninguna búsqueda.');
+                        return;  // No realizar la solicitud AJAX si no hay término de búsqueda
+                    }
+                    
+                    // Realizar la acción de búsqueda mediante AJAX si hay un término válido
+                    $.ajax({
+                        type: 'GET',
+                        url: '/hidrica/list_project_hidrica',
+                        data: { buscar_h: searchTerm },
+                        success: function(response) {
+                            $('#contenido_h').html(response);
+                        },
+                        error: function() {
+                            console.error('Error en la solicitud AJAX');
+                        }
+                    });
+                });
+            </script>
+                            
+            <div id="contenido_h">{% block search_project_hidrico %} {% include 'creacion_de_proyecto/search_project_hidrico.html' %} {% endblock %}</div> 
+        </div>
+    </section>
+    <script rel="stylesheet " src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js "></script>
+    <script src="{{ url_for( 'static', filename='js/bootstrap.min.js' ) }} "></script>
+    <script src="{{ url_for( 'static', filename='js/datatables.js' ) }} "></script>
+    <script src="{{ url_for( 'static', filename='js/scripts.js' ) }} "></script>
+</body>

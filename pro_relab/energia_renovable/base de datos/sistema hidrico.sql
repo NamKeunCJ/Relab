@@ -87,7 +87,6 @@ CREATE TABLE IF NOT EXISTS public.proyecto_hidrica
     id_pro serial NOT NULL,
     nom_pro character varying(100) COLLATE pg_catalog."default" NOT NULL,
     id_usu integer NOT NULL,
-    cred_pro character varying(2) COLLATE pg_catalog."default" NOT NULL,
     id_mot integer,
     eje_pro boolean NOT NULL DEFAULT false,
     status boolean NOT NULL DEFAULT true,
