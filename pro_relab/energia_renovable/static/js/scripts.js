@@ -475,6 +475,48 @@ $(document).ready(function() {
     });
 });
 
+//modal eliminar generador del projecto
+$(document).ready(function() {
+    $('.del_gen').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.del_gen').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#delGen').modal('show');
+            });
+        }
+    });
+});
+
+//modal eliminar tanque del projecto
+$(document).ready(function() {
+    $('.del_tan').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.del_tan').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#delTan').modal('show');
+            });
+        }
+    });
+});
+
+//modal eliminar motobomba del projecto
+$(document).ready(function() {
+    $('.del_mot').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.del_mot').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#delMot').modal('show');
+            });
+        }
+    });
+});
+
 //TOOLTIP
 document.addEventListener('DOMContentLoaded', function() {
     const exampleEl = document.getElementById('agregar-costo');

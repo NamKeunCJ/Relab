@@ -231,7 +231,7 @@
                                 <a class="nav-link tooltip_btn" id="projectCarga_{{ car_completo[5] }}" href="/modal_carga_pot?id_pcar={{car_completo[5]}}" data-bs-toggle="tooltip" data-bs-placement="top"
                                 data-bs-custom-class="custom-tooltip"
                                 data-bs-title="{{ car_completo[1]  }}">
-                                    <img src="{{ url_for('static', filename='images/' + carga_img) }}" class="imagen-iluminada" style="width: 4rem;">
+                                    <img src="{{ url_for('static', filename='images/' + carga_img) }}" class="imagen-iluminada" style="width: {% if car_completo[1] == 'Lineal' %}1.6rem{% else %}4rem{% endif %};">
                                 </a>
                             </div>
                         </td>

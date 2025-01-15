@@ -27,15 +27,44 @@
 </div>
 <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
     <div id="scrollContainer" class="card-body" style="overflow-x: auto; overflow-y: auto; position: relative; height: 100%;">
-        
+        <style>
+            .icon_table {
+                border-collapse: collapse;
+                width: 150px;
+                position: absolute;
+                z-index: 10;
+                cursor: move;
+            }
+
+            .linea {
+                position: absolute;
+                height: 2px;
+                background-color: black;
+                transform-origin: 0 0;
+                z-index: 1;
+            }
+
+            /* Estilos para asegurar que los íconos no salgan del contenedor */
+            #scrollContainer {
+                position: relative;
+                height: 100%;
+            }
+        </style>
         {% if pro_com[3] is not none %}
             <table class="motobomba icon_table" draggable="true">
+                <tr>
+                    <td>
+                        <a class="enlace-link del_mot" href="/hidrica/ver_modal_del_mot?id_pro={{  pro_com[0] }}" title="Eliminar motobomba">
+                            <i class="bi bi-trash3-fill"></i>
+                        </a>
+                    </td>
+                </tr>
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
                         <a class="nav-link tooltip_btn project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
                         data-bs-custom-class="custom-tooltip"
                         data-bs-title="{{ pro_com[10] }}">
-                            <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 12rem;">
+                            <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 7rem;">
                         </a>
                     </div>
                 </td></tr>
@@ -43,6 +72,13 @@
         {% endif %}        
         {% if pro_com[45] != 0 %}
             <table class="tanque icon_table" draggable="true">
+                <tr>
+                    <td>
+                        <a class="enlace-link del_tan" href="/hidrica/ver_modal_del_tan?id_tan={{  pro_com[44] }}" title="Eliminar Tanque">
+                            <i class="bi bi-trash3-fill"></i>
+                        </a>
+                    </td>
+                </tr>
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center"> 
                         {% set ranges = [
@@ -59,7 +95,7 @@
                                 <a class="nav-link tooltip_btn project_tanque" href="/hidrica/modal_tanque_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
                                 data-bs-custom-class="custom-tooltip"
                                 data-bs-title="{{ pro_com[45] }} L/m³">
-                                    <img src="{{ url_for('static', filename='images/' + range[2]) }}" class="imagen-iluminada" style="width: 10rem;">
+                                    <img src="{{ url_for('static', filename='images/' + range[2]) }}" class="imagen-iluminada" style="width: 6rem;">
                                 </a>
                             {% endif %}
                         {% endfor %}
@@ -70,19 +106,26 @@
 
         {% if pro_com[25] is not none and pro_com[30] is not none %}
             <table class="generador icon_table" draggable="true">
+                <tr>
+                    <td>
+                        <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[24] }}" title="Eliminar Generador">
+                            <i class="bi bi-trash3-fill"></i>
+                        </a>
+                    </td>
+                </tr>
                 <tr><td>
                     <div class="d-flex flex-column align-items-center">
                         <!-- Contenedor para las dos imágenes en la misma fila -->
                         <div class="d-flex justify-content-center align-items-center">
                             <!-- Primera imagen (Caudalímetro) -->
-                            <a class="nav-link tooltip_btn project_caudalimetro" style="margin-top: 8rem;"
+                            <a class="nav-link tooltip_btn project_caudalimetro" style="margin-top: 5.5rem;"
                                href="/hidrica/modal_caudalimetro_project?id_pro={{ pro_com[0] }}" 
                                data-bs-toggle="tooltip" data-bs-placement="top"
                                data-bs-custom-class="custom-tooltip"
                                data-bs-title="Ingresa Valor Caudalimetro">
                                 <img src="{{ url_for('static', filename='images/caudalimetro.png') }}" 
                                      class="imagen-iluminada" 
-                                     style="width: 2.5rem; margin-top: 0;">
+                                     style="width: 1.7rem; margin-top: 0;">
                             </a>
                             
                             <!-- Segunda imagen (Generador) -->
@@ -93,7 +136,7 @@
                                data-bs-title="{{ pro_com[33] }}">
                                 <img src="{{ url_for('static', filename='images/generador.png') }}" 
                                      class="imagen-iluminada" 
-                                     style="width: 7rem;">
+                                     style="width: 5rem;">
                             </a>
                         </div>
                         {% set turbina_data = {
@@ -103,7 +146,7 @@
                         
                         {% if pro_com[61] in turbina_data %}
                         <!-- Contenedor para la última imagen (Turbina debajo en la base) -->
-                        <div class="d-flex justify-content-center align-items-center" style="margin-top: -3.1rem;">
+                        <div class="d-flex justify-content-center align-items-center" style="margin-top: -2.1rem;">
                             <a class="nav-link tooltip_btn project_turbina_alabes" 
                                href="/hidrica/modal_turbina_alabes_project?id_pro={{ pro_com[0] }}" 
                                data-bs-toggle="tooltip" data-bs-placement="top"
@@ -111,7 +154,7 @@
                                data-bs-title="Turbina {{ pro_com[61] }}">
                                 <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[61]]) }}" 
                                      class="imagen-iluminada" 
-                                     style="width: 9.7rem; margin-top: 0;">
+                                     style="width: 6.7rem; margin-top: 0;">
                             </a>
                         </div>
                         {% endif %} 
@@ -148,7 +191,7 @@
                                 <a class="nav-link tooltip_btn" id="projectCargah_{{ car_com[0] }}" href="/hidrica/modal_carga_pot_hidrica?id_pcar={{car_com[0]}}" data-bs-toggle="tooltip" data-bs-placement="top"
                                 data-bs-custom-class="custom-tooltip"
                                 data-bs-title="{{ car_com[1]  }}">
-                                    <img src="{{ url_for('static', filename='images/' + carga_img) }}" class="imagen-iluminada" style="width: 4rem;">
+                                    <img src="{{ url_for('static', filename='images/' + carga_img) }}" class="imagen-iluminada" style="width: {% if car_com[1] == 'Lineal' %}1.6rem{% else %}4rem{% endif %};">
                                 </a>
                             </div>
                         </td>                        
@@ -158,147 +201,149 @@
         {% endif %}
         <div class="linea_h"></div>
         {% for car_com in car_com %}
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    function initIcono(x_arr, y_arr,ban_id, x_tan, y_tan, id_pro, x_mot, y_mot, x_reg, y_reg,pcar_id, x_pcar, y_pcar, x_red, y_red, condition) {
-                        const generador = document.querySelector(`.generador`);
-                        const motobomba = document.querySelector('.motobomba');
-                        const regulador = document.querySelector('.regulador');
-                        const tanque = document.querySelector(`.tanque`);
-                        const carga = document.querySelector(`.carga_${pcar_id}`);
-                        const red = document.querySelector('.red');
-                        const scrollContainer = document.getElementById('scrollContainer');
-            
-                        let linea_h1, linea_h2, linea_h3, linea_h4, linea_h5;
-            
-                        // Revisar si regulador está presente para establecer las conexiones
-                        if (condition === 'No') {
-                            linea_h1 = generador && regulador ? document.createElement('div') : null;
-                            linea_h2 = regulador && tanque ? document.createElement('div') : null;
-                            linea_h3 = tanque && motobomba ? document.createElement('div') : null;
-                            linea_h4 = motobomba && carga ? document.createElement('div') : null;  // Conexión de motobomba a carga
-                            linea_h5 = motobomba && red ? document.createElement('div') : null;  // Conexión de motobomba a red
-                        } else {
-                            linea_h1 = generador && motobomba ? document.createElement('div') : null;
-                            linea_h2 = motobomba && tanque ? document.createElement('div') : null;
-                            linea_h3 = null; // Evitar crear una línea entre tanque e motobomba si no hay regulador
-                            linea_h4 = motobomba && carga ? document.createElement('div') : null;
-                            linea_h5 = motobomba && red ? document.createElement('div') : null;
-                        }
-            
-                        // Añadir las líneas al contenedor
-                        linea_h1 && scrollContainer.appendChild(linea_h1).classList.add('linea_h');
-                        linea_h2 && scrollContainer.appendChild(linea_h2).classList.add('linea_h');
-                        linea_h3 && scrollContainer.appendChild(linea_h3).classList.add('linea_h');
-                        linea_h4 && scrollContainer.appendChild(linea_h4).classList.add('linea_h');
-                        linea_h5 && scrollContainer.appendChild(linea_h5).classList.add('linea_h');
-            
-                        const setPos = (el, x, y) => el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
-                        setPos(generador, x_arr, y_arr);
-                        setPos(motobomba, x_mot, y_mot);
-                        setPos(tanque, x_tan, y_tan);
-                        setPos(carga, x_pcar, y_pcar);
-                        setPos(red, x_red, y_red); 
-            
-                        if (condition === 'No') {
-                            setPos(regulador, x_reg, y_reg);
-                        }
-            
-                        const calcularCentro = el => {
-                            const { left, top, width, height } = el.getBoundingClientRect();
-                            const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
-                            return { x: left + width / 2 - pLeft + scrollContainer.scrollLeft, y: top + height / 2 - pTop + scrollContainer.scrollTop };
-                        };
-            
-                        const actualizarLinea_h = (linea_h, el1, el2) => {
-                            if (!linea_h || !el1 || !el2) return;
-                            const [p1, p2] = [calcularCentro(el1), calcularCentro(el2)];
-                            Object.assign(linea_h.style, {
-                                width: `${Math.hypot(p2.x - p1.x, p2.y - p1.y)}px`,
-                                transform: `rotate(${Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI}deg)`,
-                                top: `${p1.y}px`, left: `${p1.x}px`, position: 'absolute'
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                function initIcono(x_gen, y_gen, x_tan, y_tan, id_pro, x_mot, y_mot, pcar_id, x_pcar, y_pcar) {
+                    const elements = {
+                        generador: document.querySelector('.generador'),
+                        motobomba: document.querySelector('.motobomba'),
+                        tanque: document.querySelector('.tanque'),
+                        carga: document.querySelector(`.carga_${pcar_id}`),
+                        scrollContainer: document.getElementById('scrollContainer'),
+                    };
+        
+                    let draggedElement = null;
+                    const lineas = [null, null, null];
+        
+                    // Crear líneas si los elementos están presentes
+                    ['tanque-motobomba', 'motobomba-generador', 'generador-carga'].forEach((_, i) => {
+                        if (Object.values(elements).slice(i, i + 2).every((el) => el)) {
+                            lineas[i] = Object.assign(document.createElement('div'), {
+                                className: 'linea_h',
+                                style: 'position: absolute; height: 2px; background-color: black; z-index: 1;',
                             });
+                            elements.scrollContainer.appendChild(lineas[i]);
+                        }
+                    });
+        
+                    // Función para posicionar elementos
+                    const setPos = (el, x, y) =>
+                        el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
+        
+                    // Inicializar posiciones
+                    setPos(elements.generador, x_gen, y_gen);
+                    setPos(elements.motobomba, x_mot, y_mot);
+                    setPos(elements.tanque, x_tan, y_tan);
+                    setPos(elements.carga, x_pcar, y_pcar);
+        
+                    // Calcular el centro de un elemento
+                    const calcularCentro = (el) => {
+                        const rect = el.getBoundingClientRect();
+                        const scrollRect = elements.scrollContainer.getBoundingClientRect();
+                        return {
+                            x: rect.left + rect.width / 2 - scrollRect.left + elements.scrollContainer.scrollLeft,
+                            y: rect.top + rect.height / 2 - scrollRect.top + elements.scrollContainer.scrollTop,
                         };
-            
-                        const actualizarLinea_hs = () => {
-                            if (condition === 'No') {
-                                // Conexión en caso de que haya regulador
-                                actualizarLinea_h(linea_h1, generador, regulador);  // generador a Regulador
-                                actualizarLinea_h(linea_h2, regulador, tanque);    // Regulador a tanque
-                                actualizarLinea_h(linea_h3, tanque, motobomba);     // tanque a motobomba
-                            } else {
-                                // Conexión directa sin regulador
-                                actualizarLinea_h(linea_h1, generador, motobomba);   // generador a motobomba (si no hay regulador)
-                                actualizarLinea_h(linea_h2, motobomba, tanque);     // motobomba a tanque (si aplica)
-                            }
-                            
-                            actualizarLinea_h(linea_h4, motobomba, carga);        // motobomba a Carga
-                            actualizarLinea_h(linea_h5, motobomba, red);          // motobomba a Red (si aplica)
-                        };
-
-            
-                        document.addEventListener('dragstart', e => draggedElement = e.target);
-                        document.addEventListener('dragover', e => e.preventDefault());
-            
-                        document.addEventListener('drop', e => {
-                            e.preventDefault();
-                            if (!draggedElement) return;
-                            const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
-                            const x = Math.max(0, e.clientX - pLeft - draggedElement.offsetWidth / 2 + scrollContainer.scrollLeft);
-                            const y = Math.max(0, e.clientY - pTop - draggedElement.offsetHeight / 2 + scrollContainer.scrollTop);
-            
-                            if (draggedElement === generador) [x_arr, y_arr] = [x, y];
-                            else if (draggedElement === motobomba) [x_mot, y_mot] = [x, y];
-                            else if (draggedElement === regulador) [x_reg, y_reg] = [x, y];
-                            else if (draggedElement === tanque) [x_tan, y_tan] = [x, y];
-                            else if (draggedElement === carga) [x_pcar, y_pcar] = [x, y];
-                            else if (draggedElement === red) [x_red, y_red] = [x, y]; 
-            
-                            Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
-            
-                            actualizarLinea_hs();
-            
-                            fetch('/update-coordinates', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    x: x_arr, y: y_arr, pro_id: id_pro,  ban_id,
-                                    x_mot, y_mot,
-                                    x_reg: condition === 'No' ? x_reg : null,
-                                    y_reg: condition === 'No' ? y_reg : null,
-                                    x_tan, y_tan, pcar_id, x_pcar, y_pcar, x_red, y_red 
-                                })
-                            }).then(res => res.json()).then(data => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar')).catch(console.error);
+                    };
+        
+                    // Actualizar una línea entre dos elementos
+                    const actualizarLinea_h = (linea, el1, el2) => {
+                        if (!linea || !el1 || !el2) return;
+                        const [p1, p2] = [calcularCentro(el1), calcularCentro(el2)];
+                        const [dx, dy] = [p2.x - p1.x, p2.y - p1.y];
+                        Object.assign(linea.style, {
+                            width: `${Math.hypot(dx, dy)}px`,
+                            transform: `rotate(${Math.atan2(dy, dx) * (180 / Math.PI)}deg)`,
+                            transformOrigin: '0 0',
+                            left: `${p1.x}px`,
+                            top: `${p1.y}px`,
                         });
-            
-                        scrollContainer.addEventListener('scroll', actualizarLinea_hs);
-                        actualizarLinea_hs();
-                    }
-            
-                    const condition = "{{ pro_com[32] }}";
-                    const xIco3 = condition === 'No' ? "{{ x_reg }}" : null;
-                    const yIco3 = condition === 'No' ? "{{ y_reg }}" : null;
-            
-                    initIcono(                    
-                        "500",
-                        "50",
-                        "0",
-                        "515",
-                        "300",
-                        "0",
-                        "200",
-                        "80",
-                        "0",
-                        "0",
-                        "{{ car_com[0] }}",
-                        "{{ car_com[9] }}",
-                        "{{ car_com[10] }}",
-                        "0",
-                        "0",
-                        condition
-                    );
-                });
-            </script>
+                    };
+        
+                    // Actualizar todas las líneas
+                    const actualizarLineas = () => {
+                        actualizarLinea_h(lineas[0], elements.tanque, elements.motobomba);
+                        actualizarLinea_h(lineas[1], elements.motobomba, elements.generador);
+                        actualizarLinea_h(lineas[2], elements.generador, elements.carga);
+                    };
+        
+                    // Drag and Drop para mover elementos
+                    document.addEventListener('dragstart', (e) => {
+                        draggedElement = e.target;
+                    });
+        
+                    document.addEventListener('dragover', (e) => e.preventDefault());
+        
+                    document.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        if (!draggedElement) return;
+        
+                        const { left, top } = elements.scrollContainer.getBoundingClientRect();
+                        const [x, y] = [
+                            Math.max(0, e.clientX - left - draggedElement.offsetWidth / 2 + elements.scrollContainer.scrollLeft),
+                            Math.max(0, e.clientY - top - draggedElement.offsetHeight / 2 + elements.scrollContainer.scrollTop),
+                        ];
+        
+                        if (draggedElement === elements.generador) {
+                            x_gen = x;
+                            y_gen = y;
+                        } else if (draggedElement === elements.motobomba) {
+                            x_mot = x;
+                            y_mot = y;
+                        } else if (draggedElement === elements.tanque) {
+                            x_tan = x;
+                            y_tan = y;
+                        } else if (draggedElement === elements.carga) {
+                            x_pcar = x;
+                            y_pcar = y;
+                        }
+        
+                        Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
+                        actualizarLineas();
+        
+                        // Enviar actualización al servidor
+                        fetch('/hidrica/update_coordinates_hidrica', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                x: x_gen,
+                                y: y_gen,
+                                pro_id: id_pro,
+                                x_mot,
+                                y_mot,
+                                x_tan,
+                                y_tan,
+                                pcar_id,
+                                x_pcar,
+                                y_pcar,
+                            }),
+                        })
+                            .then((res) => res.json())
+                            .then((data) => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar'))
+                            .catch(console.error);
+                    });
+        
+                    elements.scrollContainer.addEventListener('scroll', actualizarLineas);
+        
+                    // Inicializar las líneas
+                    actualizarLineas();
+                }
+        
+                initIcono(
+                    "500",
+                    "50",
+                    "515",
+                    "300",
+                    "{{ pro_com[0] }}",
+                    "200",
+                    "80",
+                    "{{ car_com[0] }}",
+                    "{{ car_com[9] }}",
+                    "{{ car_com[10] }}"
+                );
+            });
+        </script>
+                
         {% endfor %}
     </div>
 </div>

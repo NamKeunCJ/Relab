@@ -16,25 +16,27 @@
                     <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>Información</b></label>
                     <ul class="list-group list-group-flush">                        
                         <li class="list-group-item">
-                            <a href="/inicio_proyecto_hidrica?num_info=1&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Motobomba">
+                            <a href="/hidrica/inicio_proyecto_hidrica?num_info=1&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Motobomba">
                                 Información Motobomba
                             </a>
                         </li>
                         <li class="list-group-item">
-                            <a href="/inicio_proyecto_hidrica?num_info=2&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Generador">
+                            <a href="/hidrica/inicio_proyecto_hidrica?num_info=2&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Generador">
                                 Información Generador
                             </a>
                         </li>
                         <li class="list-group-item">
-                            <a href="/inicio_proyecto_hidrica?num_info=3&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Turbina">
+                            <a href="/hidrica/inicio_proyecto_hidrica?num_info=3&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Turbina">
                                 Información Tanque
                             </a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="/inicio_proyecto_hidrica?num_info=4&id_pro={{ pro_h[0] }}" class="nav-link text-dark nav-color" title="Información Tanque">
-                                Información Turbina
-                            </a>
-                        </li>                       
+                        </li> 
+                        {% if num_info is not none%}
+                            <li class="list-group-item">
+                                <a href="/hidrica//inicio_proyecto_hidrica?id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Proyecto Fotovoltaico">
+                                    <b>Regresar al Proyecto</b> 
+                                </a>
+                            </li>
+                        {% endif%}                     
                     </ul> 
                 </div>
             </div>              
@@ -44,6 +46,8 @@
                         <div class="col ms-sm-auto">                            
                             {% if pro_h and num_info is none%}
                                 {% block inicio %} {% include 'creacion_de_proyecto/inicio_hidrico.html' %} {% endblock %}                                                            
+                            {% else %}
+                                {% block informacion_hidrica %} {% include 'creacion_de_proyecto/informacion_hidrica.html' %} {% endblock %}                                                            
                             {% endif %}
                         </div>
                         

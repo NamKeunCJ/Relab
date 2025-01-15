@@ -300,7 +300,7 @@ def davis():
 
         # Obtiene el timestamp actual y define el rango de tiempo de 30 días hacia atrás.
         end_timestamp = int(time.time())
-        start_timestamp = end_timestamp - (30 * 24 * 3600)
+        start_timestamp = end_timestamp - (40 * 24 * 3600)
 
         # Duración máxima permitida para cada consulta (86400 segundos = 1 día).
         max_duration_seconds = 86400
@@ -350,8 +350,9 @@ def davis():
 def revisar_completar_datos_faltantes():
     # Definir el rango de 30 días
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
-
+    start_date = end_date - timedelta(days=40)
+    print(end_date)
+    print(start_date)
     # Recuperar todos los datos de los últimos 30 días desde la base de datos
     with get_db_connection() as conn:
         with conn.cursor() as cursor:

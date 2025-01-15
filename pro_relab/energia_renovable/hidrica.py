@@ -604,10 +604,33 @@ def modal_carga_pot_hidrica():
         return render_template('creacion_de_proyecto/pot_car_hidrico.html', pcar=pcar)
 
 ################################################################################################################################################
-#--------------------------------------------EDITAR PROYECTO FOTOVOLTAICO-------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Modificar coordenadas de cada arreglo que muevo
+@hidrica_bp.route('/update_coordinates_hidrica', methods=['POST'])
+def update_coordinates_hidrica():
+    from app import get_db_connection
+    data = request.get_json()
+    # Recibir los datos del JSON    
+    id_pcar = data.get('pcar_id')  # ID del proyecto
+    x_pcar = data.get('x_pcar')    # Nueva coordenada X de la carga
+    y_pcar = data.get('y_pcar')    # Nueva coordenada Y de la carga
+    print('carga: ',x_pcar,y_pcar)
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:            
+            # Validar que id_car sea un valor válido antes de ejecutar la consulta
+            if id_pcar !='None':
+                cur.execute('''
+                    UPDATE proyecto_cargah SET x_pcar = %s, y_pcar = %s WHERE id_pcar = %s;
+                ''', (x_pcar, y_pcar, id_pcar))
+                conn.commit()
+
+    return jsonify(success=True)  # Respuesta de éxito
+
+################################################################################################################################################
+#--------------------------------------------EDITAR PROYECTO HIDRICO-------------------------------------------------------------------------------------------------------------------------------------------------
 ################################################################################################################################################
 
-#Lista de proyectos fotovoltaicos creados
+#Lista de proyectos hidricos creados
 @hidrica_bp.route('/list_project_hidrica')
 def list_project_hidrica():
     from app import get_db_connection
@@ -660,4 +683,120 @@ def list_project_hidrica():
         'creacion_de_proyecto/list_project_hidrico.html' if not buscar else 'creacion_de_proyecto/search_project_hidrico.html',
         user=user, pro_list=pro_list, success=success, error=error
     )
+
+
+#Eliminar generador
+@hidrica_bp.route('/ver_modal_del_gen')
+def ver_modal_del_gen():
+    from app import get_db_connection
+    id_pgen = request.args.get('id_pgen')
+    id_pro = request.args.get('id_pro')
+    id_pgen_del = request.args.get('id_pgen_del')
+    if id_pgen_del is not None:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Ejecutamos la eliminación del generador del proyecto
+                cur.execute('''
+                    UPDATE proyecto_generador SET id_gen = %s, cau_pgen = %s, deleted_at = CURRENT_TIMESTAMP  WHERE id_pro = %s;
+                ''', (None, 0, id_pro))
+                cur.execute('''
+                    UPDATE proyecto_turbina SET id_tur = %s, cant_ptur = %s, vel_ptur=%s, deleted_at = CURRENT_TIMESTAMP  WHERE id_pro = %s;
+                ''', (None, 6, 0, id_pro))
+                conn.commit()
+        
+        # Redirigir al inicio del proyecto
+        return redirect(url_for('hidrica.inicio_proyecto_hidrica', id_pro=id_pro))
     
+    else:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles del generador que se esta usando en el proyecto
+                cur.execute('SELECT id_pgen,id_pro FROM proyecto_generador WHERE id_pgen = %s;', (id_pgen,))
+                pgen = cur.fetchone()
+        
+        # Renderizar la plantilla para mostrar el modal de eliminación
+        return render_template('creacion_de_proyecto/delete_generador_project.html', pgen=pgen)
+################################################################################################################################################
+
+#Eliminar tanque
+@hidrica_bp.route('/ver_modal_del_tan')
+def ver_modal_del_tan():
+    from app import get_db_connection
+    id_tan = request.args.get('id_tan')
+    id_pro = request.args.get('id_pro')
+    id_tan_del = request.args.get('id_tan_del')
+    if id_tan_del is not None:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Ejecutamos la eliminación del tanque del proyecto
+                cur.execute('''
+                    UPDATE tanque SET cap_tan = %s, deleted_at = CURRENT_TIMESTAMP  WHERE id_pro = %s;
+                ''', (0, id_pro))
+                conn.commit()
+        
+        # Redirigir al inicio del proyecto
+        return redirect(url_for('hidrica.inicio_proyecto_hidrica', id_pro=id_pro))
+    
+    else:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles del tanque que se esta usando en el proyecto
+                cur.execute('SELECT id_tan,id_pro FROM tanque WHERE id_tan = %s;', (id_tan,))
+                tan = cur.fetchone()
+        
+        # Renderizar la plantilla para mostrar el modal de eliminación
+        return render_template('creacion_de_proyecto/delete_tanque_project.html', tan=tan)
+################################################################################################################################################
+
+#Eliminar motobomba
+@hidrica_bp.route('/ver_modal_del_mot')
+def ver_modal_del_mot():
+    from app import get_db_connection
+    id_pro = request.args.get('id_pro')
+    id_mot_del = request.args.get('id_mot_del')
+    if id_mot_del is not None:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Ejecutamos la eliminación del motobomba del proyecto
+                cur.execute('''
+                    UPDATE proyecto_hidrica SET id_mot = %s  WHERE id_pro = %s;
+                ''', (None, id_pro))
+                conn.commit()
+        
+        # Redirigir al inicio del proyecto
+        return redirect(url_for('hidrica.inicio_proyecto_hidrica', id_pro=id_pro))
+    
+    else:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles del motobomba que se esta usando en el proyecto
+                cur.execute('SELECT id_mot,id_pro FROM proyecto_hidrica WHERE id_pro = %s;', (id_pro,))
+                mot = cur.fetchone()
+        
+        # Renderizar la plantilla para mostrar el modal de eliminación
+        return render_template('creacion_de_proyecto/delete_motobomba_project.html', mot=mot)
+################################################################################################################################################
+#--------------------------------------------ELIMINAR PROYECTO HIDRICO-------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
+
+
+#Eliminar un proyecto
+@hidrica_bp.route('/delete_project_hidrica')
+def delete_project_hidrica():
+    from app import get_db_connection
+    id_pro = request.args.get('id_pro')
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Ejecutar la consulta para actualizar el estado del proyecto a "false"
+            cur.execute('''
+                UPDATE proyecto_hidrica SET status = false WHERE id_pro = %s
+            ''', (id_pro,))
+            
+            # Confirmar los cambios en la base de datos
+            conn.commit()
+    
+    # Redirigir de vuelta a la lista de proyectos
+    return redirect(url_for('hidrica.list_project_hidrica'))
+
+################################################################################################################################################

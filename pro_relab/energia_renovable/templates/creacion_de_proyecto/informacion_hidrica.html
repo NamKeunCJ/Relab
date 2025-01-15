@@ -1,275 +1,208 @@
 {% block head %} {% include 'layouts/head.html' %} {% endblock %}
-{% if num_info != '5' %}
+{% if num_info != '4' %}
     <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
         <div id="scrollContainer" class="card-body" style="overflow: auto; position: relative; height: 100%;">
+            
             {% if num_info == '1' %}
-                {% if cant_componentes[2] != 0 %}
-                    <div class="card mx-3 mb-3 border-0 shadow" style="background-color: #f0f8ff;">
-                        <div class="card-header text-white text-center" style="background-color: #13447c;">
-                            <h5 class="card-title mb-0"><b>Pasos</b></h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <ol class="pl-3" style="font-size: 1.1rem; line-height: 1.7;">
-                                <li>Sumamos los voltajes y escogemos la corriente mínima de cada serie.</li>
-                                <li>El resultado formará una columna, con paneles conectados en paralelo, sumamos las corrientes y escogemos el voltaje mínimo.</li>
-                                <li>Multiplicamos el resultado para obtener la potencia total del arreglo.</li>
-                            </ol>
-                        </div>
-                    </div>
-                            
-                    {% for arr_completo in arreglos_completos %}
-                    <div class="row mt-4">
-                        <div class="col">
-                            <table class="table table-bordered table-primary rounded-table">
-                                <h5><b>Arreglo {{ loop.index }}</b></h5>
-                                <tbody>
-                                    {% set serie_pro = arr_completo.series_totales %}
-                                    {% set paralelo = arr_completo.paralelos %}
-
-                                    {% for i in range(arr_completo.arreglo[50]) %}
-                                    <tr>
-                                        {% for j in range(arr_completo.arreglo[51]) %}
-                                            {% set panel = serie_pro[i].paneles[j] %}
-                                            {% if panel[3] is not none %}
-                                                <td class="text-center align-middle">
-                                                    <small>{{ panel[3] }} V<br>{{ panel[4] }} A</small>
-                                                </td>
-                                            {% else %}
-                                                <td class="text-center align-middle">
-                                                    <small>0.0 V<br>0.0 A</small>
-                                                </td>
-                                            {% endif %}
-                                        {% endfor %}
-
-                                        {% if loop.index == 1 %}
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <h1 style="font-size: 50px;">}</h1>
-                                            </td>
-                                        {% endif %}
-
-                                        {% if paralelo %}
-                                            <td class="text-center align-middle">
-                                                <small>{{ paralelo[i][2] }} V<br>{{ paralelo[i][3] }} A</small>
-                                            </td>
-                                        {% endif %}
-
-                                        {% if loop.index == 1 %}
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <h1 style="font-size: 50px;">}</h1>
-                                            </td>
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <small>{{ arr_completo.arreglo[46] }} V<br>{{ arr_completo.arreglo[47] }} A</small>
-                                            </td>
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <h1 style="font-size: 50px;">}</h1>
-                                            </td>
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <small>{{ arr_completo.arreglo[45] }} W</small>
-                                            </td>
-                                        {% endif %}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <br>
-                    {% endfor %}
-                {% else %}
-                    <div class="alert alert-warning text-center mt-4">
-                        No hay Arreglos de Paneles registrados en este proyecto.
-                    </div>
-                {% endif %}
-
-            {% elif num_info == '2' %}
-                {% if cant_componentes[0] != 0 %} 
-                    {% if error_cap_inv is not none %}
-                        <div class="alert alert-danger text-center">
-                            <small>{{error_cap_inv}}<br>{{error_inv_arr}}</small>
-                        </div>
-                    {% endif %}
+                {% if pro_com[3] is not none %}                     
                     <div class="container mt-4">
                         <div class="card shadow border-0 rounded-3 mt-4">
                             <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
-                                <h5 class="mb-0">Datos del Inversor</h5>
+                                <h5 class="mb-0">Datos del Motobomba</h5>
                             </div>
                             <div class="card-body bg-light p-4 rounded-bottom">
                                 <table class="table table-hover table-bordered rounded">
                                     <thead class="table-primary">
                                         <tr>
-                                            <th scope="col">Inversor</th>
+                                            <th scope="col">Motobomba</th>
                                             <th scope="col">Datos</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <th scope="row">Referencia Inversor</th>
-                                            <td>{{pro_com[18]}}</td>
+                                            <th scope="row">Referencia Motobomba</th>
+                                            <td>{{pro_com[10]}}</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Número de Entradas</th>
-                                            <td>{{pro_com[19]}}</td>
+                                            <th scope="row">Potencia Maxima</th>
+                                            <td>{{pro_com[11]}} Kw</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Voltaje Máximo de Entrada (Vme)</th>
-                                            <td>{{pro_com[21]}}</td>
+                                            <th scope="row">Voltaje Maximo</th>
+                                            <td>{{pro_com[12]}} V</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Corriente Máxima de Entrada (Ime)</th>
-                                            <td>{{pro_com[22]}}</td>
+                                            <th scope="row">Caudal Motobomba</th>
+                                            <td>{{pro_com[13]}} L/m</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Potencia Máxima (Pmax)</th>
-                                            <td>{{pro_com[20]}}</td>
+                                            <th scope="row">Diametro de Entrada</th>
+                                            <td>{{pro_com[14]}} mm</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Voltaje de Salida (Vout)</th>
-                                            <td>{{pro_com[23]}}</td>
+                                            <th scope="row">Diametro de Salida</th>
+                                            <td>{{pro_com[15]}} mm</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Eficiencia (%)</th>
-                                            <td>{{pro_com[25]}}</td>
+                                            <th scope="row">Frecuencia Motobomba</th>
+                                            <td>{{pro_com[16]}} Hz</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Onda de Salida</th>
-                                            <td>{{pro_com[24]}}</td>
+                                            <th scope="row">Presion Motobomba</th>
+                                            <td>{{pro_com[17]}} Bar</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center mt-4">
+                        No hay Motobomba registrada en este proyecto.
+                    </div>
+                {% endif %}
+            {% endif %}
+            {% if num_info == '2' %}
+                {% if pro_com[32] is not none %}                     
+                    <div class="container mt-4">
+                        <div class="card shadow border-0 rounded-3 mt-4">
+                            <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                                <h5 class="mb-0">Datos del Generador</h5>
+                            </div>
+                            <div class="card-body bg-light p-4 rounded-bottom">
+                                <table class="table table-hover table-bordered rounded">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th scope="col">Generador</th>
+                                            <th scope="col">Datos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Referencia Generador</th>
+                                            <td>{{pro_com[33]}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Potencia Maxima</th>
+                                            <td>{{pro_com[34]}} W</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Voltaje Maximo</th>
+                                            <td>{{pro_com[35]}} V</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Velocidad Generador</th>
+                                            <td>{{pro_com[36]}} rpm</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Diametro Generador</th>
+                                            <td>{{pro_com[37]}} mm</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>       
+
+                        {% if pro_com[60] is not none %}
+                            <div class="card shadow border-0 rounded-3 mt-4">
+                                <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                                    <h5 class="mb-0">Datos del Turbina</h5>
+                                </div>
+                                <div class="card-body bg-light p-4 rounded-bottom">
+                                    <table class="table table-hover table-bordered rounded">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th scope="col">Turbina</th>
+                                                <th scope="col">Datos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">Tipo Turbina</th>
+                                                <td>{{pro_com[61]}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Cantidad de {{pro_com[66]}}</th>
+                                                <td>{{pro_com[52]}} Und</td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Velocidad Turbina</th>
+                                                <td>{{pro_com[53]}} rpm</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         
                         
-                
-                        {% if pro_com[32] == 'No' %}
-                            {% if pro_com[10] is not none %}
-                                <div class="card shadow border-0 rounded-3 mt-4">
-                                    <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
-                                        <h5 class="mb-0">Datos del Regulador</h5>
-                                    </div>
-                                    <div class="card-body bg-light p-4 rounded-bottom">
-                                        <table class="table table-hover table-bordered rounded">
-                                            <thead class="table-primary">
-                                                <tr>
-                                                    <th scope="col">Regulador</th>
-                                                    <th scope="col">Datos</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row">Referencia Regulador</th>
-                                                    <td>{{pro_com[34]}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">Voltaje (V)</th>
-                                                    <td>{{pro_com[36]}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">Corriente (A)</th>
-                                                    <td>{{pro_com[37]}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">Potencia (W)</th>
-                                                    <td>{{pro_com[35]}}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            
-                            
-                            {% else %}
-                                <div class="alert alert-warning text-center mt-4">
-                                    No hay Reguladores registrados en este proyecto.
-                                </div>
-                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-warning text-center mt-4">
+                                No hay turbina registrada en este proyecto.
+                            </div>
                         {% endif %}
                     </div>
                 {% else %}
                     <div class="alert alert-warning text-center mt-4">
-                        No hay Inversores registrados en este proyecto.
+                        No hay generador registrado en este proyecto.
                     </div>
                 {% endif %}
-        
-            {% elif num_info == '3' %}
-                {% if cant_componentes[3] != 0 %}
-                    <div class="card mx-3 mb-3 border-0 shadow" style="background-color: #f0f8ff;">
-                        <div class="card-header text-white text-center" style="background-color: #13447c;">
-                            <h5 class="card-title mb-0"><b>Pasos</b></h5>
+            {% endif %}
+            {% if num_info == '3' %}
+                {% if pro_com[45] != 0 %}
+                    <div class="card shadow border-0 rounded-3 mt-4">
+                        <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                            <h5 class="mb-0">Datos del Tanque</h5>
                         </div>
-                        <div class="card-body p-4">
-                            <ol class="pl-3" style="font-size: 1.1rem; line-height: 1.7;">
-                                <li>Sumamos los voltajes y realizamos promedio de las capacidades, de cada serie.</li>
-                                <li>El resultado formará una columna, con baterías conectadas en paralelo; sumamos las capacidades y verificamos que el voltaje sea el mismo.</li>
-                                <li>Multiplicamos el resultado, obteniendo la energía total del banco.</li>
-                            </ol>
-                        </div>
-                    </div>            
-                
-                    {% for ban_completo in bancos_completos %}
-                    <div class="row mt-4">
-                        <div class="col">
-                            <table class="table table-bordered table-primary rounded-table">
-                                <h5><b>Banco {{ loop.index }}</b></h5>
-                                <tbody>
-                                    {% set serie_pro = ban_completo.series_totales %}
-                                    {% set paralelo = ban_completo.paralelos %}
-                                    {% for i in range(ban_completo.banco[64]) %}
-                                    <tr>
-                                        {% for j in range(ban_completo.banco[65]) %}
-                                            {% set bateria = serie_pro[i].baterias[j] %}
-                                            {% if bateria[3] is not none %}
-                                                <td class="text-center align-middle">
-                                                    <small>{{ bateria[2] }} V<br>{{ bateria[3] }} Ah</small>
-                                                </td>
-                                            {% else %}
-                                                <td class="text-center align-middle">
-                                                    <small>0.0 V<br>0.0 Ah</small>
-                                                </td>
-                                            {% endif %}
-                                        {% endfor %}
-
-                                        {% if loop.index == 1 %}
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <h1 style="font-size: 50px;">}</h1>
-                                            </td>
+                        <div class="card-body bg-light p-4 rounded-bottom">
+                            <div class="row g-4 align-items-center">
+                                <!-- Columna de la imagen del tanque -->
+                                <div class="col-md-6 d-flex align-items-center justify-content-center"> 
+                                    {% set ranges = [
+                                        (0, 10, 'tanque0.png'),
+                                        (10, 25, 'tanque1.png'),
+                                        (25, 50, 'tanque2.png'),
+                                        (50, 75, 'tanque3.png'),
+                                        (75, 100, 'tanque4.png'),
+                                        (100, 9999999999, 'tanque5.png')
+                                    ] %}
+                                    {% for range in ranges %}
+                                        {% if pro_com[45] >= range[0] and pro_com[45] < range[1] %}
+                                            <img src="{{ url_for('static', filename='images/' + range[2]) }}" 
+                                                class="tooltip_btn" 
+                                                style="width: 12rem;" 
+                                                data-bs-toggle="tooltip" 
+                                                data-bs-placement="top" 
+                                                data-bs-custom-class="custom-tooltip" 
+                                                data-bs-title="{{ pro_com[45] }} L/m³">
                                         {% endif %}
-
-                                        {% if paralelo %}
-                                            <td class="text-center align-middle">
-                                                <small>{{ paralelo[i][1] }} V<br>{{ paralelo[i][2] }} Ah</small>
-                                            </td>
-                                        {% endif %}
-
-                                        {% if loop.index == 1 %}
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <h1 style="font-size: 50px;">}</h1>
-                                            </td>
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <small>{{ ban_completo.banco[60] }} V<br>{{ ban_completo.banco[61] }} Ah</small>
-                                            </td>
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <h1 style="font-size: 50px;">}</h1>
-                                            </td>
-                                            <td rowspan="0" class="text-center align-middle">
-                                                <small>{{ ban_completo.banco[62] }} Wh</small>
-                                            </td>
-                                        {% endif %}
-                                    </tr>
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                                </div>
+                    
+                                <!-- Columna de la tabla de datos -->
+                                <div class="col-md-6">
+                                    <table class="table table-hover table-bordered rounded text-center">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th scope="col">Tanque</th>
+                                                <th scope="col">Datos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">Capacidad Tanque</th>
+                                                <td>{{ pro_com[45] }} L/m³</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <br>
-                    {% endfor %}
+                    </div>  
                 {% else %}
                     <div class="alert alert-warning text-center mt-4">
-                        No hay Banco de Baterias registrados en este proyecto.
+                        No hay tanque registrado en este proyecto.
                     </div>
                 {% endif %}
-            {% elif num_info == '5' %}
-                Comparacion con estructura fisica
             {% endif %}
         </div>
     </div>
