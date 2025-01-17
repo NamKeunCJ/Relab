@@ -1,0 +1,87 @@
+<div class="modal fade" id="projectTuberia" tabindex="-1" role="dialog" aria-labelledby="ProjectArregloModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega la trayectoria de la tuberia</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-ser-pan" method="POST" action="/hidrica/add_tuberia_project">
+                <input type="hidden" name="id_pro" value="{{pro[0]}}">  
+                <div class="modal-body" style="height: 20rem;">
+                    <label for="dia_tra">Diametro de trayectoria es:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="dia_tra" aria-describedby="basic-addon2" min="1" max="1900" name="dia_tra" step="0.01" value="{{pro[1]}}"  required>
+                        <span class="input-group-text" id="basic-addon2">mm</span>
+                    </div>
+                    <label for="lon_tub">Longitud de Tuberia es:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="lon_tub" aria-describedby="basic-addon2" min="1" max="1900" name="lon_tub" step="0.01"  required>
+                        <span class="input-group-text" id="basic-addon2">cm</span>
+                    </div>
+                    <div class="form-group" style="margin-top: 0.5rem;">
+                        <label for="ang_cod">Angulo de codo: </label>
+                        <select class="form-control" id="ang_cod" name="ang_cod" required>
+                            
+                            <option value="" disabled selected>Selecciona una respuesta</option>
+                            {% for cod in cod %}
+                                <option value="{{ cod[0] }}">{{ cod[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div> 
+                    <div class="form-group" style="margin-top: 0.5rem;">
+                        <label for="ori_tub">Orientación codo: </label>
+                        <select class="form-control" id="ori_tub" name="ori_tub" required>
+                            <option value="" disabled selected>Selecciona una respuesta</option>
+                            <option value="Derecha">Derecha</option>
+                            <option value="Izquierda">Izquierda</option>
+                        </select>
+                    </div> 
+                    <script>
+                        // Selecciona los elementos del DOM
+                        const angCodSelect = document.getElementById('ang_cod');
+                        const oriTubSelect = document.getElementById('ori_tub');
+                    
+                        // Evento 'change' para cuando se selecciona un valor en ang_cod
+                        angCodSelect.addEventListener('change', function () {
+                            const selectedValue = this.value;
+                    
+                            // Limpia las opciones actuales de ori_tub
+                            while (oriTubSelect.options.length > 1) {
+                                oriTubSelect.remove(1);
+                            }
+                    
+                            // Verifica si el valor seleccionado es 5
+                            if (selectedValue === '5') {
+                                // Agrega la opción "No Aplica" y la selecciona automáticamente
+                                const noAplicaOption = document.createElement('option');
+                                noAplicaOption.value = 'No Aplica';
+                                noAplicaOption.textContent = 'No Aplica';
+                                oriTubSelect.appendChild(noAplicaOption);
+                                oriTubSelect.value = 'No Aplica';
+                                // Deshabilita el select
+                                oriTubSelect.setAttribute('disabled', 'true');
+                            } else {
+                                // Si no es 5, vuelve a habilitar y agrega las opciones originales
+                                oriTubSelect.removeAttribute('disabled');
+                    
+                                const derechaOption = document.createElement('option');
+                                derechaOption.value = 'Derecha';
+                                derechaOption.textContent = 'Derecha';
+                                oriTubSelect.appendChild(derechaOption);
+                    
+                                const izquierdaOption = document.createElement('option');
+                                izquierdaOption.value = 'Izquierda';
+                                izquierdaOption.textContent = 'Izquierda';
+                                oriTubSelect.appendChild(izquierdaOption);
+                            }
+                        });
+                    </script>
+                </div>                 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Añadir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

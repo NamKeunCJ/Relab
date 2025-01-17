@@ -6,7 +6,7 @@ import time
 import requests # elementos para datos davis
 # hidrica.py
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
-
+import math
 
 # Crear un Blueprint para las rutas hídricas
 hidrica_bp = Blueprint('hidrica', __name__, static_folder='static',template_folder='templates')
@@ -258,6 +258,8 @@ def add_proyecto_h():
                 cur.execute('INSERT INTO proyecto_generador (id_pro) VALUES (%s);', (id_pro,))
                 # Insertar el el turbina predeterminado para el proyecto en la base de datos
                 cur.execute('INSERT INTO proyecto_turbina (id_pro) VALUES (%s);', (id_pro,))
+                # Insertar el el turbina predeterminado para el proyecto en la base de datos
+                cur.execute('INSERT INTO trayectoria_tubo (id_pro) VALUES (%s);', (id_pro,))
                 conn.commit()
                 
                 return jsonify({'id_pro': id_pro})
@@ -303,12 +305,21 @@ def inicio_proyecto_hidrica():
                 pro.id_pro = %s ;
             ''', (id_pro,id_pro,))  # La coma final es necesaria para formar una tupla
             car_com = cur.fetchall()
+            # Obtenemos el proyecto principal en cuestion de las tuberias
+            cur.execute('''SELECT tub.lon_tub, tub.ori_tub, cod.ang_cod, tra.dia_tra
+                FROM proyecto_hidrica pro
+                JOIN trayectoria_tubo tra ON pro.id_pro = tra.id_pro
+                JOIN tubo tub ON pro.id_pro = tub.id_pro 
+                JOIN codo cod ON cod.id_cod = tub.id_cod
+                WHERE pro.id_pro = %s order by tub.created_at asc;
+            ''', (id_pro,))  # La coma final es necesaria para formar una tupla
+            tub_com = cur.fetchall()
             # Obtenemos el proyecto principal
             cur.execute('SELECT * FROM proyecto_hidrica WHERE id_pro = %s AND id_usu = %s AND status = true;', (id_pro, user_id))
             pro_h = cur.fetchone()
             if pro_h:
                 # Pasamos todo a la plantilla
-                return render_template('creacion_de_proyecto/proyecto_hidrico.html', pro_com=pro_com, car_com=car_com, num_info=num_info, pro_h=pro_h)
+                return render_template('creacion_de_proyecto/proyecto_hidrico.html', pro_com=pro_com, car_com=car_com, tub_com=tub_com, num_info=num_info, pro_h=pro_h, cos=math.cos, sin=math.sin, pi=math.pi)
             else:
                 return redirect(url_for('inicio_principal'))
 
@@ -604,6 +615,45 @@ def modal_carga_pot_hidrica():
         return render_template('creacion_de_proyecto/pot_car_hidrico.html', pcar=pcar)
 
 ################################################################################################################################################
+#mostrar modal para agregar la tuberia al proyecto
+@hidrica_bp.route('/modal_tuberia_project')
+def modal_tuberia_project():    
+    from app import get_db_connection
+    id_pro = request.args.get('id_pro')
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('select pro.id_pro, tra.dia_tra from proyecto_hidrica pro join trayectoria_tubo tra on pro.id_pro=tra.id_pro where pro.id_pro= %s ; ', (id_pro,))
+            pro = cur.fetchone() 
+            cur.execute('select * from codo where status= %s ;', (True,))
+            cod = cur.fetchall() 
+    return render_template('creacion_de_proyecto/project_tuberia.html', pro = pro, cod = cod)
+
+#agregar la tuberia alproyecto
+@hidrica_bp.route('/add_tuberia_project', methods=['POST'])
+def add_tuberia_project():     
+    from app import get_db_connection
+    id_pro = request.form['id_pro']
+    dia_tra = request.form['dia_tra']
+    lon_tub = request.form['lon_tub']
+    id_cod = request.form['ang_cod']
+    ori_tub = request.form.get('ori_tub', 'No Aplica')
+
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''
+                INSERT INTO tubo (id_pro, lon_tub, id_cod, ori_tub)
+                values(%s, %s, %s, %s)
+            ''', (id_pro, lon_tub, id_cod, ori_tub))
+            conn.commit()
+            alt_tra=2
+            cur.execute('''
+                UPDATE trayectoria_tubo set dia_tra=%s, alt_tra=%s where id_pro=%s;                
+            ''', (dia_tra, alt_tra,id_pro))
+            conn.commit()
+    return redirect(url_for('hidrica.inicio_proyecto_hidrica', id_pro=id_pro))
+################################################################################################################################################
 
 #Modificar coordenadas de cada arreglo que muevo
 @hidrica_bp.route('/update_coordinates_hidrica', methods=['POST'])
@@ -800,3 +850,70 @@ def delete_project_hidrica():
     return redirect(url_for('hidrica.list_project_hidrica'))
 
 ################################################################################################################################################
+#---------------------------------------------------------INFORMES------------------------------------------------------------------------------------------------------------------------------------------------
+################################################################################################################################################
+@hidrica_bp.route('/informes_hidrica',methods=['GET', 'POST'])
+def informes_hidrica():
+    from app import get_db_connection
+    user_id = session.get('user_id')
+    user_rol = session.get('user_rol')
+    
+    if user_id is None:
+        # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+        return redirect(url_for('inicio_sesion'))
+    start_date,end_date=None,None     
+    # Suponiendo que tienes una función para obtener la conexión a la base de datos
+    if user_rol=='Administrador':
+        with get_db_connection() as conn:  
+            with conn.cursor() as cur:  
+                # Ejecuta la consulta usando id_pro como parámetro
+                cur.execute('''
+                    select p.created_at, p.nom_pro, avg(e.tot_ene)as tot_ene, avg(e.efi_ene)as efi_ene
+                    from  proyecto_hidrica p 
+                    join trayectoria_tubo t on t.id_pro=p.id_pro 
+                    join energia_generada e on e.id_tra=t.id_tra
+                    where p.eje_pro=true group by p.created_at, p.nom_pro order by avg(e.tot_ene) desc limit 30;
+
+                ''')
+                sist_optima = cur.fetchall()  # Obtiene todos los resultados de la consulta
+                if request.method == 'POST':
+                    start_date = request.form['start_date']
+                    end_date = request.form['end_date'] 
+                    start_date = f"{start_date} 00:00:00"  # Agrega hora 06:00:00 a la fecha de inicio
+                    end_date = f"{end_date} 23:59:59"
+                    print('DAMOS INFORMES',start_date,'-',end_date)
+                    # Ejecuta la consulta usando id_pro como parámetro
+                    cur.execute('''
+                        SELECT p.id_pro, p.created_at,  p.nom_pro, 
+                        (SELECT COUNT(id_mot) FROM motobomba WHERE id_mot = p.id_mot) AS cant_mot,
+                        (SELECT COUNT(id_gen) FROM proyecto_generador WHERE id_pro = p.id_pro) AS cant_gen,
+                        (SELECT COUNT(id_tur) FROM proyecto_turbina WHERE id_pro = p.id_pro) AS cant_tur,
+                        (SELECT COUNT(id_tan) FROM tanque WHERE id_pro = p.id_pro and cap_tan!=0) AS cant_tan,
+                        (SELECT COUNT(id_pcar) FROM proyecto_cargah WHERE id_pro = p.id_pro and pot_pcar!=0) AS cant_pcar,
+                        avg(e.tot_ene), p.status
+                        from  proyecto_hidrica p 
+                        left join trayectoria_tubo t on t.id_pro=p.id_pro 
+                        left join energia_generada e on e.id_tra=t.id_tra
+                        WHERE p.created_at >= %s AND p.created_at <= %s
+                        GROUP BY p.id_pro, p.created_at, p.nom_pro order by created_at desc;
+                    ''', (start_date, end_date,))
+                else:
+                    print('DAMOS INFORMES',start_date,'-',end_date)
+                    # Ejecuta la consulta usando id_pro como parámetro
+                    cur.execute('''
+                        SELECT p.id_pro, p.created_at,  p.nom_pro, 
+                        (SELECT COUNT(id_mot) FROM motobomba WHERE id_mot = p.id_mot) AS cant_mot,
+                        (SELECT COUNT(id_gen) FROM proyecto_generador WHERE id_pro = p.id_pro) AS cant_gen,
+                        (SELECT COUNT(id_tur) FROM proyecto_turbina WHERE id_pro = p.id_pro) AS cant_tur,
+                        (SELECT COUNT(id_tan) FROM tanque WHERE id_pro = p.id_pro and cap_tan!=0) AS cant_tan,
+                        (SELECT COUNT(id_pcar) FROM proyecto_cargah WHERE id_pro = p.id_pro and pot_pcar!=0) AS cant_pcar,
+                        avg(e.tot_ene), p.status
+                        from  proyecto_hidrica p 
+                        left join trayectoria_tubo t on t.id_pro=p.id_pro 
+                        left join energia_generada e on e.id_tra=t.id_tra
+                        GROUP BY p.id_pro, p.created_at, p.nom_pro order by created_at desc limit 30;
+                    ''')
+                estructuras = cur.fetchall()  # Obtiene todos los resultados de la consulta
+        return render_template('informe_y_Estadistica/informes_hidrica.html',sist_optima=sist_optima,estructuras=estructuras)
+    else:
+        return redirect(url_for('inicio_principal'))

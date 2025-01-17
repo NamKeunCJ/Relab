@@ -60,6 +60,13 @@ delete from tanque;
 SELECT setval(pg_get_serial_sequence('tanque', 'id_tan'), 1, false);
 delete from proyecto_turbina;
 SELECT setval(pg_get_serial_sequence('proyecto_turbina', 'id_ptur'), 1, false);
+delete from proyecto_cargah;
+SELECT setval(pg_get_serial_sequence('proyecto_cargah', 'id_pcar'), 1, false);
+delete from tubo;
+SELECT setval(pg_get_serial_sequence('tubo', 'id_tub'), 1, false);
+delete from trayectoria_tubo;
+SELECT setval(pg_get_serial_sequence('trayectoria_tubo', 'id_tra'), 1, false);
 delete from proyecto_hidrica;
 SELECT setval(pg_get_serial_sequence('proyecto_hidrica', 'id_pro'), 1, false);
+
 

@@ -58,14 +58,14 @@
                 </li>
                 {% if pro_com[25] is not none and pro_com[30] is not none %}
                 <li class="nav-item" id="item_turbina">
-                    <a class="icon nav-link d-flex align-items-center project_turbina" href="/hidrica/modal_turbina_project?id_pro={{pro_h[0]}}" title="Añade un turbina de baterías a tu proyecto">
+                    <a class="icon nav-link d-flex align-items-center project_turbina" href="/hidrica/modal_turbina_project?id_pro={{pro_h[0]}}" title="Añade una turbina  a tu proyecto">
                         <img src="/static/images/icon_turbina.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
                         <span class="d-none d-md-inline">Añadir turbina</span>
                     </a>
                 </li>
                 {% endif %}
                 <li class="nav-item" id="item_tuberia">
-                    <a class="icon nav-link d-flex align-items-center" id="project_tuberia" href="#" title="Añade un tuberia de baterías a tu proyecto">
+                    <a class="icon nav-link d-flex align-items-center project_tuberia" href="/hidrica/modal_tuberia_project?id_pro={{ pro_com[0] }}" title="Añade una tuberia  a tu proyecto">
                         <img src="/static/images/icon_tuberia.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
                         <span class="d-none d-md-inline">Añadir tuberia</span>
                     </a>
@@ -114,7 +114,8 @@
                     <li>
                         <a class="dropdown-item" href="/component_list">Componentes</a>
                     </li>
-                    <li><a class="dropdown-item" href="/informes">Informes</a></li>
+                    <li><a class="dropdown-item" href="/informes">Informes Fotovoltaica</a></li>
+                    <li><a class="dropdown-item" href="/hidrica/informes_hidrica">Informes Hidrica</a></li>
                     <li><a class="dropdown-item" href="/update_user">Usuarios</a></li>
                     {% endif%}
                 </ul>

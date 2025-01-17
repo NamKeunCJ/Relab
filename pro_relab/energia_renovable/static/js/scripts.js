@@ -446,6 +446,20 @@ $(document).ready(function() {
     });
 });
 
+//modal proyecto tuberia
+$(document).ready(function() {
+    $('.project_tuberia').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.project_tuberia').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#projectTuberia').modal('show');
+            });
+        }
+    });
+});
+
 //modal proyecto cargah
 $(document).ready(function() {
     $('#project_carga_h').off('click').on('click', function(event) {

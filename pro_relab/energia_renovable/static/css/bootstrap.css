@@ -460,6 +460,14 @@
     }
 }
 
+.tuberia {
+    background-color: #00aaff; /* Color de fondo para las tuberías */
+    border-radius: 0.2rem; /* Borde redondeado opcional */
+    height: 1rem; /* Altura mínima (ajusta según necesites) */
+    margin-right: 1rem; /* Espacio entre tuberías (ajusta según necesites) */
+}
+
+
 .icon img {
     width: 45px;
     transition: transform 10s;

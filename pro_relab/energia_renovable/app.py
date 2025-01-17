@@ -2274,28 +2274,31 @@ def informes():
                     print('DAMOS INFORMES',start_date,'-',end_date)
                     # Ejecuta la consulta usando id_pro como parámetro
                     cur.execute('''
-                        SELECT id_pro, created_at, nom_pro, 
-                            COUNT(id_inv) AS cant_inv, 
-                            COUNT(id_reg) AS cant_reg,
-                            (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = p.id_pro) AS cant_arr,
-                            (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = p.id_pro) AS cant_ban,
-                            (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = p.id_pro) AS cant_pcar
-                        FROM proyecto_fotovoltaica p 
+                        SELECT p.id_pro, p.created_at,  p.nom_pro, 
+                        (SELECT COUNT(id_inv) FROM inversor WHERE id_inv = p.id_inv) AS cant_inv,
+                        (SELECT COUNT(id_reg) FROM regulador WHERE id_reg = p.id_reg) AS cant_reg,
+                        (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = p.id_pro) AS cant_arr,
+                        (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = p.id_pro) AS cant_ban,
+                        (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = p.id_pro and pot_pcar!=0) AS cant_pcar,
+                        avg(e.w_ene), p.status
+                        FROM proyecto_fotovoltaica p LEFT JOIN energia_arreglo e on e.id_pro=p.id_pro
                         WHERE p.created_at >= %s AND p.created_at <= %s
-                        GROUP BY p.id_pro, p.nom_pro 
-                        ORDER BY created_at DESC;
+                        GROUP BY p.id_pro, p.created_at, p.nom_pro order by created_at desc;
                     ''', (start_date, end_date,))
                 else:
                     print('DAMOS INFORMES',start_date,'-',end_date)
                     # Ejecuta la consulta usando id_pro como parámetro
                     cur.execute('''
-                        SELECT id_pro, created_at,  nom_pro, 
-                        COUNT(id_inv) AS cant_inv, 
-                        COUNT(id_reg) AS cant_reg,
+                        SELECT p.id_pro, p.created_at,  p.nom_pro, 
+                        (SELECT COUNT(id_inv) FROM inversor WHERE id_inv = p.id_inv) AS cant_inv,
+                        (SELECT COUNT(id_reg) FROM regulador WHERE id_reg = p.id_reg) AS cant_reg,
                         (SELECT COUNT(id_arr) FROM arreglo_de_paneles WHERE id_pro = p.id_pro) AS cant_arr,
                         (SELECT COUNT(id_ban) FROM banco_de_baterias WHERE id_pro = p.id_pro) AS cant_ban,
-                        (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = p.id_pro) AS cant_pcar
-                        FROM proyecto_fotovoltaica p GROUP BY p.id_pro, p.created_at, p.nom_pro order by created_at desc limit 30;
+                        (SELECT COUNT(id_pcar) FROM proyecto_carga WHERE id_pro = p.id_pro and pot_pcar!=0) AS cant_pcar,
+                        avg(e.w_ene), p.status
+                        FROM proyecto_fotovoltaica p 
+                        LEFT JOIN energia_arreglo e on e.id_pro=p.id_pro
+                        GROUP BY p.id_pro, p.created_at, p.nom_pro order by created_at desc limit 30;
                     ''')
                 estructuras = cur.fetchall()  # Obtiene todos los resultados de la consulta
         return render_template('informe_y_Estadistica/informes.html',sist_optima=sist_optima,estructuras=estructuras)

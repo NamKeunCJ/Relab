@@ -49,7 +49,7 @@
                 position: relative;
                 height: 100%;
             }
-        </style>
+        </style>        
         {% if pro_com[3] is not none %}
             <table class="motobomba icon_table" draggable="true">
                 <tr>
@@ -59,17 +59,89 @@
                         </a>
                     </td>
                 </tr>
-                <tr><td>
-                    <div class="col d-flex align-items-end justify-content-center ">                        
-                        <a class="nav-link tooltip_btn project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                        data-bs-custom-class="custom-tooltip"
-                        data-bs-title="{{ pro_com[10] }}">
-                            <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 7rem;">
+                <tr>
+                    <td>
+                        <div class="col d-flex align-items-end justify-content-center ">                        
+                            <a class="nav-link tooltip_btn project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip" data-bs-title="{{ pro_com[10] }}">
+                                <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 7rem;">
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        {% endif %}   
+        <div id="pipeline-container" style="display: flex; align-items: center;">
+            {% if tub_com %}
+                <div id="tuberia-container" style="display: flex; align-items: center; gap: 1rem;">
+                    {% for tuberia in tub_com %}
+                        <div class="tuberia" 
+                                style=" width: {{ tuberia[0]  }}rem; height: 1rem; background-color: #00aaff; border-radius: 0.2rem;"
+                                title="Diámetro: {{ tuberia[3] }} mm, Codo: {{ tuberia[2] }}°, Orientación: {{ tuberia[1] }}">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>            
+        {% if pro_com[25] is not none and pro_com[30] is not none %}
+            <table class="generador icon_table" draggable="true">
+                <tr>
+                    <td>
+                        <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[24] }}" title="Eliminar Generador">
+                            <i class="bi bi-trash3-fill"></i>
                         </a>
-                    </div>
+                    </td>
+                </tr>
+                <tr><td>
+                    <div class="d-flex flex-column align-items-center">
+                        <!-- Contenedor para las dos imágenes en la misma fila -->
+                        <div class="d-flex justify-content-center align-items-center">
+                            <!-- Primera imagen (Caudalímetro) -->
+                            <a class="nav-link tooltip_btn project_caudalimetro" style="margin-top: 5.5rem;"
+                            href="/hidrica/modal_caudalimetro_project?id_pro={{ pro_com[0] }}" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Ingresa Valor Caudalimetro">
+                                <img src="{{ url_for('static', filename='images/caudalimetro.png') }}" 
+                                    class="imagen-iluminada" 
+                                    style="width: 1.7rem; margin-top: 0;">
+                            </a>
+                            
+                            <!-- Segunda imagen (Generador) -->
+                            <a class="nav-link tooltip_btn project_generador" 
+                            href="/hidrica/modal_generador_project?id_pro={{ pro_com[0] }}" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="{{ pro_com[33] }}">
+                                <img src="{{ url_for('static', filename='images/generador.png') }}" 
+                                    class="imagen-iluminada" 
+                                    style="width: 5rem;">
+                            </a>
+                        </div>
+                        {% set turbina_data = {
+                            "Pelton": "turbina1.png",
+                            "Michell-Banki": "turbina2.png"
+                        } %}
+                        
+                        {% if pro_com[61] in turbina_data %}
+                        <!-- Contenedor para la última imagen (Turbina debajo en la base) -->
+                        <div class="d-flex justify-content-center align-items-center" style="margin-top: -2.1rem;">
+                            <a class="nav-link tooltip_btn project_turbina_alabes" 
+                            href="/hidrica/modal_turbina_alabes_project?id_pro={{ pro_com[0] }}" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Turbina {{ pro_com[61] }}">
+                                <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[61]]) }}" 
+                                    class="imagen-iluminada" 
+                                    style="width: 6.7rem; margin-top: 0;">
+                            </a>
+                        </div>
+                        {% endif %} 
+                                            
+                    </div>                    
                 </td></tr>
             </table>
-        {% endif %}        
+        {% endif %}
         {% if pro_com[45] != 0 %}
             <table class="tanque icon_table" draggable="true">
                 <tr>
@@ -100,66 +172,6 @@
                             {% endif %}
                         {% endfor %}
                     </div>
-                </td></tr>
-            </table>
-        {% endif %}
-
-        {% if pro_com[25] is not none and pro_com[30] is not none %}
-            <table class="generador icon_table" draggable="true">
-                <tr>
-                    <td>
-                        <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[24] }}" title="Eliminar Generador">
-                            <i class="bi bi-trash3-fill"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr><td>
-                    <div class="d-flex flex-column align-items-center">
-                        <!-- Contenedor para las dos imágenes en la misma fila -->
-                        <div class="d-flex justify-content-center align-items-center">
-                            <!-- Primera imagen (Caudalímetro) -->
-                            <a class="nav-link tooltip_btn project_caudalimetro" style="margin-top: 5.5rem;"
-                               href="/hidrica/modal_caudalimetro_project?id_pro={{ pro_com[0] }}" 
-                               data-bs-toggle="tooltip" data-bs-placement="top"
-                               data-bs-custom-class="custom-tooltip"
-                               data-bs-title="Ingresa Valor Caudalimetro">
-                                <img src="{{ url_for('static', filename='images/caudalimetro.png') }}" 
-                                     class="imagen-iluminada" 
-                                     style="width: 1.7rem; margin-top: 0;">
-                            </a>
-                            
-                            <!-- Segunda imagen (Generador) -->
-                            <a class="nav-link tooltip_btn project_generador" 
-                               href="/hidrica/modal_generador_project?id_pro={{ pro_com[0] }}" 
-                               data-bs-toggle="tooltip" data-bs-placement="top"
-                               data-bs-custom-class="custom-tooltip"
-                               data-bs-title="{{ pro_com[33] }}">
-                                <img src="{{ url_for('static', filename='images/generador.png') }}" 
-                                     class="imagen-iluminada" 
-                                     style="width: 5rem;">
-                            </a>
-                        </div>
-                        {% set turbina_data = {
-                            "Pelton": "turbina1.png",
-                            "Michell-Banki": "turbina2.png"
-                        } %}
-                        
-                        {% if pro_com[61] in turbina_data %}
-                        <!-- Contenedor para la última imagen (Turbina debajo en la base) -->
-                        <div class="d-flex justify-content-center align-items-center" style="margin-top: -2.1rem;">
-                            <a class="nav-link tooltip_btn project_turbina_alabes" 
-                               href="/hidrica/modal_turbina_alabes_project?id_pro={{ pro_com[0] }}" 
-                               data-bs-toggle="tooltip" data-bs-placement="top"
-                               data-bs-custom-class="custom-tooltip"
-                               data-bs-title="Turbina {{ pro_com[61] }}">
-                                <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[61]]) }}" 
-                                     class="imagen-iluminada" 
-                                     style="width: 6.7rem; margin-top: 0;">
-                            </a>
-                        </div>
-                        {% endif %} 
-                                               
-                    </div>                    
                 </td></tr>
             </table>
         {% endif %}
@@ -211,13 +223,13 @@
                         carga: document.querySelector(`.carga_${pcar_id}`),
                         scrollContainer: document.getElementById('scrollContainer'),
                     };
-        
+
                     let draggedElement = null;
-                    const lineas = [null, null, null];
-        
+                    const lineas = [null, null]; // Solo dos líneas: tanque-motobomba y generador-carga
+
                     // Crear líneas si los elementos están presentes
-                    ['tanque-motobomba', 'motobomba-generador', 'generador-carga'].forEach((_, i) => {
-                        if (Object.values(elements).slice(i, i + 2).every((el) => el)) {
+                    ['tanque-motobomba', 'generador-carga'].forEach((_, i) => {
+                        if (Object.values(elements).slice(i * 2, i * 2 + 2).every((el) => el)) {
                             lineas[i] = Object.assign(document.createElement('div'), {
                                 className: 'linea_h',
                                 style: 'position: absolute; height: 2px; background-color: black; z-index: 1;',
@@ -225,17 +237,17 @@
                             elements.scrollContainer.appendChild(lineas[i]);
                         }
                     });
-        
+
                     // Función para posicionar elementos
                     const setPos = (el, x, y) =>
                         el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
-        
+
                     // Inicializar posiciones
                     setPos(elements.generador, x_gen, y_gen);
                     setPos(elements.motobomba, x_mot, y_mot);
                     setPos(elements.tanque, x_tan, y_tan);
                     setPos(elements.carga, x_pcar, y_pcar);
-        
+
                     // Calcular el centro de un elemento
                     const calcularCentro = (el) => {
                         const rect = el.getBoundingClientRect();
@@ -245,7 +257,7 @@
                             y: rect.top + rect.height / 2 - scrollRect.top + elements.scrollContainer.scrollTop,
                         };
                     };
-        
+
                     // Actualizar una línea entre dos elementos
                     const actualizarLinea_h = (linea, el1, el2) => {
                         if (!linea || !el1 || !el2) return;
@@ -259,31 +271,30 @@
                             top: `${p1.y}px`,
                         });
                     };
-        
+
                     // Actualizar todas las líneas
                     const actualizarLineas = () => {
                         actualizarLinea_h(lineas[0], elements.tanque, elements.motobomba);
-                        actualizarLinea_h(lineas[1], elements.motobomba, elements.generador);
-                        actualizarLinea_h(lineas[2], elements.generador, elements.carga);
+                        actualizarLinea_h(lineas[1], elements.generador, elements.carga); // Solo actualiza tanque-motobomba y generador-carga
                     };
-        
+
                     // Drag and Drop para mover elementos
                     document.addEventListener('dragstart', (e) => {
                         draggedElement = e.target;
                     });
-        
+
                     document.addEventListener('dragover', (e) => e.preventDefault());
-        
+
                     document.addEventListener('drop', (e) => {
                         e.preventDefault();
                         if (!draggedElement) return;
-        
+
                         const { left, top } = elements.scrollContainer.getBoundingClientRect();
                         const [x, y] = [
                             Math.max(0, e.clientX - left - draggedElement.offsetWidth / 2 + elements.scrollContainer.scrollLeft),
                             Math.max(0, e.clientY - top - draggedElement.offsetHeight / 2 + elements.scrollContainer.scrollTop),
                         ];
-        
+
                         if (draggedElement === elements.generador) {
                             x_gen = x;
                             y_gen = y;
@@ -297,10 +308,10 @@
                             x_pcar = x;
                             y_pcar = y;
                         }
-        
+
                         Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
                         actualizarLineas();
-        
+
                         // Enviar actualización al servidor
                         fetch('/hidrica/update_coordinates_hidrica', {
                             method: 'POST',
@@ -322,13 +333,13 @@
                             .then((data) => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar'))
                             .catch(console.error);
                     });
-        
+
                     elements.scrollContainer.addEventListener('scroll', actualizarLineas);
-        
+
                     // Inicializar las líneas
                     actualizarLineas();
                 }
-        
+
                 initIcono(
                     "500",
                     "50",
@@ -342,9 +353,9 @@
                     "{{ car_com[10] }}"
                 );
             });
-        </script>
-                
-        {% endfor %}
+
+        </script>              
+        {% endfor %}         
     </div>
 </div>
 

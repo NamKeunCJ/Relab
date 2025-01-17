@@ -21,8 +21,10 @@
                 }
             },
             "order": [
-                [0, "desc"]
-            ]
+                [1, "desc"]
+            ],
+            "pageLength": 5,
+            "lengthMenu": [5, 10, 25, 50], 
         });
     });
 </script>
@@ -66,30 +68,34 @@
                         <div class="col-lg-12 col-sm-12 ms-sm-auto">
                             <div  class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
                                 <div class="card-body" style="overflow-x: auto;">
-                                    <h3>Estructuras Fotovoltaicas</h3>
+                                    <h3>Recursos por Proyecto</h3>
                                         {% if estructuras is not none %}                        
                                         <table id="tabla" class="table table-responsive table table-hover" >
                                             <thead class="table-primary">
                                                 <tr>
-                                                    <th>Fecha y Hora</th>
                                                     <th>Nombre Proyecto</th>
-                                                    <th>Cant. Inversor</th>
-                                                    <th>Cant. Regulador</th>
-                                                    <th>Cant. Arreglo-Paneles</th>
-                                                    <th>Cant. Banco-Bateria</th>
-                                                    <th>Cant. Carga</th>
+                                                    <th>Fecha y Hora</th>                                                    
+                                                    <th>Inversor</th>
+                                                    <th>Regulador</th>
+                                                    <th>Arreglo-Paneles</th>
+                                                    <th>Banco-Bateria</th>
+                                                    <th>Cargas</th>
+                                                    <th>Energía Promedio Generada (kWh)</th>
+                                                    <th>Estado</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {% for estructuras in estructuras %}
                                                 <tr>
-                                                    <td class='Fecha_Hora'>{{estructuras[1]}}</td>
                                                     <td class='Nombre_Proyecto'>{{estructuras[2]}}</td>
+                                                    <td class='Fecha_Hora'>{{estructuras[1]}}</td>                                                    
                                                     <td class='Inversor'>{{estructuras[3]}}</td>
                                                     <td class='Regulador'>{{estructuras[4]}}</td>
                                                     <td class='Arreglo_Paneles'>{{estructuras[5]}}</td>
                                                     <td class='Banco_Bateria'>{{estructuras[6]}}</td>
                                                     <td class='Carga'>{{estructuras[7]}}</td>
+                                                    <td class='Energia'> {% if estructuras[8] is none %} Sin Ejecutarse {% else %} {{estructuras[8]}} {% endif %} </td>
+                                                    <td class='Estado'> {% if estructuras[9] == false %} Eliminado {% else %} Activo  {% endif %} </td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -103,7 +109,7 @@
                         <div class="col-lg-12 col-sm-12 ms-sm-auto">
                             <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
                                 <div class="card-body" style="overflow-x: auto;">
-                                    <h3>Sistemas Fotovoltaicos Eficientes</h3>
+                                    <h3>Rendimiento Energético por Proyecto</h3>
                                     {% if sist_optima is not none %}
                                     <table id="tabla" class="table table-responsive table table-hover">
                                         <thead class="table-primary">
@@ -126,7 +132,7 @@
                                         </tbody>
                                     </table>
                                     {% else %}
-                                    <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
+                                    <p class="text-danger">Error: No se encontraron datos de proyectos fotovoltaicos.</p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -268,7 +274,7 @@
                                     size: 0,
                                 },
                                 title: {
-                                    text: 'Energía Generada por los Proyectos Fotovoltaicos',
+                                    text: 'Rendimiento Energético por Proyecto',
                                     align: 'left'
                                 },
                                 fill: {
