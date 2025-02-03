@@ -56,7 +56,7 @@
                         <span class="d-none d-md-inline">Añadir tanque</span>
                     </a>
                 </li>
-                {% if pro_com[25] is not none and pro_com[30] is not none %}
+                {% if pro_com[27] is not none and pro_com[32] is not none %}
                 <li class="nav-item" id="item_turbina">
                     <a class="icon nav-link d-flex align-items-center project_turbina" href="/hidrica/modal_turbina_project?id_pro={{pro_h[0]}}" title="Añade una turbina  a tu proyecto">
                         <img src="/static/images/icon_turbina.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
@@ -64,12 +64,14 @@
                     </a>
                 </li>
                 {% endif %}
+                {% if pro_com[11] is not none  %}
                 <li class="nav-item" id="item_tuberia">
                     <a class="icon nav-link d-flex align-items-center project_tuberia" href="/hidrica/modal_tuberia_project?id_pro={{ pro_com[0] }}" title="Añade una tuberia  a tu proyecto">
                         <img src="/static/images/icon_tuberia.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
                         <span class="d-none d-md-inline">Añadir tuberia</span>
                     </a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="icon nav-link d-flex align-items-center" id="project_carga_h" href="/hidrica/modal_carga_project?id_pro={{pro_h[0]}}" title="Añade una carga a tu proyecto">
                         <img src="/static/images/icon_carga.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">

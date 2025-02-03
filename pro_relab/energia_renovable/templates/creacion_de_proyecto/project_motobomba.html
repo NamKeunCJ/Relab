@@ -33,8 +33,8 @@
                 <div class="modal-body">
                     <h5 style="margin-bottom: 1rem;"><b> Informacion del Motobomba:  </b></h5>
                     {%if info is not none %} 
-                    {% if info[20]==false %}
-                        <div class="alert alert-danger">El Motobomba {{info[10]}} con identificacion {{info[19]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro motobomba.</div>
+                    {% if info[22]==false %}
+                        <div class="alert alert-danger">El Motobomba {{info[12]}} con identificacion {{info[21]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro motobomba.</div>
                     {% endif %}
                     <table class="table table-responsive">
                         <thead>
@@ -47,10 +47,10 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{info[10]}}</td>
-                                <td>{{info[11]}}</td>
                                 <td>{{info[12]}}</td>
                                 <td>{{info[13]}}</td>
+                                <td>{{info[14]}}</td>
+                                <td>{{info[15]}}</td>
                             </tr>
                         </tbody>
                     </table>

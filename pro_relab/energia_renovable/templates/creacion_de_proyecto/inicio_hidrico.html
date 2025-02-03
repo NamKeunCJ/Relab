@@ -49,7 +49,19 @@
                 position: relative;
                 height: 100%;
             }
-        </style>        
+            
+            #canvas {
+                position: relative;
+                width: 500px;
+                height: 500px;
+            }
+            .line {
+                position: absolute;
+                height: 2px;
+                background-color: rgb(0, 160, 253);
+                transform-origin: 0 0; /* La rotación ocurre desde el inicio de la línea */
+            }
+        </style>
         {% if pro_com[3] is not none %}
             <table class="motobomba icon_table" draggable="true">
                 <tr>
@@ -63,31 +75,23 @@
                     <td>
                         <div class="col d-flex align-items-end justify-content-center ">                        
                             <a class="nav-link tooltip_btn project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip" data-bs-title="{{ pro_com[10] }}">
+                            data-bs-custom-class="custom-tooltip" data-bs-title="{{ pro_com[12] }}">
                                 <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 7rem;">
                             </a>
                         </div>
                     </td>
                 </tr>
             </table>
-        {% endif %}   
-        <div id="pipeline-container" style="display: flex; align-items: center;">
-            {% if tub_com %}
-                <div id="tuberia-container" style="display: flex; align-items: center; gap: 1rem;">
-                    {% for tuberia in tub_com %}
-                        <div class="tuberia" 
-                                style=" width: {{ tuberia[0]  }}rem; height: 1rem; background-color: #00aaff; border-radius: 0.2rem;"
-                                title="Diámetro: {{ tuberia[3] }} mm, Codo: {{ tuberia[2] }}°, Orientación: {{ tuberia[1] }}">
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>            
-        {% if pro_com[25] is not none and pro_com[30] is not none %}
+        {% endif %}  
+
+        
+        
+           
+        {% if pro_com[27] is not none and pro_com[32] is not none %}
             <table class="generador icon_table" draggable="true">
                 <tr>
                     <td>
-                        <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[24] }}" title="Eliminar Generador">
+                        <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[26] }}" title="Eliminar Generador">
                             <i class="bi bi-trash3-fill"></i>
                         </a>
                     </td>
@@ -112,7 +116,7 @@
                             href="/hidrica/modal_generador_project?id_pro={{ pro_com[0] }}" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            data-bs-title="{{ pro_com[33] }}">
+                            data-bs-title="{{ pro_com[35] }}">
                                 <img src="{{ url_for('static', filename='images/generador.png') }}" 
                                     class="imagen-iluminada" 
                                     style="width: 5rem;">
@@ -123,15 +127,15 @@
                             "Michell-Banki": "turbina2.png"
                         } %}
                         
-                        {% if pro_com[61] in turbina_data %}
+                        {% if pro_com[65] in turbina_data %}
                         <!-- Contenedor para la última imagen (Turbina debajo en la base) -->
                         <div class="d-flex justify-content-center align-items-center" style="margin-top: -2.1rem;">
                             <a class="nav-link tooltip_btn project_turbina_alabes" 
                             href="/hidrica/modal_turbina_alabes_project?id_pro={{ pro_com[0] }}" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            data-bs-title="Turbina {{ pro_com[61] }}">
-                                <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[61]]) }}" 
+                            data-bs-title="Turbina {{ pro_com[65] }}">
+                                <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[65]]) }}" 
                                     class="imagen-iluminada" 
                                     style="width: 6.7rem; margin-top: 0;">
                             </a>
@@ -142,11 +146,11 @@
                 </td></tr>
             </table>
         {% endif %}
-        {% if pro_com[45] != 0 %}
+        {% if pro_com[47] != 0 %}
             <table class="tanque icon_table" draggable="true">
                 <tr>
                     <td>
-                        <a class="enlace-link del_tan" href="/hidrica/ver_modal_del_tan?id_tan={{  pro_com[44] }}" title="Eliminar Tanque">
+                        <a class="enlace-link del_tan" href="/hidrica/ver_modal_del_tan?id_tan={{  pro_com[46] }}" title="Eliminar Tanque">
                             <i class="bi bi-trash3-fill"></i>
                         </a>
                     </td>
@@ -163,10 +167,10 @@
                         ] %}
                         
                         {% for range in ranges %}
-                            {% if pro_com[45] >= range[0] and pro_com[45] < range[1] %}
+                            {% if pro_com[47] >= range[0] and pro_com[47] < range[1] %}
                                 <a class="nav-link tooltip_btn project_tanque" href="/hidrica/modal_tanque_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
                                 data-bs-custom-class="custom-tooltip"
-                                data-bs-title="{{ pro_com[45] }} L/m³">
+                                data-bs-title="{{ pro_com[47] }} L/m³">
                                     <img src="{{ url_for('static', filename='images/' + range[2]) }}" class="imagen-iluminada" style="width: 6rem;">
                                 </a>
                             {% endif %}
@@ -211,151 +215,181 @@
                 </table>
             {% endfor %}
         {% endif %}
+        <div id="canvas"></div>
         <div class="linea_h"></div>
-        {% for car_com in car_com %}
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
+        
+        <script>                           
+            document.addEventListener("DOMContentLoaded", function () {
+                const tubComData = JSON.parse('{{ tub_com | tojson | safe }}');
+                const [xmot, ymot] = ['{{ pro_com[9] }}', '{{ pro_com[10] }}'].map(Number);
+                const canvas = document.getElementById("canvas");
+                let lastX, lastY;
+
+                function drawLine(x, y, length, angle) {
+                    const radians = (angle * Math.PI) / 180;
+                    const endX = x + length * Math.cos(radians);
+                    const endY = y + length * Math.sin(radians);
+                    canvas.appendChild(Object.assign(document.createElement("div"), {
+                        className: "line",
+                        style: `width:${length}px; transform:rotate(${angle}deg); left:${x}px; top:${y}px;`
+                    }));
+                    
+                    return { x: endX, y: endY };
+                }
+
+                function drawFromTuples(data) {
+                    let [x, y, angle] = [xmot + 115, ymot + 50, 0];
+
+                    data.forEach(([l, relAngle, o]) => {
+                        angle += o === 'Derecha' ? -relAngle : relAngle;
+                        ({ x, y } = drawLine(x, y, l, angle));
+                    });
+                    [window.lastX, window.lastY] = [x, y];
+                }
+
+                function init() {
+                    const data = tubComData.length > 0 ? [[0.3, 0, 'Continua'], ...tubComData.map(([l, o, a]) => [l, a, o])] : [];
+                    drawFromTuples(data.map(([l, a, o]) => [l * 10, a > 0 && a <= 180 ? 180 - a : a, o]));
+                }
+
+                init();
+
+                function waitForCoordinates(callback) {
+                    window.lastX !== undefined && window.lastY !== undefined ? callback() : setTimeout(() => waitForCoordinates(callback), 100);
+                }
+
+                {% for car_com in car_com %}
+                waitForCoordinates(() => {
+                    initIcono(
+                        window.lastX -7, window.lastY - 123, "{{ pro_com[53] }}", "{{ pro_com[54] }}",
+                        "{{ pro_com[0] }}", "{{ pro_com[9] }}", "{{ pro_com[10] }}",
+                        "{{ car_com[0] }}", "{{ car_com[9] }}", "{{ car_com[10] }}"
+                    );
+                });
+                {% endfor %}
+
                 function initIcono(x_gen, y_gen, x_tan, y_tan, id_pro, x_mot, y_mot, pcar_id, x_pcar, y_pcar) {
                     const elements = {
-                        generador: document.querySelector('.generador'),
-                        motobomba: document.querySelector('.motobomba'),
-                        tanque: document.querySelector('.tanque'),
+                        generador: document.querySelector(".generador"),
+                        motobomba: document.querySelector(".motobomba"),
+                        tanque: document.querySelector(".tanque"),
                         carga: document.querySelector(`.carga_${pcar_id}`),
-                        scrollContainer: document.getElementById('scrollContainer'),
+                        scrollContainer: document.getElementById("scrollContainer"),
                     };
 
-                    let draggedElement = null;
-                    const lineas = [null, null]; // Solo dos líneas: tanque-motobomba y generador-carga
+                    const lineas = ['tanqueMotobomba', 'generadorCarga'].reduce((acc, key) => {
+                        const div = Object.assign(document.createElement("div"), {
+                            className: "linea_h",
+                            style: "position: absolute; height: 2px; background-color: black; z-index: 1;",
+                        });
+                        elements.scrollContainer.appendChild(div);
+                        acc[key] = div;
+                        return acc;
+                    }, {});
 
-                    // Crear líneas si los elementos están presentes
-                    ['tanque-motobomba', 'generador-carga'].forEach((_, i) => {
-                        if (Object.values(elements).slice(i * 2, i * 2 + 2).every((el) => el)) {
-                            lineas[i] = Object.assign(document.createElement('div'), {
-                                className: 'linea_h',
-                                style: 'position: absolute; height: 2px; background-color: black; z-index: 1;',
-                            });
-                            elements.scrollContainer.appendChild(lineas[i]);
-                        }
-                    });
+                    function setPos(el, x, y) {
+                        if (el) Object.assign(el.style, { position: "absolute", left: `${x}px`, top: `${y}px` });
+                    }
 
-                    // Función para posicionar elementos
-                    const setPos = (el, x, y) =>
-                        el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
-
-                    // Inicializar posiciones
-                    setPos(elements.generador, x_gen, y_gen);
-                    setPos(elements.motobomba, x_mot, y_mot);
-                    setPos(elements.tanque, x_tan, y_tan);
-                    setPos(elements.carga, x_pcar, y_pcar);
-
-                    // Calcular el centro de un elemento
-                    const calcularCentro = (el) => {
+                    function calcularCentro(el) {
                         const rect = el.getBoundingClientRect();
                         const scrollRect = elements.scrollContainer.getBoundingClientRect();
                         return {
                             x: rect.left + rect.width / 2 - scrollRect.left + elements.scrollContainer.scrollLeft,
                             y: rect.top + rect.height / 2 - scrollRect.top + elements.scrollContainer.scrollTop,
                         };
-                    };
+                    }
 
-                    // Actualizar una línea entre dos elementos
-                    const actualizarLinea_h = (linea, el1, el2) => {
+                    function actualizarLinea(linea, el1, el2) {
                         if (!linea || !el1 || !el2) return;
-                        const [p1, p2] = [calcularCentro(el1), calcularCentro(el2)];
-                        const [dx, dy] = [p2.x - p1.x, p2.y - p1.y];
+                        const p1 = calcularCentro(el1), p2 = calcularCentro(el2);
                         Object.assign(linea.style, {
-                            width: `${Math.hypot(dx, dy)}px`,
-                            transform: `rotate(${Math.atan2(dy, dx) * (180 / Math.PI)}deg)`,
-                            transformOrigin: '0 0',
-                            left: `${p1.x}px`,
-                            top: `${p1.y}px`,
+                            width: `${Math.hypot(p2.x - p1.x, p2.y - p1.y)}px`,
+                            transform: `rotate(${Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI)}deg)`,
+                            transformOrigin: "0 0", left: `${p1.x}px`, top: `${p1.y}px`,
                         });
-                    };
+                    }
 
-                    // Actualizar todas las líneas
-                    const actualizarLineas = () => {
-                        actualizarLinea_h(lineas[0], elements.tanque, elements.motobomba);
-                        actualizarLinea_h(lineas[1], elements.generador, elements.carga); // Solo actualiza tanque-motobomba y generador-carga
-                    };
+                    function actualizarLineas() {
+                        actualizarLinea(lineas.tanqueMotobomba, elements.tanque, elements.motobomba);
+                        actualizarLinea(lineas.generadorCarga, elements.generador, elements.carga);
+                    }
 
-                    // Drag and Drop para mover elementos
-                    document.addEventListener('dragstart', (e) => {
-                        draggedElement = e.target;
-                    });
-
-                    document.addEventListener('dragover', (e) => e.preventDefault());
-
-                    document.addEventListener('drop', (e) => {
+                    document.addEventListener("dragstart", (e) => draggedElement = e.target);
+                    document.addEventListener("dragover", (e) => e.preventDefault());
+                    document.addEventListener("drop", (e) => {
                         e.preventDefault();
                         if (!draggedElement) return;
-
+                        
                         const { left, top } = elements.scrollContainer.getBoundingClientRect();
                         const [x, y] = [
                             Math.max(0, e.clientX - left - draggedElement.offsetWidth / 2 + elements.scrollContainer.scrollLeft),
-                            Math.max(0, e.clientY - top - draggedElement.offsetHeight / 2 + elements.scrollContainer.scrollTop),
+                            Math.max(0, e.clientY - top - draggedElement.offsetHeight / 2 + elements.scrollContainer.scrollTop)
                         ];
-
-                        if (draggedElement === elements.generador) {
-                            x_gen = x;
-                            y_gen = y;
-                        } else if (draggedElement === elements.motobomba) {
-                            x_mot = x;
-                            y_mot = y;
-                        } else if (draggedElement === elements.tanque) {
-                            x_tan = x;
-                            y_tan = y;
-                        } else if (draggedElement === elements.carga) {
-                            x_pcar = x;
-                            y_pcar = y;
+                        
+                        switch (draggedElement) {
+                            case elements.motobomba:
+                            [x_mot, y_mot] = [x, y];
+                            actualizarTuberia();
+                            break;
+                            case elements.generador: [x_gen, y_gen] = [x, y]; break;
+                            case elements.tanque: [x_tan, y_tan] = [x, y]; break;
+                            case elements.carga: [x_pcar, y_pcar] = [x, y];  break;
                         }
-
+                        
                         Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
                         actualizarLineas();
-
-                        // Enviar actualización al servidor
-                        fetch('/hidrica/update_coordinates_hidrica', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                x: x_gen,
-                                y: y_gen,
-                                pro_id: id_pro,
-                                x_mot,
-                                y_mot,
-                                x_tan,
-                                y_tan,
-                                pcar_id,
-                                x_pcar,
-                                y_pcar,
-                            }),
+                        actualizarTuberia();
+                        
+                        fetch("/hidrica/update_coordinates_hidrica", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ x: x_gen, y: y_gen, pro_id: id_pro, x_mot, y_mot, x_tan, y_tan, pcar_id, x_pcar, y_pcar }),
                         })
-                            .then((res) => res.json())
-                            .then((data) => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar'))
-                            .catch(console.error);
+                        .then(res => res.json())
+                        .then(data => console.log(data.success ? "Coordenadas actualizadas" : "Error al actualizar"))
+                        .catch(console.error);
                     });
+                    
+                    function actualizarTuberia() {
+                        document.querySelectorAll(".line").forEach(el => el.remove()); // Borra todas las líneas previas
 
-                    elements.scrollContainer.addEventListener('scroll', actualizarLineas);
+                        // Obtener nueva posición de la motobomba
+                        const motobomba = document.querySelector(".motobomba");
+                        const rect = motobomba.getBoundingClientRect();
+                        const scrollRect = document.getElementById("scrollContainer").getBoundingClientRect();
 
-                    // Inicializar las líneas
+                        let x_inicio = rect.left - scrollRect.left + document.getElementById("scrollContainer").scrollLeft + 115;
+                        let y_inicio = rect.top - scrollRect.top + document.getElementById("scrollContainer").scrollTop + 50;
+
+
+                        const data = tubComData.length > 0 ? [[0.3, 0, 'Continua'], ...tubComData.map(([l, o, a]) => [l, a, o])] : [];
+                        drawFromTuples(data.map(([l, a, o]) => [l * 10, a > 0 && a <= 180 ? 180 - a : a, o]), x_inicio, y_inicio);
+                        
+                    }
+
+                    function drawFromTuples(data, x_inicio, y_inicio) {
+                        let [x, y, angle] = [x_inicio, y_inicio, 0];
+                        console.log(data);
+                        data.forEach(([l, relAngle, o]) => {
+                            console.log('l',l,'relAngle',relAngle,'o', o)
+                            angle += o === 'Derecha' ? -relAngle : relAngle;
+                            ({ x, y } = drawLine(x, y, l, angle));
+                        });
+                        [window.lastX, window.lastY] = [x, y];
+                        setPos(elements.generador, x-7, y-123);
+                        actualizarLineas();
+                    }
+                    
+                    elements.scrollContainer.addEventListener("scroll", actualizarLineas);
+                    setPos(elements.generador, x_gen, y_gen);
+                    setPos(elements.motobomba, x_mot, y_mot);
+                    setPos(elements.tanque, x_tan, y_tan);
+                    setPos(elements.carga, x_pcar, y_pcar);
                     actualizarLineas();
                 }
-
-                initIcono(
-                    "500",
-                    "50",
-                    "515",
-                    "300",
-                    "{{ pro_com[0] }}",
-                    "200",
-                    "80",
-                    "{{ car_com[0] }}",
-                    "{{ car_com[9] }}",
-                    "{{ car_com[10] }}"
-                );
             });
-
-        </script>              
-        {% endfor %}         
+        </script>           
     </div>
 </div>
 

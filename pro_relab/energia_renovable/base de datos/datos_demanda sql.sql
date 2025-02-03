@@ -64,6 +64,8 @@ delete from proyecto_cargah;
 SELECT setval(pg_get_serial_sequence('proyecto_cargah', 'id_pcar'), 1, false);
 delete from tubo;
 SELECT setval(pg_get_serial_sequence('tubo', 'id_tub'), 1, false);
+delete from energia_generada;
+SELECT setval(pg_get_serial_sequence('energia_generada', 'id_ene'), 1, false);
 delete from trayectoria_tubo;
 SELECT setval(pg_get_serial_sequence('trayectoria_tubo', 'id_tra'), 1, false);
 delete from proyecto_hidrica;

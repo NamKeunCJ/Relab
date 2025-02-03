@@ -17,7 +17,7 @@
                     </div>
                     
                     <div class="col-sm-3 text-end">
-                        {% if pro_list[24] is none and pro_list[3] is none and pro_list[52] is none and pro_list[39] ==0 %}
+                        {% if pro_list[24] is none and pro_list[3] is none and pro_list[54] is none and pro_list[39] ==0 %}
                             <small class="form-text text-muted">(Vacío)</small>
                         {% endif %}
                     </div>
@@ -29,7 +29,7 @@
                                     {{ icon('generador', pro_list[24] is not none, 'Generador') }}
                                     {{ icon('motobomba', pro_list[3] is not none, 'motobomba') }}
                                     {{ icon('tanque', pro_list[39] !=0, 'Tanque') }}
-                                    {{ icon('turbina', pro_list[52] is not none, 'Turbina') }}
+                                    {{ icon('turbina', pro_list[54] is not none, 'Turbina') }}
                                 </tr>
                             </tbody>
                         </table>
@@ -57,7 +57,7 @@
                                         <h5 class="card-title">{{pro_list[1]}}</h5>
                                     </div>
                                     <div class="col-sm-3 text-end">
-                                        {% if pro_list[24] is none and pro_list[3] is none and pro_list[52] is none and pro_list[39] ==0 %}
+                                        {% if pro_list[24] is none and pro_list[3] is none and pro_list[54] is none and pro_list[39] ==0 %}
                                             <small class="form-text text-muted">(Vacío)</small>
                                         {% endif %}
                                     </div>
@@ -69,7 +69,7 @@
                                             {{ icon('generador', pro_list[24] is not none, 'Generador') }}
                                             {{ icon('motobomba', pro_list[3] is not none, 'motobomba') }}
                                             {{ icon('tanque', pro_list[39] !=0, 'Tanque') }}
-                                            {{ icon('turbina', pro_list[52] is not none, 'Turbina') }}
+                                            {{ icon('turbina', pro_list[54] is not none, 'Turbina') }}
                                         </tr>
                                     </tbody>
                                 </table>

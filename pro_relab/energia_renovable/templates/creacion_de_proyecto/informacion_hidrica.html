@@ -21,35 +21,35 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">Referencia Motobomba</th>
-                                            <td>{{pro_com[10]}}</td>
+                                            <td>{{pro_com[12]}}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Potencia Maxima</th>
-                                            <td>{{pro_com[11]}} Kw</td>
+                                            <td>{{pro_com[13]}} Kw</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Voltaje Maximo</th>
-                                            <td>{{pro_com[12]}} V</td>
+                                            <td>{{pro_com[14]}} V</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Caudal Motobomba</th>
-                                            <td>{{pro_com[13]}} L/m</td>
+                                            <td>{{pro_com[15]}} L/m</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Diametro de Entrada</th>
-                                            <td>{{pro_com[14]}} mm</td>
+                                            <td>{{pro_com[16]}} mm</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Diametro de Salida</th>
-                                            <td>{{pro_com[15]}} mm</td>
+                                            <td>{{pro_com[17]}} mm</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Frecuencia Motobomba</th>
-                                            <td>{{pro_com[16]}} Hz</td>
+                                            <td>{{pro_com[18]}} Hz</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Presion Motobomba</th>
-                                            <td>{{pro_com[17]}} Bar</td>
+                                            <td>{{pro_com[19]}} Bar</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -63,7 +63,7 @@
                 {% endif %}
             {% endif %}
             {% if num_info == '2' %}
-                {% if pro_com[32] is not none %}                     
+                {% if pro_com[34] is not none %}                     
                     <div class="container mt-4">
                         <div class="card shadow border-0 rounded-3 mt-4">
                             <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
@@ -80,30 +80,30 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">Referencia Generador</th>
-                                            <td>{{pro_com[33]}}</td>
+                                            <td>{{pro_com[35]}}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Potencia Maxima</th>
-                                            <td>{{pro_com[34]}} W</td>
+                                            <td>{{pro_com[36]}} W</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Voltaje Maximo</th>
-                                            <td>{{pro_com[35]}} V</td>
+                                            <td>{{pro_com[37]}} V</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Velocidad Generador</th>
-                                            <td>{{pro_com[36]}} rpm</td>
+                                            <td>{{pro_com[38]}} rpm</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Diametro Generador</th>
-                                            <td>{{pro_com[37]}} mm</td>
+                                            <td>{{pro_com[39]}} mm</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>       
 
-                        {% if pro_com[60] is not none %}
+                        {% if pro_com[64] is not none %}
                             <div class="card shadow border-0 rounded-3 mt-4">
                                 <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
                                     <h5 class="mb-0">Datos del Turbina</h5>
@@ -119,15 +119,15 @@
                                         <tbody>
                                             <tr>
                                                 <th scope="row">Tipo Turbina</th>
-                                                <td>{{pro_com[61]}}</td>
+                                                <td>{{pro_com[65]}}</td>
                                             </tr>
                                             <tr>
-                                                <th scope="row">Cantidad de {{pro_com[66]}}</th>
-                                                <td>{{pro_com[52]}} Und</td>
+                                                <th scope="row">Cantidad de {{pro_com[70]}}</th>
+                                                <td>{{pro_com[56]}} Und</td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">Velocidad Turbina</th>
-                                                <td>{{pro_com[53]}} rpm</td>
+                                                <td>{{pro_com[57]}} rpm</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -148,7 +148,7 @@
                 {% endif %}
             {% endif %}
             {% if num_info == '3' %}
-                {% if pro_com[45] != 0 %}
+                {% if pro_com[47] != 0 %}
                     <div class="card shadow border-0 rounded-3 mt-4">
                         <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
                             <h5 class="mb-0">Datos del Tanque</h5>
@@ -166,14 +166,14 @@
                                         (100, 9999999999, 'tanque5.png')
                                     ] %}
                                     {% for range in ranges %}
-                                        {% if pro_com[45] >= range[0] and pro_com[45] < range[1] %}
+                                        {% if pro_com[47] >= range[0] and pro_com[47] < range[1] %}
                                             <img src="{{ url_for('static', filename='images/' + range[2]) }}" 
                                                 class="tooltip_btn" 
                                                 style="width: 12rem;" 
                                                 data-bs-toggle="tooltip" 
                                                 data-bs-placement="top" 
                                                 data-bs-custom-class="custom-tooltip" 
-                                                data-bs-title="{{ pro_com[45] }} L/m³">
+                                                data-bs-title="{{ pro_com[47] }} L/m³">
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -190,7 +190,7 @@
                                         <tbody>
                                             <tr>
                                                 <th scope="row">Capacidad Tanque</th>
-                                                <td>{{ pro_com[45] }} L/m³</td>
+                                                <td>{{ pro_com[47] }} L/m³</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -208,5 +208,5 @@
     </div>
 {% endif %}
 {% if num_info == '4' %}
-    {% block eje_proyecto %} {% include 'creacion_de_proyecto/eje_proyecto.html' %} {% endblock %}   
+    {% block eje_proyecto %} {% include 'creacion_de_proyecto/eje_proyecto_hidrica.html' %} {% endblock %}   
 {% endif %}

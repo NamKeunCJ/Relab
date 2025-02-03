@@ -2195,7 +2195,8 @@ def ejecutar_proyecto():
                         INSERT INTO energia_arreglo (id_pro, parr_ene, id_irr, efi_ene, w_ene, kw_ene, created_at)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (id_pro, created_at) DO NOTHING
-                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadoWh, created_at)]) 
+                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadoWh, created_at)])
+                    conn.commit() 
          
 #Mostrar datos de proyecto generacion de energia
 def mostrar_ejecucion_proyecto(id_pro,start_date,end_date):

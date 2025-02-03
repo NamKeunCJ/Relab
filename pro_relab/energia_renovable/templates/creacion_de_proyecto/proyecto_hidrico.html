@@ -38,6 +38,35 @@
                             </li>
                         {% endif%}                     
                     </ul> 
+                    {% for proyecto in pro_com %}
+                        {% if loop.index == 1 and pro_com[3] is not none and pro_com[27] !=0 and pro_com[32] is not none and pro_com[64] is not none and pro_com[72] != 0 and car_com[0][7]!=0 and (car_com|selectattr(8, '!=', 0)|list)|length > 0 and pro_com[47] != 0 %}
+
+                            <hr class="border border-dark border-1 opacity-75">
+                            <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>EJECUTAR PROYECTO</b></label>
+                            <a class="btn btn-primary tooltip_btn" href="/hidrica/inicio_proyecto_hidrica?num_info=4&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Ejecuta la estructura y recolecta datos.">Ejecutar</a>
+
+                            <!--<hr class="border border-dark border-1 opacity-75">
+                            <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>CONECTAR A ESTRUCTURA FISICA</b></label>
+                            <a class="btn btn-primary tooltip_btn" href="/inicio_proyecto_fotovoltaica?num_info=5&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Compara datos con una estructura física.">Conectar</a> --> 
+                            <!-- Alerta que se muestra por 5 segundos debajo del nombre del proyecto -->
+                            <div id="alerta-proyecto" class="alert alert-info custom-alert" style="display: none;margin-top: 2rem;">
+                                <small>¡Proyecto listo para ejecutar! Presiona <strong>EJECUTAR PROYECTO</strong> para iniciar la recolección de datos en tiempo real.</small>
+                            </div>
+                            <script>
+                                // Mostrar la alerta
+                                document.getElementById("alerta-proyecto").style.display = "block";
+
+                                // Ocultar la alerta después de 7 segundos
+                                setTimeout(function() {
+                                    document.getElementById("alerta-proyecto").style.display = "none";
+                                }, 5000);
+                            </script>                        
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>              
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
