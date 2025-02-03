@@ -41,6 +41,8 @@
             <thead>
                 <tr>
                     <th style="width: 12rem;">Fecha y Hora</th>
+                    <th>Altura</th>
+                    <th>Caudal</th>
                     <th>Potencia total (Kw)</th>
                     <th>Eficiencia Energia</th>
                 </tr>
@@ -49,6 +51,8 @@
                 {% for eje_pro in result_proyect_ene %}
                 <tr>
                     <td class="time_irradiance">{{eje_pro[3]}}</td>
+                    <td class="alt_ene">{{eje_pro[5]}}</td>
+                    <td class="cau_ene">{{eje_pro[6]}}</td>
                     <td class="parr_ene">{{eje_pro[2]}}</td>
                     <td class="efi_ene">{{eje_pro[1]}}</td>
                 </tr>
@@ -94,46 +98,50 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var energiaData = []; // Arreglo para almacenar los datos extraídos
+        var energiaData = []; // Almacenará la información completa
 
-        // Recorrer las filas de la tabla para extraer datos
         document.querySelectorAll('#tablaP tbody tr').forEach(function(row) {
-            var fecha = row.querySelector('.time_irradiance')?.innerText;
-            var potencia = row.querySelector('.parr_ene')?.innerText;
-            var eficiencia = row.querySelector('.efi_ene')?.innerText;
+            var timeElement = row.querySelector('.time_irradiance');
+            var potenciaElement = row.querySelector('.parr_ene');
+            var eficienciaElement = row.querySelector('.efi_ene');
+            var alturaElement = row.querySelector('.alt_ene');
+            var caudalElement = row.querySelector('.cau_ene');
 
-            if (fecha && potencia && eficiencia) {
-                // Parsear y almacenar los datos si son válidos
-                var time = new Date(fecha).getTime(); // Convertir fecha a timestamp
-                var potenciaVal = parseFloat(potencia.replace(/,/g, ''));
-                var eficienciaVal = parseFloat(eficiencia.replace(/,/g, ''));
+            if (timeElement && potenciaElement && eficienciaElement && alturaElement && caudalElement) {
+                var timeText = timeElement.innerText;
+                var time = new Date(timeText).getTime();
 
-                if (!isNaN(time) && !isNaN(potenciaVal) && !isNaN(eficienciaVal)) {
-                    energiaData.push({
-                        x: time,
-                        y: potenciaVal, // Usamos potencia como eje Y principal
-                        eficiencia: eficienciaVal // Guardar eficiencia para el tooltip
+                var potencia = parseFloat(potenciaElement.innerText.replace(/,/g, ''));
+                var eficiencia = parseFloat(eficienciaElement.innerText.replace(/,/g, ''));
+                var altura = parseFloat(alturaElement.innerText.replace(/,/g, ''));
+                var caudal = parseFloat(caudalElement.innerText.replace(/,/g, ''));
+
+                if (!isNaN(time) && !isNaN(potencia) && !isNaN(eficiencia) && !isNaN(altura) && !isNaN(caudal)) {
+                    energiaData.push({ 
+                        x: time, 
+                        y: potencia, 
+                        eficiencia: eficiencia,
+                        altura: altura,
+                        caudal: caudal
                     });
                 }
             }
         });
 
-        console.log(energiaData); // Verifica los datos procesados
+        console.log(energiaData); // Verificar los datos extraídos
 
         // Función para exportar datos a CSV
         function exportToCSV(data, filename) {
             var csvContent = "data:text/csv;charset=utf-8,";
 
-            // Encabezados del archivo CSV
-            csvContent += "Fecha y Hora,Potencia Total (Kw),Eficiencia (%)\n";
+            // Añadir encabezados
+            csvContent += "Fecha y Hora,Potencia Total (Kw),Eficiencia (%),Altura (m),Caudal (m3/s)\n";
 
-            // Datos del archivo CSV
+            // Añadir cada fila de datos
             data.forEach(function(row) {
-                var fecha = new Date(row.x).toLocaleString();
-                csvContent += `${fecha},${row.y.toFixed(2)},${row.eficiencia.toFixed(2)}\n`;
+                csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},${row.y.toFixed(2)},${row.eficiencia.toFixed(2)},${row.altura.toFixed(2)},${row.caudal.toFixed(2)}\n`;
             });
 
-            // Crear enlace para descarga
             var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
             link.setAttribute("href", encodedUri);
@@ -143,89 +151,123 @@
             document.body.removeChild(link);
         }
 
-        // Asociar el botón de exportar a la función de CSV
+        // Asociar el evento de clic al botón para exportar a CSV
         document.getElementById("exportCSVButton").addEventListener("click", function() {
-            exportToCSV(energiaData, "energia_generada.csv");
+            exportToCSV(energiaData, "energia_generada_completo.csv");
         });
 
-        // Configuración del gráfico con ApexCharts
-        var chartOptions = {
-            series: [
-                {
-                    name: 'Energía Generada (Kw)',
-                    data: energiaData
-                }
-            ],
-            chart: {
-                type: 'line',
-                height: 350,
-                zoom: {
-                    enabled: true,
-                    type: 'x',
-                    autoScaleYaxis: true
-                },
-                toolbar: {
-                    tools: {
-                        download: true
-                    }
-                }
-            },
-            title: {
-                text: 'Energía Generada por el Proyecto',
-                align: 'center'
-            },
+        // Configuración del gráfico
+        var options = {
             tooltip: {
                 shared: false,
                 custom: function({ series, seriesIndex, dataPointIndex, w }) {
                     var data = w.config.series[seriesIndex].data[dataPointIndex];
                     var date = new Date(data.x).toLocaleString();
+                    
                     return `
-                        <div>
-                            <strong>Fecha y Hora:</strong> ${date}<br>
-                            <strong>Potencia Generada:</strong> ${data.y.toFixed(2)} kW<br>
-                            <strong>Eficiencia Energética:</strong> ${data.eficiencia.toFixed(2)}%
-                        </div>`;
+                        <small><div class="card-header bg-secundary p-2 bg-opacity-55"">
+                                ${date}
+                            </div>
+                        <div class="card-body">  
+                            Detalles de Generación                          
+                            <ul class="text-dark">
+                                <li>Potencia Total:<b> ${data.y.toFixed(0)} Kw</b></li>
+                                <li>Eficiencia Energética:<b> ${data.eficiencia.toFixed(2)}%</b></li>
+                                <li>Altura:<b> ${data.altura.toFixed(2)} m</b></li>
+                                <li>Caudal:<b> ${data.caudal.toFixed(2)} m³/s</b></li>
+                            </ul>
+                        </div></small>
+                    `;
+                },
+                x: {
+                    formatter: function (val) {
+                        return new Date(val).toLocaleString();
+                    }
                 }
+            },
+
+            series: [
+                {
+                    name: 'Energía Generada',
+                    data: energiaData
+                }
+            ],
+            chart: {
+                type: 'line',
+                height: 300,
+                zoom: {
+                    type: 'x',
+                    enabled: true,
+                    autoScaleYaxis: true
+                },
+                toolbar: {
+                    autoSelected: 'zoom',
+                    export: {
+                        csv: {
+                            filename: 'energia_generada',
+                            columnDelimiter: ',',
+                            headerCategory: 'Fecha y Hora',
+                            headerValue: 'Energía Generada',
+                            categoryFormatter(x) {
+                                return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+                            },
+                            valueFormatter(y) {
+                                return y.toFixed(2);
+                            }
+                        },
+                        svg: { filename: 'grafico_energia_generada' },
+                        png: { filename: 'grafico_energia_generada' }
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            markers: {
+                size: 0,
+            },
+            title: {
+                text: 'Energía generada por el proyecto',
+                align: 'left'
+            },
+            fill: {
+                type: 'solid',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100]
+                },
+            },
+            stroke: {
+                width: 2,
+                curve: 'straight'
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val) {
+                        return val.toFixed(0);
+                    },
+                },
+                title: {
+                    text: 'Energía Generada'
+                },
             },
             xaxis: {
                 type: 'datetime',
                 labels: {
-                    datetimeFormatter: {
-                        year: 'yyyy',
-                        month: "MMM 'yy",
-                        day: 'dd MMM',
-                        hour: 'HH:mm'
+                    formatter: function (value) {
+                        return new Date(value).toLocaleDateString();
                     }
-                },
-                title: {
-                    text: 'Fecha y Hora'
                 }
-            },
-            yaxis: {
-                labels: {
-                    formatter: function(val) {
-                        return val.toFixed(2) + " kW";
-                    }
-                },
-                title: {
-                    text: 'Energía Generada (kW)'
-                }
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 2
-            },
-            markers: {
-                size: 5,
-                hover: {
-                    size: 7
-                }
-            }
+            },            
         };
 
         // Crear y renderizar el gráfico
-        var chart = new ApexCharts(document.querySelector("#myChartPro"), chartOptions);
+        var chart = new ApexCharts(document.querySelector("#myChartPro"), options);
         chart.render();
     });
 </script>
+
 

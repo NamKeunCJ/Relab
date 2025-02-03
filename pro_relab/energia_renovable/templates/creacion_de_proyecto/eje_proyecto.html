@@ -187,7 +187,7 @@
 
             // Añadir cada fila de datos
             data.forEach(function(row) {
-                csvContent += `${new Date(row.x).toLocaleString()},${row.potencia},${row.irradiance},${row.eficiencia},${row.y},${row.energiaKW}\n`;
+                csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},${row.potencia},${row.irradiance},${row.eficiencia},${row.y},${row.energiaKW}\n`;
             });
 
             var encodedUri = encodeURI(csvContent);

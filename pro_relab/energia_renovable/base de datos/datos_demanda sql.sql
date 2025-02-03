@@ -53,7 +53,8 @@ select * from dato_irradiancia where created_at >= '2024-08-13' and created_at <
 --delete from dato_irradiancia;
 --SELECT setval(pg_get_serial_sequence('dato_irradiancia', 'id_irr'), 1, false);
 --COPY PUBLIC.dato_irradiancia (created_at,prom_irr,max_irr) FROM 'C:\Dataset_2013_2024_Completo.csv' DELIMITER ',' CSV HEADER;
-
+delete from energia_generada;
+SELECT setval(pg_get_serial_sequence('energia_generada', 'id_ene'), 1, false);
 delete from proyecto_generador;
 SELECT setval(pg_get_serial_sequence('proyecto_generador', 'id_pgen'), 1, false);
 delete from tanque;
@@ -64,8 +65,6 @@ delete from proyecto_cargah;
 SELECT setval(pg_get_serial_sequence('proyecto_cargah', 'id_pcar'), 1, false);
 delete from tubo;
 SELECT setval(pg_get_serial_sequence('tubo', 'id_tub'), 1, false);
-delete from energia_generada;
-SELECT setval(pg_get_serial_sequence('energia_generada', 'id_ene'), 1, false);
 delete from trayectoria_tubo;
 SELECT setval(pg_get_serial_sequence('trayectoria_tubo', 'id_tra'), 1, false);
 delete from proyecto_hidrica;

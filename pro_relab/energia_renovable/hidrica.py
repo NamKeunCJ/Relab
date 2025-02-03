@@ -995,74 +995,68 @@ def informes_hidrica():
 def ejecutar_proyecto_hidrica(id_pro):
     from app import get_db_connection
     from datetime import datetime
-
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             # Obtener los datos iniciales
-            cur.execute('''SELECT t.alt_tra, g.cau_pgen, t.id_tra, g.id_pgen, gen.pot_gen, AVG(e.tot_ene) AS avg_ene
-                           FROM trayectoria_tubo t 
-                           JOIN proyecto_hidrica p ON t.id_pro = p.id_pro 
-                           JOIN proyecto_generador g ON g.id_pro = p.id_pro 
-                           JOIN generador gen ON gen.id_gen = g.id_gen
-                           LEFT JOIN energia_generada e ON e.id_tra = t.id_tra
-                           WHERE p.eje_pro = %s AND p.id_pro = %s 
-                           GROUP BY p.id_pro, t.id_tra, g.id_pgen, gen.id_gen;''', (True, id_pro))
+            cur.execute('''
+                SELECT t.alt_tra, g.cau_pgen, t.id_tra, g.id_pgen, gen.pot_gen
+                FROM trayectoria_tubo t 
+                JOIN proyecto_hidrica p ON t.id_pro = p.id_pro 
+                JOIN proyecto_generador g ON g.id_pro = p.id_pro 
+                JOIN generador gen ON gen.id_gen = g.id_gen
+                WHERE p.eje_pro = %s AND p.id_pro = %s
+            ''', (True, id_pro))
+            
             w_tot_rows = cur.fetchone()
-
-            if w_tot_rows:
-                # Acceder a los valores individuales dentro de la tupla w_tot
-                tot_alt = w_tot_rows[0]
-                tot_cau = w_tot_rows[1]
-                id_tra = w_tot_rows[2]
-                id_pgen = w_tot_rows[3]
-                pot_gen = w_tot_rows[4]
-
-                # Calcular resultadoKW
-                resultadoKW = 7 * tot_cau * tot_alt
-
-                # Verificar si ya existen registros similares en la tabla
-                cur.execute('''
-                    SELECT id_tra, tot_ene, id_pgen, created_at
-                    FROM energia_generada
-                    WHERE id_tra = %s AND id_pgen = %s
-                    ORDER BY created_at DESC
-                    LIMIT 1;
-                ''', (id_tra, id_pgen))
-                existing_record = cur.fetchone()
-
-                if existing_record:
-                    fecha_creacion = existing_record[3]
-                    diferencia_dias = (datetime.now() - fecha_creacion).days
-
-                    # Si la diferencia de días es menor o igual a 1 y el registro es similar, salir
-                    if diferencia_dias <= 1 and existing_record[1] == resultadoKW:
-                        return
-
-                # Primera inserción (sin efi_ene)
-                cur.execute('''
-                    INSERT INTO energia_generada (id_tra, tot_ene, id_pgen, efi_ene)
-                    VALUES (%s, %s, %s, %s)
-                ''', (id_tra, resultadoKW, id_pgen,0))
-                conn.commit()
-                print(id_tra)
-                # Recalcular avg_ene incluyendo el nuevo registro
-                cur.execute('''
-                    SELECT AVG(tot_ene) 
-                    FROM energia_generada 
-                    WHERE id_tra = %s;
-                ''', (id_tra,))
-                avg_ene = cur.fetchone()[0]
-
-                # Calcular efi_ene ahora que avg_ene incluye el nuevo registro
-                efi_ene = (avg_ene * 100) / pot_gen if avg_ene is not None else 0
-
-                # Actualizar el registro con efi_ene
-                cur.execute('''
-                    UPDATE energia_generada
-                    SET efi_ene = %s
-                    WHERE id_tra = %s AND tot_ene = %s AND id_pgen = %s;
-                ''', (efi_ene, id_tra, resultadoKW, id_pgen))
-                conn.commit()
+            if not w_tot_rows:
+                print("No se encontraron datos para el proyecto.")
+                return
+            
+            tot_alt, tot_cau, id_tra, id_pgen, pot_gen = w_tot_rows
+            resultadoKW = 7 * tot_cau * tot_alt
+            
+            # Verificar si existe un registro reciente con los mismos datos
+            cur.execute('''
+                SELECT id_tra, tot_ene, id_pgen, cau_ene, alt_ene, created_at
+                FROM energia_generada
+                WHERE id_tra = %s AND id_pgen = %s AND alt_ene = %s AND cau_ene = %s
+                ORDER BY created_at DESC
+                LIMIT 1;
+            ''', (id_tra, id_pgen, tot_alt, tot_cau))
+            
+            existing_record = cur.fetchone()
+            if existing_record:
+                _, tot_ene, _, _, _, fecha_creacion = existing_record
+                diferencia_dias = (datetime.now() - fecha_creacion).days
+                if diferencia_dias <= 1 and tot_ene == resultadoKW:
+                    print("Registro reciente similar encontrado. No se requiere actualización.")
+                    return
+            
+            # Insertar nueva medición
+            cur.execute('''
+                INSERT INTO energia_generada (id_tra, tot_ene, id_pgen, efi_ene, cau_ene, alt_ene)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (id_tra, resultadoKW, id_pgen, 0, tot_cau, tot_alt))
+            conn.commit()
+            
+            # Recalcular el promedio de energía generada
+            cur.execute('''
+                SELECT AVG(tot_ene) FROM energia_generada WHERE id_tra = %s;
+            ''', (id_tra,))
+            avg_ene = cur.fetchone()[0] or 0
+            
+            # Calcular eficiencia energética
+            efi_ene = (avg_ene * 100) / pot_gen if pot_gen else 0
+            
+            # Actualizar la eficiencia energética
+            cur.execute('''
+                UPDATE energia_generada
+                SET efi_ene = %s
+                WHERE id_tra = %s AND tot_ene = %s AND id_pgen = %s AND alt_ene = %s AND cau_ene = %s;
+            ''', (efi_ene, id_tra, resultadoKW, id_pgen, tot_alt, tot_cau))
+            conn.commit()
+            
+            print(f"Registro actualizado para id_tra {id_tra} con eficiencia {efi_ene:.2f}%")
 
 
 #Mostrar datos de proyecto generacion de energia
@@ -1072,8 +1066,8 @@ def mostrar_ejecucion_proyecto_hidrica(id_pro,start_date,end_date):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date is None and end_date is None:
-                cur.execute('''SELECT p.id_pro, e.efi_ene, e.tot_ene, e.created_at, p.eje_pro FROM trayectoria_tubo t JOIN proyecto_hidrica p ON t.id_pro = p.id_pro JOIN energia_generada e ON e.id_tra = t.id_tra where e.created_at::date = CURRENT_DATE and p.id_pro=%s ORDER BY e.created_at;''', (id_pro,))
+                cur.execute('''SELECT p.id_pro, e.efi_ene, e.tot_ene, e.created_at, p.eje_pro, e.alt_ene, e.cau_ene FROM trayectoria_tubo t JOIN proyecto_hidrica p ON t.id_pro = p.id_pro JOIN energia_generada e ON e.id_tra = t.id_tra where e.created_at::date = CURRENT_DATE and p.id_pro=%s ORDER BY e.created_at;''', (id_pro,))
             else:
-                cur.execute('SELECT p.id_pro, e.efi_ene, e.tot_ene, e.created_at, p.eje_pro FROM trayectoria_tubo t JOIN proyecto_hidrica p ON t.id_pro = p.id_pro JOIN energia_generada e ON e.id_tra = t.id_tra WHERE (e.created_at >= %s and e.created_at <= %s) and p.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
+                cur.execute('SELECT p.id_pro, e.efi_ene, e.tot_ene, e.created_at, p.eje_pro, e.alt_ene, e.cau_ene FROM trayectoria_tubo t JOIN proyecto_hidrica p ON t.id_pro = p.id_pro JOIN energia_generada e ON e.id_tra = t.id_tra WHERE (e.created_at >= %s and e.created_at <= %s) and p.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
             result_proyect_ene = cur.fetchall()# Obtener el id_pro de la carga
             return result_proyect_ene
