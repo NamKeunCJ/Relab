@@ -86,20 +86,20 @@
                     <th style="width: 12rem;">Fecha y Hora</th>
                     <th>Potencia total (W)</th>
                     <th>Radiacion Alta (W/m²)</th>
-                    <th>Eficiencia Energia</th>
+                    <th>Eficiencia Paneles</th>
                     <th>Energia (W)</th>
-                    <th>Energia (KW)</th>
+                    <th>Energia (kwh)</th>
                 </tr>
             </thead>
             <tbody>
                 {% for eje_pro in result_proyect_ene %}
                 <tr>
                     <td class="time_irradiance">{{eje_pro[6]}}</td>
-                    <td class="parr_ene">{{eje_pro[1]}}</td>
-                    <td class="avg_irradiance">{{eje_pro[2]}}</td>
-                    <td class="efi_ene">{{eje_pro[3]}}</td>
-                    <td class="w_ene">{{eje_pro[4]}}</td>
-                    <td class="kw_ene">{{eje_pro[5]}}</td>
+                    <td class="parr_ene">{{eje_pro[1] | round(6) }}</td>
+                    <td class="avg_irradiance">{{eje_pro[2] | round(6) }}</td>
+                    <td class="efi_ene">{{eje_pro[3] | round(6)  }}</td>
+                    <td class="w_ene">{{eje_pro[4] | round(6) }}</td>
+                    <td class="kw_ene">{{eje_pro[5] | round(6) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -222,7 +222,7 @@
                                 <li>Potencia Total de los Arreglos:<b> ${data.potencia.toFixed(0)} W</b></li>
                                 <li>Eficiencia Energía:<b> ${data.eficiencia.toFixed(2)}%</b></li>
                                 <li>Generación en (W):<b> ${data.y.toFixed(0)} W</b></li>
-                                <li>Generación en (KW):<b> ${data.energiaKW.toFixed(2)} kW</b></li>
+                                <li>Generación en (kwh):<b> ${data.energiaKW.toFixed(6)} kwh</b></li>
                                 <li>Irradiancia:<b> ${data.irradiance.toFixed(0)} W/m²</b></li>
                             </ul>
                         </div></small>

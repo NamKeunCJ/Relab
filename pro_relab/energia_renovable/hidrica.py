@@ -681,7 +681,7 @@ def add_tuberia_project():
             
             tub_com = cur.fetchall()
 
-            # Calcular la altura considerando que los datos ahora están en la forma correcta
+            # Calcular la altura 
             alt_tra = sum(l * math.sin(math.radians(a)) * (-1 if o == 'Derecha' else 1) for l, a, o in tub_com)
             if alt_tra<0:
                 alt_tra = -(alt_tra)

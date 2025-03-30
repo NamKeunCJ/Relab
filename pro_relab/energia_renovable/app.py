@@ -298,7 +298,7 @@ def davis():
         STATION_ID = "181874"
         headers = {"X-Api-Secret": "sxchcxmtchcydblvcgbknst9mumap1cq"}
 
-        # Obtiene el timestamp actual y define el rango de tiempo de 30 días hacia atrás.
+        # Obtiene el timestamp actual y define el rango de tiempo de 40 días hacia atrás.
         end_timestamp = int(time.time())
         start_timestamp = end_timestamp - (40 * 24 * 3600)
 
@@ -2170,10 +2170,10 @@ def modal_carga_pot():
 def ejecutar_proyecto():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('''SELECT sum(a.ptot_arr) as tot_arr, avg(a.efi_arr) as tot_efi, a.id_pro  
+            cur.execute('''SELECT sum(a.ptot_arr) as tot_arr, avg(a.efi_arr) as tot_efi, a.id_pro, sum(a.area_arr) as tot_area  
                            FROM arreglo_de_paneles a 
                            JOIN proyecto_fotovoltaica p ON a.id_pro = p.id_pro 
-                           WHERE p.eje_pro = %s 
+                           WHERE p.eje_pro = %s
                            GROUP BY a.id_pro;''', (True,))
             w_tot_rows = cur.fetchall()  # Obtener todas las filas
             cur.execute('SELECT id_irr, prom_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
@@ -2181,21 +2181,25 @@ def ejecutar_proyecto():
             
             for w_tot in w_tot_rows:
                 # Acceder a los valores individuales dentro de la tupla w_tot
-                tot_arr = w_tot[0]
-                tot_efi = w_tot[1]
+                tot_arr = w_tot[0]       
                 id_pro = w_tot[2]
+                Area_pro = w_tot[3]
                 
                 for row in irr:
                     prom_irr = row[1]
                     id_irr = row[0]
                     created_at = row[2]
-                    resultadoW = (tot_arr * prom_irr) / 1000
-                    resultadoWh = resultadoW / 1000
+                    resultadoW = tot_arr * (prom_irr / 1000)  # Potencia ajustada a la irradiancia real en Wh
+                    resultadokwh = (resultadoW / 1000)  # Potencia ajustada a la irradiancia real en kwh
+                    if prom_irr==0:
+                        tot_efi=0                        
+                    else:   
+                        tot_efi =(resultadoW/(Area_pro*prom_irr))*100
                     cur.executemany("""
                         INSERT INTO energia_arreglo (id_pro, parr_ene, id_irr, efi_ene, w_ene, kw_ene, created_at)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (id_pro, created_at) DO NOTHING
-                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadoWh, created_at)])
+                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadokwh, created_at)])
                     conn.commit() 
          
 #Mostrar datos de proyecto generacion de energia
@@ -2231,11 +2235,11 @@ def get_latest_proyecto_data(id_pro):
 
     # Estructura los datos en una lista de diccionarios con formato ajustado
     data = [{
-        'parr_ene': f"{float(row[1]):.15f}",
+        'parr_ene': f"{float(row[1]):.3f}",
         'prom_irr': f"{float(row[2]):.1f}",
-        'efi_ene': f"{float(row[3]):.1f}",
-        'w_ene': f"{float(row[4]):.1f}",
-        'kw_ene': f"{float(row[5]):.2f}",
+        'efi_ene': f"{float(row[3]):.3f}",
+        'w_ene': f"{float(row[4]):.3f}",
+        'kw_ene': f"{float(row[5]):.3f}",
         'created_at': row[6].strftime('%Y-%m-%d %H:%M:%S')
     } for row in db_irr]
     
