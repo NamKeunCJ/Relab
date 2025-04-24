@@ -1,46 +1,69 @@
 <div class="modal fade" id="projectCargah" tabindex="-1" role="dialog" aria-labelledby="ProjectBancoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" >
-        <div class="modal-content" >
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega una nueva carga a tú proyecto</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-scrollable modal-md">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info text-white">
+                <h1 class="modal-title fs-5">Agrega una nueva carga a tu proyecto</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+
             {% if id_pro %}
             <form method="POST" action="/hidrica/add_carga_project_hidrica">
-                <input type="hidden" name="id_pro" value="{{ id_pro }}">               
-                <div class="modal-body" style="height: 22rem;">
-                    <table class="table">
-                        <thead>
-                             <tr>
-                                <th><label><h5><b>Cargas</b></h5></label></th> 
-                                <th><label><h5><b>Tipos de Carga</b></h5></label></th>   
-                                <th><label><h5><b>-</b></h5></label></th>                         
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><label for="car_lineal"><img src="{{ url_for('static', filename='images/bombillo.png') }}" title="Bombillo" style="width: 2rem;margin-left: 1rem;"></label></td>
-                                <td><label for="car_lineal"><h5>Lineal</h5></label></td>
-                                <td><input type="checkbox" id="car_lineal" name="car_lineal" value="Lineal" 
-                                           {% if 'Lineal' in cargas %}checked{% endif %}></td>                            
-                            </tr>
-                            <tr>
-                                <td><label for="car_inductiva"><img src="{{ url_for('static', filename='images/motor.png') }}" title="Motor"></label></td>
-                                <td><label for="car_inductiva"><h5>Inductiva</h5></label></td>
-                                <td><input type="checkbox" id="car_inductiva" name="car_inductiva" value="Inductiva" 
-                                           {% if 'Inductiva' in cargas %}checked{% endif %}></td>                            
-                            </tr>
-                            <tr>
-                                <td><label for="car_no_lineal"><img src="{{ url_for('static', filename='images/pc.png') }}"title="PC"></label></td>
-                                <td><label for="car_no_lineal"><h5>No Lineal</h5></label></td>
-                                <td><input type="checkbox" id="car_no_lineal" name="car_no_lineal" value="No Lineal" 
-                                           {% if 'No Lineal' in cargas %}checked{% endif %}></td>
-                            </tr>
-                        </tbody>                        
-                    </table>
+                <input type="hidden" name="id_pro" value="{{ id_pro }}">
+
+                <div class="modal-body px-4 py-3">
+                    <div class="table-responsive">
+                        <table class="table align-middle text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><h6 class="fw-bold">Cargas</h6></th>
+                                    <th><h6 class="fw-bold">Tipos</h6></th>
+                                    <th><h6 class="fw-bold">Seleccionar</h6></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <label for="car_lineal">
+                                            <img src="{{ url_for('static', filename='images/bombillo.png') }}" alt="Bombillo" title="Bombillo" style="width: 2.5rem;">
+                                        </label>
+                                    </td>
+                                    <td><label for="car_lineal" class="fw-medium">Lineal</label></td>
+                                    <td>
+                                        <input class="form-check-input" type="checkbox" id="car_lineal" name="car_lineal" value="Lineal"
+                                            {% if 'Lineal' in cargas %}checked{% endif %}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="car_inductiva">
+                                            <img src="{{ url_for('static', filename='images/motor.png') }}" alt="Motor" title="Motor" style="width: 2.5rem;">
+                                        </label>
+                                    </td>
+                                    <td><label for="car_inductiva" class="fw-medium">Inductiva</label></td>
+                                    <td>
+                                        <input class="form-check-input" type="checkbox" id="car_inductiva" name="car_inductiva" value="Inductiva"
+                                            {% if 'Inductiva' in cargas %}checked{% endif %}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="car_no_lineal">
+                                            <img src="{{ url_for('static', filename='images/pc.png') }}" alt="PC" title="PC" style="width: 2.5rem;">
+                                        </label>
+                                    </td>
+                                    <td><label for="car_no_lineal" class="fw-medium">No Lineal</label></td>
+                                    <td>
+                                        <input class="form-check-input" type="checkbox" id="car_no_lineal" name="car_no_lineal" value="No Lineal"
+                                            {% if 'No Lineal' in cargas %}checked{% endif %}>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Aceptar</button>
                 </div>
             </form>

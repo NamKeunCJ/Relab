@@ -4,28 +4,68 @@
     </td>
 {% endmacro %}
 
-{% for pro_list in pro_list %}
-    <div class="row justify-content-center">
-        <div class="clase_table" style="margin-right: 5rem; margin-left: 5rem; margin-bottom: 2rem; padding: 2rem;height: 3cm;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title">
-                            {{ pro_list[1][:30] + '...' if pro_list[1]|length > 30 else pro_list[1] }}
-                        </h5>
-                        <small class="form-text text-muted">({{pro_list[3]}})</small>
-                    </div>
-                    
-                    <div class="col-sm-3 text-end">
-                        {% if pro_list[4] is none and pro_list[2] is none and pro_list[5] is none %}
-                            <small class="form-text text-muted">(Vacío)</small>
-                        {% endif %}
-                    </div>
+<div class="container-fluid px-3">
+    {% for pro_list in pro_list %}
+        <div class="row justify-content-center">
+            <div class="clase_table card shadow-sm p-3 mb-4" style="margin-right: 5rem; margin-left: 5rem; padding: 2rem;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 col-12">
+                            <h5 class="card-title text-truncate">
+                                    {{ pro_list[1][:30] + '...' if pro_list[1]|length > 30 else pro_list[1] }}
+                            </h5>
+                            <small class="form-text text-muted">({{pro_list[3]}})</small>
+                        </div>
+                            
+                        <div class="col-md-3 col-12 text-md-end text-start mt-2 mt-md-0">
+                            {% if pro_list[4] is none and pro_list[2] is none and pro_list[5] is none %}
+                                <small class="form-text text-muted">(Vacío)</small>
+                            {% endif %}
+                        </div>
 
-                    <div class="col-sm-3 text-end">
-                        <table class="table">
+                        <div class="col-md-3 col-12 text-md-end text-start mt-2 mt-md-0">
+                            <table class="table table-responsive">
+                                <tbody>
+                                    <tr>
+                                        {{ icon('arreglo', pro_list[4] is not none, 'Arreglos') }}
+                                        {{ icon('inversor', pro_list[2] is not none, 'Inversor') }}
+                                        {{ icon('banco', pro_list[5] is not none, 'Bancos') }}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-md-2 col-12 text-md-end text-start mt-2 mt-md-0">
+                            <a href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_list[0] }}" class="btn btn-primary btn-sm">Ingresar</a>
+                            <a id="{{pro_list[0]}}" data-bs-toggle="modal" data-bs-target="#eliminar{{pro_list[0]}}">
+                                <i class="bi bi-trash3-fill text-danger ms-3" style="font-size: 1.2rem;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Eliminar -->
+        <div class="modal fade" id="eliminar{{pro_list[0]}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered" >
+                <div class="modal-content" style="height: 20rem;">
+                    <div class="modal-header">
+                        <h6 class="modal-title fuente text-center" id="exampleModalLabel">¿Eliminar proyecto?</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+        
+                    <div class="modal-body text-center p-3">
+                        <h6 class="card-title mb-2">{{ pro_list[1] }}</h6>
+                        <small class="form-text text-muted d-block">({{ pro_list[3] }})</small>
+        
+                        {% if pro_list[4] is none and pro_list[2] is none and pro_list[5] is none %}
+                            <small class="form-text text-muted d-block mt-2">(Vacío)</small>
+                        {% endif %}
+        
+                        <table class="table table-borderless mt-2 mx-auto" style="max-width: 10rem;">
                             <tbody>
-                                <tr>
+                                <tr class="text-center">
                                     {{ icon('arreglo', pro_list[4] is not none, 'Arreglos') }}
                                     {{ icon('inversor', pro_list[2] is not none, 'Inversor') }}
                                     {{ icon('banco', pro_list[5] is not none, 'Bancos') }}
@@ -33,56 +73,15 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <div class="col-sm-3 text-end">
-                        <a href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_list[0] }}" class="btn btn-primary">Ingresa al proyecto</a>
-                        <a id="{{pro_list[0]}}" data-bs-toggle="modal" data-bs-target="#eliminar{{pro_list[0]}}">
-                            <i class="bi bi-trash3-fill" style="color: rgb(255, 95, 95); margin-left: 4rem; font-size: 1.4rem;"></i>
-                        </a>
+        
+                    <div class="modal-footer d-flex justify-content-between px-3">
+                        <a href="/delete_project?id_pro={{ pro_list[0] }}" class="btn btn-danger btn-sm">Eliminar</a>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </div>
-
-                <!-- Modal Eliminar -->
-                <div class="modal fade" id="eliminar{{pro_list[0]}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" style="width: 20rem;">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h6 class="modal-title fuente" id="exampleModalLabel">¿Desea eliminar este proyecto?</h6>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body" style="height: 10rem;">
-                                <div class="row">
-                                    <div class="col">
-                                        <h5 class="card-title">{{pro_list[1]}}</h5>
-                                    </div>
-                                    <div class="col-sm-3 text-end">
-                                        {% if pro_list[4] is none and pro_list[2] is none and pro_list[5] is none %}
-                                            <small class="form-text text-muted">(Vacío)</small>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <small class="form-text text-muted">({{pro_list[3]}})</small>
-                                <table class="table" style="width: 10rem;">
-                                    <tbody>
-                                        <tr>
-                                            {{ icon('arreglo', pro_list[4] is not none, 'Arreglos') }}
-                                            {{ icon('inversor', pro_list[2] is not none, 'Inversor') }}
-                                            {{ icon('banco', pro_list[5] is not none, 'Bancos') }}
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="modal-footer">
-                                <a href="/delete_project?id_pro={{ pro_list[0] }}" class="btn btn-danger">Eliminar</a>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Fin Modal Eliminar -->
-
             </div>
         </div>
-    </div>
-{% endfor %}
+        
+    {% endfor %}
+</div>
    

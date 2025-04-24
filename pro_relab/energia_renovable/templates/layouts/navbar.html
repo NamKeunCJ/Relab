@@ -1,129 +1,204 @@
-<nav class="navbar navbar-expand-lg bg-nav sticky-top fixed-top" >
-    <div class="container">
-        <h1><a class="nav-link nav-color" href="/inicio_principal" style="margin-right: 2rem;"><img src="static/images/logo/RELAB.png" style="height: 1.3cm;" ></a></h1>
+<nav class="navbar navbar-expand-lg bg-nav sticky-top fixed-top"  >
+    <div class="container d-flex justify-content-between align-items-center" >
+        <div class="d-flex align-items-center">
+            <h1><a class="nav-link nav-color" href="/inicio_principal" style="margin:0.5rem ;margin-right: 2rem;"><img src="static/images/logo/RELAB.png" style="height: 1.3cm;" ></a></h1>
+        </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <!--para poder agregar, editar y elimnar componentes rol administrador --->
-        <!--Para empezar a crear un proyecto --->
-        {% if pro and pro[0] is not none %}             
-            <ul class="nav list-unstyled" style="margin-top: 0.20cm;">  
-                {% set ent_inv = proyecto_completo[0] %}              
-                {% set is_disabled = ent_inv[19] == cant_componentes[2] %}
-                <li class="nav-item d-flex align-items-center mb-3" id="item_arreglo">
-                    <a class="icon nav-link d-flex align-items-center {{ 'disabled' if is_disabled else '' }}" id="project_arreglo" href="/modal_arreglo_project?id_pro={{pro[0]}}" title="Añade un arreglo de paneles a tu proyecto">
-                        <img src="/static/images/icon_arreglo.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
-                        <span class="d-none d-md-inline">Añadir arreglo</span>
-                    </a>
-                </li>
-
-                <li class="nav-item d-flex align-items-center mb-3" id="item_inversor">                    
-                    <a class="icon nav-link d-flex align-items-center project_inversor" href="/modal_inversor_project?id_pro={{pro[0]}}" title="Añade un inversor a tu proyecto">
-                        <img src="static/images/icon_inversor.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
-                        <span class="d-none d-md-inline">Añadir inversor</span>
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center mb-3" id="item_banco">
-                    <a class="icon nav-link d-flex align-items-center" id="project_banco" href="/modal_banco_project?id_pro={{pro[0]}}" title="Añade un banco de baterías a tu proyecto">
-                        <img src="/static/images/icon_banco.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
-                        <span class="d-none d-md-inline">Añadir banco</span>
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center mb-3">
-                    <a class="icon nav-link d-flex align-items-center" id="project_carga" href="/modal_carga_project?id_pro={{pro[0]}}" title="Añade una carga a tu proyecto">
-                        <img src="/static/images/icon_carga.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 1rem;">
-                        <span class="d-none d-md-inline">Añadir carga</span>
-                    </a>
-                </li>
-            </ul>
-        {% elif pro_h and pro_h[0] is not none %}             
-            <ul class="nav list-unstyled d-flex flex-wrap justify-content-start align-items-center gap-2" style="margin-top: 0.20cm;">
-                <li class="nav-item" id="item_motobomba">                    
-                    <a class="icon nav-link d-flex align-items-center project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{pro_h[0]}}" title="Añade un motobomba a tu proyecto">
-                        <img src="static/images/icon_motobomba.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
-                        <span class="d-none d-md-inline">Añadir motobomba</span>
-                    </a>
-                </li>
-                <li class="nav-item" id="item_generador">
-                    <a class="icon nav-link d-flex align-items-center project_generador" href="/hidrica/modal_generador_project?id_pro={{pro_h[0]}}" title="Añade un generador de baterías a tu proyecto">
-                        <img src="/static/images/icon_generador.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
-                        <span class="d-none d-md-inline">Añadir generador</span>
-                    </a>
-                </li>
-                <li class="nav-item" id="item_tanque">                    
-                    <a class="icon nav-link d-flex align-items-center project_tanque" href="/hidrica/modal_tanque_project?id_pro={{pro_h[0]}}" title="Añade un tanque a tu proyecto">
-                        <img src="static/images/icon_tanque.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
-                        <span class="d-none d-md-inline">Añadir tanque</span>
-                    </a>
-                </li>
-                {% if pro_com[27] is not none and pro_com[32] is not none %}
-                <li class="nav-item" id="item_turbina">
-                    <a class="icon nav-link d-flex align-items-center project_turbina" href="/hidrica/modal_turbina_project?id_pro={{pro_h[0]}}" title="Añade una turbina  a tu proyecto">
-                        <img src="/static/images/icon_turbina.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
-                        <span class="d-none d-md-inline">Añadir turbina</span>
-                    </a>
-                </li>
-                {% endif %}
-                {% if pro_com[11] is not none  %}
-                <li class="nav-item" id="item_tuberia">
-                    <a class="icon nav-link d-flex align-items-center project_tuberia" href="/hidrica/modal_tuberia_project?id_pro={{ pro_com[0] }}" title="Añade una tuberia  a tu proyecto">
-                        <img src="/static/images/icon_tuberia.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
-                        <span class="d-none d-md-inline">Añadir tuberia</span>
-                    </a>
-                </li>
-                {% endif %}
-                <li class="nav-item">
-                    <a class="icon nav-link d-flex align-items-center" id="project_carga_h" href="/hidrica/modal_carga_project?id_pro={{pro_h[0]}}" title="Añade una carga a tu proyecto">
-                        <img src="/static/images/icon_carga.png" class="img-fluid" style="width: 24px; height: auto; margin-right: 0.5rem;">
-                        <span class="d-none d-md-inline">Añadir carga</span>
-                    </a>
-                </li>
-            </ul>
-        
-        {% else %}            
-            <div class="collapse navbar-collapse text-center" id="navbarNavDropdown">
-                <ul class="navbar-nav ml-auto ">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link icon nav-color dropdown-toggle" style="margin-right: 1rem;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Crear Proyecto
+        <div class="collapse navbar-collapse justify-content-end align-items-center text-center" id="navbarNavDropdown">  
+            <ul class="navbar-nav ml-auto ">
+                {% if pro and pro[0] is not none %}           
+                    {% set ent_inv = proyecto_completo[0] %}              
+                    {% set is_disabled = ent_inv[19] == cant_componentes[2] %}
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_arreglo">
+                        <a class="nav-link nav-color d-flex flex-column align-items-center {{ 'disabled' if is_disabled else '' }}"
+                           id="project_arreglo"
+                           href="/modal_arreglo_project?id_pro={{pro[0]}}"
+                           title="Añade un arreglo de paneles a tu proyecto">
+                            <img src="/static/images/icon_arreglo.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Arreglo
+                            </div>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item modal_proyecto_h" href="/hidrica/ver_modal_proyecto_h" data-toggle="modal" data-target="#modalProyecto_h" data-dismiss="modal" title="Crea un nuevo proyecto" >Estructura Hídrica</a></li>
-                            <li><a class="dropdown-item modal_proyecto" href="/ver_modal_proyecto" data-toggle="modal" data-target="#modalProyecto" data-dismiss="modal" title="Crea un nuevo proyecto" >Estructura Fotovoltaica</a></li>
-                        </ul>
                     </li>
-                </ul>
-                <ul class="navbar-nav ml-auto ">
+                    
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_inversor">
+                        <a class="nav-link nav-color project_inversor d-flex flex-column align-items-center"
+                           href="/modal_inversor_project?id_pro={{pro[0]}}"
+                           title="Añade un inversor a tu proyecto">
+                            <img src="/static/images/icon_inversor.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Inversor
+                            </div>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_banco">
+                        <a class="nav-link nav-color d-flex flex-column align-items-center"
+                           id="project_banco"
+                           href="/modal_banco_project?id_pro={{pro[0]}}"
+                           title="Añade un banco de baterías a tu proyecto">
+                            <img src="/static/images/icon_banco.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Banco
+                            </div>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item text-center" style="margin-right: 1rem;">
+                        <a class="nav-link nav-color d-flex flex-column align-items-center"
+                           id="project_carga"
+                           href="/modal_carga_project?id_pro={{pro[0]}}"
+                           title="Añade una carga a tu proyecto">
+                            <img src="/static/images/icon_carga.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Carga
+                            </div>
+                        </a>
+                    </li>
+                    
+                        
+                {% elif pro_h and pro_h[0] is not none %}            
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_motobomba">                    
+                        <a class="nav-link nav-color project_motobomba d-flex flex-column align-items-center" 
+                        href="/hidrica/modal_motobomba_project?id_pro={{pro_h[0]}}" 
+                        title="Añade un motobomba a tu proyecto">
+                            <img src="static/images/icon_motobomba.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Motobomba
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_generador">
+                        <a class="nav-link nav-color project_generador d-flex flex-column align-items-center" href="/hidrica/modal_generador_project?id_pro={{pro_h[0]}}" title="Añade un generador de baterías a tu proyecto">
+                            <img src="/static/images/icon_generador.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Generador
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_tanque">                    
+                        <a class="nav-link nav-color project_tanque d-flex flex-column align-items-center"
+                           href="/hidrica/modal_tanque_project?id_pro={{pro_h[0]}}" 
+                           title="Añade un tanque a tu proyecto">
+                            <img src="static/images/icon_tanque.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Tanque
+                            </div>
+                        </a>
+                    </li>
+                    
+                    {% if pro_com[27] is not none and pro_com[32] is not none %}
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_turbina">
+                        <a class="nav-link nav-color project_turbina d-flex flex-column align-items-center"
+                           href="/hidrica/modal_turbina_project?id_pro={{pro_h[0]}}" 
+                           title="Añade una turbina a tu proyecto">
+                            <img src="/static/images/icon_turbina.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Turbina
+                            </div>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if pro_com[11] is not none %}
+                    <li class="nav-item text-center" style="margin-right: 1rem;" id="item_tuberia">
+                        <a class="nav-link nav-color project_tuberia d-flex flex-column align-items-center"
+                           href="/hidrica/modal_tuberia_project?id_pro={{ pro_com[0] }}" 
+                           title="Añade una tuberia a tu proyecto">
+                            <img src="/static/images/icon_tuberia.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Tubería
+                            </div>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="nav-item text-center" style="margin-right: 1rem;">
+                        <a class="nav-link nav-color d-flex flex-column align-items-center" 
+                           id="project_carga_h" 
+                           href="/hidrica/modal_carga_project?id_pro={{pro_h[0]}}" 
+                           title="Añade una carga a tu proyecto">
+                            <img src="/static/images/icon_carga.png" class="img-fluid mb-1" style="width: 28px;">
+                            <div class="small d-inline">
+                                <i class="bi bi-plus-circle me-1"></i>Carga
+                            </div>
+                        </a>
+                    </li>
+                    
+                {% else %}            
+                    <ul class="navbar-nav ml-auto ">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link icon nav-color dropdown-toggle" style="margin-right: 1rem;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Crear Proyecto
+                            </a>
+                            <ul class="dropdown-menu shadow-lg rounded-3">
+                                <li><a class="dropdown-item modal_proyecto_h" href="/hidrica/ver_modal_proyecto_h" data-toggle="modal" data-target="#modalProyecto_h" data-dismiss="modal" title="Crea un nuevo proyecto" >Estructura Hídrica</a></li>
+                                <li><a class="dropdown-item modal_proyecto" href="/ver_modal_proyecto" data-toggle="modal" data-target="#modalProyecto" data-dismiss="modal" title="Crea un nuevo proyecto" >Estructura Fotovoltaica</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                     <li class="nav-item">
                         <a class="icon nav-link nav-color" style="margin-right: 1rem;" href="/irradiance_display">Irradiancia (W/m²)</a>
                     </li>
                     <li class="nav-item">
                         <a class="icon nav-link nav-color"  href="/demand_display">Demanda Energetica</a>
                     </li>
-                </ul>
-            </div>
-        {% endif %}
-        <ul class="navbar-nav ml-auto ">
-            <li class="nav-item dropdown">
-                <a class="nav-link icon nav-color dropdown-toggle" style="margin-right: 2rem;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle"></i>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/edit_profile">Editar Perfil</a></li>
-                    <li><a class="dropdown-item" href="/list_project">Proyectos Fotovoltaicos</a></li>
-                    <li><a class="dropdown-item" href="/hidrica/list_project_hidrica">Proyectos Hidricos</a></li>
-                    {% if 'user_rol' in session and session['user_rol'] == 'Administrador' %}
-                    <li>
-                        <a class="dropdown-item" href="/component_list">Componentes</a>
+                {% endif %}
+                <ul class="navbar-nav ml-auto ">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link icon nav-color dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu shadow-lg rounded-3" style="min-width: 200px;">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/edit_profile">
+                                    <i class="bi bi-pencil me-2"></i> Editar Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/list_project">
+                                    <i class="bi bi-house-door me-2"></i> Proyectos Fotovoltaicos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/hidrica/list_project_hidrica">
+                                    <i class="bi bi-droplet me-2"></i> Proyectos Hidricos
+                                </a>
+                            </li>
+                            {% if 'user_rol' in session and session['user_rol'] == 'Administrador' %}
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/component_list">
+                                    <i class="bi bi-gear me-2"></i> Componentes
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/informes">
+                                    <i class="bi bi-file-earmark-bar-graph me-2"></i> Informes Fotovoltaica
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/hidrica/informes_hidrica">
+                                    <i class="bi bi-file-earmark-bar-graph me-2"></i> Informes Hidrica
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/update_user">
+                                    <i class="bi bi-person-lines-fill me-2"></i> Usuarios
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
                     </li>
-                    <li><a class="dropdown-item" href="/informes">Informes Fotovoltaica</a></li>
-                    <li><a class="dropdown-item" href="/hidrica/informes_hidrica">Informes Hidrica</a></li>
-                    <li><a class="dropdown-item" href="/update_user">Usuarios</a></li>
-                    {% endif%}
                 </ul>
-            </li>
-        </ul>
-        <a href="/logout" class="nav-link nav-color">Cerrar Sesion</a>
+
+                <li class="nav-item text-center" style="margin-right: 1rem;">
+                    <a href="/logout" class="nav-link nav-color">Cerrar Sesion</a>
+                </li>                
+            </ul>
+        </div>
     </div>
 </nav>
 <div id="modalContent"></div>

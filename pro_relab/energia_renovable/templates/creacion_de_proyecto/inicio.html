@@ -28,7 +28,7 @@
 {% if error_cap_inv is not none %}
     <div class="alert alert-danger" style="margin: 1rem;">{{error_cap_inv}}</div>
 {% endif %} 
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10 rounded-4" style="padding: 1rem; height: 80vh; position: relative;">
     <div id="scrollContainer" class="card-body" style="overflow-x: auto; overflow-y: auto; position: relative; height: 100%;">
         <style>
             .icon_table {
@@ -52,10 +52,14 @@
                 position: relative;
                 height: 100%;
             }
+            .oculto {
+                visibility: hidden;
+            }
+
         </style>
         {% if cant_componentes[2]!=0 %}
             {% for arr_completo in arreglos_completos %}                   
-                <table class="arreglo_{{ arr_completo.arreglo[44] }} icon_table " draggable="true" style="text-align: center;">
+                <table class="arreglo_{{ arr_completo.arreglo[44] }} icon_table oculto" draggable="true" style="text-align: center;">
                     {% if arr_completo.arreglo[50] is not none %}   
                         <tr>
                             <td>
@@ -117,7 +121,14 @@
             {% endfor %}
         {% endif %}
         {% if cant_componentes[0]!=0 %}
-                <table class="inversor icon_table" draggable="true">
+                <table class="inversor icon_table  oculto" draggable="true">
+                    <tr class="text-center">
+                        <td>
+                            <a class="enlace-link del_inv" href="/ver_modal_del_inv?id_pro={{ pro_com[0] }}" title="Eliminar Inversor">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
                     <tr><td>
                         <div class="col d-flex align-items-end justify-content-center ">                        
                             <a class="nav-link tooltip_btn project_inversor" href="/modal_inversor_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -135,7 +146,7 @@
             {% else %}
                 {% set regulador_image = 'regulador-none.png' %}
             {% endif %}
-            <table class="regulador icon_table" draggable="true">
+            <table class="regulador icon_table  oculto" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center ">                        
                         <a id="project_regulador" class="nav-link tooltip_btn" href="/modal_regulador_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -149,7 +160,7 @@
         {% endif %}
         {% if cant_componentes[3]!=0 %}
             {% for arr_completo in bancos_completos %}   
-                <table class="banco_{{ arr_completo.banco[59] }} icon_table " draggable="true" style="text-align: center;">
+                <table class="banco_{{ arr_completo.banco[59] }} icon_table oculto" draggable="true" style="text-align: center;">
                     {% if arr_completo.banco[64] is not none %}
                         <tr>
                             <td>
@@ -205,7 +216,7 @@
         {% endif %}
         {% if cant_componentes[4]!=0 %}
             {% for car_completo in cargas_completas %}
-                <table class="carga_{{ car_completo[5] }} icon_table" draggable="true" style="text-align: center;">
+                <table class="carga_{{ car_completo[5] }} icon_table oculto" draggable="true" style="text-align: center;">
                     <tr>
                         {% if car_completo[1] == "Lineal" and car_completo[2]==0.0 %} 
                             {% set carga_img='bombillo-none.png' %}
@@ -240,7 +251,7 @@
             {% endfor %}
         {% endif %}
         {% if pro_com[3] =='Si' and cant_componentes[0]!=0 %}
-            <table class="red icon_table" draggable="true">
+            <table class="red icon_table  oculto" draggable="true">
                 <tr><td>
                     <div class="col d-flex align-items-end justify-content-center "> 
                         <img src="/static/images/red.png" style="width: 2.7rem;" class="imagen-iluminada tooltip_btn" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -250,154 +261,204 @@
                 </td></tr>
             </table>
         {% endif %}
-        <div class="linea"></div>
+        <div class="linea oculto"></div>
             
         {% for arr_completo in arreglos_completos %}
             {% for ban_completo in bancos_completos %}
                 {% for car_completo in cargas_completas %}                    
                     {% set pro_com = proyecto_completo[0] %}
                     <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            function initIcono(arr_id, x_arr, y_arr,ban_id, x_ban, y_ban, id_pro, x_inv, y_inv, x_reg, y_reg,pcar_id, x_pcar, y_pcar, x_red, y_red, condition) {
+                        document.addEventListener('DOMContentLoaded', function () {
+                            function setPos(el, x, y) {
+                                el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
+                            }
+                        
+                            function calcularCentro(el, cont) {
+                                const { left, top, width, height } = el.getBoundingClientRect();
+                                const { left: pLeft, top: pTop } = cont.getBoundingClientRect();
+                                return {
+                                    x: left + width / 2 - pLeft + cont.scrollLeft,
+                                    y: top + height / 2 - pTop + cont.scrollTop
+                                };
+                            }
+                        
+                            function actualizarLinea(linea, el1, el2, cont) {
+                                if (!linea || !el1 || !el2) return;
+                                const [p1, p2] = [calcularCentro(el1, cont), calcularCentro(el2, cont)];
+                                Object.assign(linea.style, {
+                                    width: `${Math.hypot(p2.x - p1.x, p2.y - p1.y)}px`,
+                                    transform: `rotate(${Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI}deg)`,
+                                    top: `${p1.y}px`, left: `${p1.x}px`, position: 'absolute'
+                                });
+                            }
+                        
+                            function enviarCoordenadas(data) {
+                                fetch('/update-coordinates', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(data)
+                                })
+                                    .then(res => res.json())
+                                    .then(data => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar'))
+                                    .catch(console.error);
+                            }
+                        
+                            function initIcono(arr_id, x_arr, y_arr, ban_id, x_ban, y_ban, id_pro, x_inv, y_inv, x_reg, y_reg, pcar_id, x_pcar, y_pcar, x_red, y_red, condition) {
+                                const scrollContainer = document.getElementById('scrollContainer');
+                        
                                 const arreglo = document.querySelector(`.arreglo_${arr_id}`);
                                 const inversor = document.querySelector('.inversor');
                                 const regulador = document.querySelector('.regulador');
                                 const banco = document.querySelector(`.banco_${ban_id}`);
                                 const carga = document.querySelector(`.carga_${pcar_id}`);
                                 const red = document.querySelector('.red');
-                                const scrollContainer = document.getElementById('scrollContainer');
-                    
-                                let linea1, linea2, linea3, linea4, linea5;
-                    
-                                // Revisar si regulador está presente para establecer las conexiones
+                        
+                                const conexiones = [];
+
+                                const crearLinea = (tipo, el1, el2) => {
+                                    if (el1 && el2) {
+                                        const idLinea = `linea_${tipo}_${el1.className}_${el2.className}`.replace(/\s/g, '');
+                                        if (document.getElementById(idLinea)) return; // Ya existe, no se crea de nuevo
+
+                                        const linea = document.createElement('div');
+                                        linea.classList.add('linea');
+                                        linea.dataset.tipo = tipo;
+                                        linea.id = idLinea;
+                                        scrollContainer.appendChild(linea);
+                                        conexiones.push({ linea, el1, el2 });
+                                    }
+                                };
+
+
+                        
                                 if (condition === 'No') {
-                                    linea1 = arreglo && regulador ? document.createElement('div') : null;
-                                    linea2 = regulador && banco ? document.createElement('div') : null;
-                                    linea3 = banco && inversor ? document.createElement('div') : null;
-                                    linea4 = inversor && carga ? document.createElement('div') : null;  // Conexión de inversor a carga
-                                    linea5 = inversor && red ? document.createElement('div') : null;  // Conexión de inversor a red
+                                    crearLinea('linea1', arreglo, regulador);
+                                    crearLinea('linea2', regulador, banco);
+                                    crearLinea('linea3', banco, inversor);
                                 } else {
-                                    linea1 = arreglo && inversor ? document.createElement('div') : null;
-                                    linea2 = inversor && banco ? document.createElement('div') : null;
-                                    linea3 = null; // Evitar crear una línea entre banco e inversor si no hay regulador
-                                    linea4 = inversor && carga ? document.createElement('div') : null;
-                                    linea5 = inversor && red ? document.createElement('div') : null;
+                                    crearLinea('linea1', arreglo, inversor);
+                                    crearLinea('linea2', inversor, banco);
                                 }
-                    
-                                // Añadir las líneas al contenedor
-                                linea1 && scrollContainer.appendChild(linea1).classList.add('linea');
-                                linea2 && scrollContainer.appendChild(linea2).classList.add('linea');
-                                linea3 && scrollContainer.appendChild(linea3).classList.add('linea');
-                                linea4 && scrollContainer.appendChild(linea4).classList.add('linea');
-                                linea5 && scrollContainer.appendChild(linea5).classList.add('linea');
-                    
-                                const setPos = (el, x, y) => el && Object.assign(el.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
+                        
+                                crearLinea('linea4', inversor, carga);
+                                crearLinea('linea5', inversor, red);
+                        
                                 setPos(arreglo, x_arr, y_arr);
                                 setPos(inversor, x_inv, y_inv);
                                 setPos(banco, x_ban, y_ban);
                                 setPos(carga, x_pcar, y_pcar);
-                                setPos(red, x_red, y_red); 
-                    
-                                if (condition === 'No') {
-                                    setPos(regulador, x_reg, y_reg);
+                                setPos(red, x_red, y_red);
+                                if (condition === 'No') setPos(regulador, x_reg, y_reg);
+                        
+                                function actualizarLineas() {
+                                    conexiones.forEach(({ linea, el1, el2 }) => actualizarLinea(linea, el1, el2, scrollContainer));
                                 }
-                    
-                                const calcularCentro = el => {
-                                    const { left, top, width, height } = el.getBoundingClientRect();
-                                    const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
-                                    return { x: left + width / 2 - pLeft + scrollContainer.scrollLeft, y: top + height / 2 - pTop + scrollContainer.scrollTop };
-                                };
-                    
-                                const actualizarLinea = (linea, el1, el2) => {
-                                    if (!linea || !el1 || !el2) return;
-                                    const [p1, p2] = [calcularCentro(el1), calcularCentro(el2)];
-                                    Object.assign(linea.style, {
-                                        width: `${Math.hypot(p2.x - p1.x, p2.y - p1.y)}px`,
-                                        transform: `rotate(${Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI}deg)`,
-                                        top: `${p1.y}px`, left: `${p1.x}px`, position: 'absolute'
-                                    });
-                                };
-                    
-                                const actualizarLineas = () => {
-                                    if (condition === 'No') {
-                                        // Conexión en caso de que haya regulador
-                                        actualizarLinea(linea1, arreglo, regulador);  // Arreglo a Regulador
-                                        actualizarLinea(linea2, regulador, banco);    // Regulador a Banco
-                                        actualizarLinea(linea3, banco, inversor);     // Banco a Inversor
-                                    } else {
-                                        // Conexión directa sin regulador
-                                        actualizarLinea(linea1, arreglo, inversor);   // Arreglo a Inversor (si no hay regulador)
-                                        actualizarLinea(linea2, inversor, banco);     // Inversor a Banco (si aplica)
-                                    }
-                                    
-                                    actualizarLinea(linea4, inversor, carga);        // Inversor a Carga
-                                    actualizarLinea(linea5, inversor, red);          // Inversor a Red (si aplica)
-                                };
-
-                    
-                                document.addEventListener('dragstart', e => draggedElement = e.target);
+                        
+                                let draggedElement = null, touchOffsetX = 0, touchOffsetY = 0;
+                        
+                                document.addEventListener('dragstart', e => {
+                                    if (e.target.tagName.toLowerCase() === 'img') return e.preventDefault();
+                                    draggedElement = e.target.closest(`.arreglo_${arr_id}, .inversor, .regulador, .banco_${ban_id}, .carga_${pcar_id}, .red`);
+                                });
+                        
                                 document.addEventListener('dragover', e => e.preventDefault());
-                    
+                        
                                 document.addEventListener('drop', e => {
                                     e.preventDefault();
                                     if (!draggedElement) return;
-                                    const { left: pLeft, top: pTop } = scrollContainer.getBoundingClientRect();
-                                    const x = Math.max(0, e.clientX - pLeft - draggedElement.offsetWidth / 2 + scrollContainer.scrollLeft);
-                                    const y = Math.max(0, e.clientY - pTop - draggedElement.offsetHeight / 2 + scrollContainer.scrollTop);
-                    
-                                    if (draggedElement === arreglo) [x_arr, y_arr] = [x, y];
-                                    else if (draggedElement === inversor) [x_inv, y_inv] = [x, y];
-                                    else if (draggedElement === regulador) [x_reg, y_reg] = [x, y];
-                                    else if (draggedElement === banco) [x_ban, y_ban] = [x, y];
-                                    else if (draggedElement === carga) [x_pcar, y_pcar] = [x, y];
-                                    else if (draggedElement === red) [x_red, y_red] = [x, y]; 
-                    
-                                    Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
-                    
+                                    const { left, top } = scrollContainer.getBoundingClientRect();
+                                    const x = e.clientX - left - draggedElement.offsetWidth / 2 + scrollContainer.scrollLeft;
+                                    const y = e.clientY - top - draggedElement.offsetHeight / 2 + scrollContainer.scrollTop;
+
+                                    const xFinal = Math.max(0, x);
+                                    const yFinal = Math.max(0, y);
+
+                                    Object.assign(draggedElement.style, { left: `${xFinal}px`, top: `${yFinal}px` });
+
+                        
+                                    if (draggedElement === arreglo) [x_arr, y_arr] = [xFinal, yFinal];
+                                    else if (draggedElement === inversor) [x_inv, y_inv] = [xFinal, yFinal];
+                                    else if (draggedElement === regulador) [x_reg, y_reg] = [xFinal, yFinal];
+                                    else if (draggedElement === banco) [x_ban, y_ban] = [xFinal, yFinal];
+                                    else if (draggedElement === carga) [x_pcar, y_pcar] = [xFinal, yFinal];
+                                    else if (draggedElement === red) [x_red, y_red] = [xFinal, yFinal];
+                        
                                     actualizarLineas();
-                    
-                                    fetch('/update-coordinates', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            arr_id, x: x_arr, y: y_arr, pro_id: id_pro,  ban_id,
-                                            x_inv, y_inv,
-                                            x_reg: condition === 'No' ? x_reg : null,
-                                            y_reg: condition === 'No' ? y_reg : null,
-                                            x_ban, y_ban, pcar_id, x_pcar, y_pcar, x_red, y_red 
-                                        })
-                                    }).then(res => res.json()).then(data => console.log(data.success ? 'Coordenadas actualizadas' : 'Error al actualizar')).catch(console.error);
+                        
+                                    enviarCoordenadas({
+                                        arr_id, x: x_arr, y: y_arr, pro_id: id_pro, ban_id, x_inv, y_inv,
+                                        x_reg: condition === 'No' ? x_reg : null,
+                                        y_reg: condition === 'No' ? y_reg : null,
+                                        x_ban, y_ban, pcar_id, x_pcar, y_pcar, x_red, y_red
+                                    });
                                 });
-                    
+                        
+                                scrollContainer.addEventListener('touchstart', e => {
+                                    const touch = e.touches[0];
+                                    const target = e.target.closest(`.arreglo_${arr_id}, .inversor, .regulador, .banco_${ban_id}, .carga_${pcar_id}, .red`);
+                                    if (!target) return;
+                        
+                                    draggedElement = target;
+                                    const rect = target.getBoundingClientRect();
+                                    touchOffsetX = touch.clientX - rect.left;
+                                    touchOffsetY = touch.clientY - rect.top;
+                                }, { passive: true });
+                        
+                                scrollContainer.addEventListener('touchmove', e => {
+                                    if (!draggedElement) return;
+                                    e.preventDefault();
+                                    const touch = e.touches[0];
+                                    const { left, top } = scrollContainer.getBoundingClientRect();
+                                    const x = touch.clientX - left - touchOffsetX + scrollContainer.scrollLeft;
+                                    const y = touch.clientY - top - touchOffsetY + scrollContainer.scrollTop;
+                                    
+                                    const xFinal = Math.max(0, x);
+                                    const yFinal = Math.max(0, y);
+
+                                    Object.assign(draggedElement.style, { left: `${xFinal}px`, top: `${yFinal}px` });
+
+                        
+                                    if (draggedElement === arreglo) [x_arr, y_arr] = [xFinal, yFinal];
+                                    else if (draggedElement === inversor) [x_inv, y_inv] = [xFinal, yFinal];
+                                    else if (draggedElement === regulador) [x_reg, y_reg] = [xFinal, yFinal];
+                                    else if (draggedElement === banco) [x_ban, y_ban] = [xFinal, yFinal];
+                                    else if (draggedElement === carga) [x_pcar, y_pcar] = [xFinal, yFinal];
+                                    else if (draggedElement === red) [x_red, y_red] = [xFinal, yFinal];
+                        
+                                    actualizarLineas();
+                                }, { passive: false });
+                        
+                                scrollContainer.addEventListener('touchend', () => {
+                                    if (!draggedElement) return;
+                                    enviarCoordenadas({
+                                        arr_id, x: x_arr, y: y_arr, pro_id: id_pro, ban_id, x_inv, y_inv,
+                                        x_reg: condition === 'No' ? x_reg : null,
+                                        y_reg: condition === 'No' ? y_reg : null,
+                                        x_ban, y_ban, pcar_id, x_pcar, y_pcar, x_red, y_red
+                                    });
+                                    draggedElement = null;
+                                });
+                        
                                 scrollContainer.addEventListener('scroll', actualizarLineas);
                                 actualizarLineas();
+                        
+                                [arreglo, inversor, regulador, banco, carga, red].forEach(el => el?.classList.remove('oculto'));
                             }
-                    
+                        
                             const condition = "{{ pro_com[32] }}";
                             const xIco3 = condition === 'No' ? "{{ x_reg }}" : null;
                             const yIco3 = condition === 'No' ? "{{ y_reg }}" : null;
-                    
+                        
                             initIcono(
-                                "{{ arr_completo.arreglo[44] }}",
-                                "{{ arr_completo.arreglo[57] }}",
-                                "{{ arr_completo.arreglo[58] }}",
-                                "{{ ban_completo.banco[59] }}",
-                                "{{ ban_completo.banco[71] }}",
-                                "{{ ban_completo.banco[72] }}",
-                                "{{ pro_com[0] }}",
-                                "{{ pro_com[11] }}",
-                                "{{ pro_com[12] }}",
-                                "{{ pro_com[13] }}",
-                                "{{ pro_com[14] }}", 
-                                "{{ car_completo[5] }}",
-                                "{{ car_completo[3] }}",
-                                "{{ car_completo[4] }}",
-                                "{{ pro_com[15] }}",
-                                "{{ pro_com[16] }}",
+                                "{{ arr_completo.arreglo[44] }}", "{{ arr_completo.arreglo[57] }}", "{{ arr_completo.arreglo[58] }}",
+                                "{{ ban_completo.banco[59] }}", "{{ ban_completo.banco[71] }}", "{{ ban_completo.banco[72] }}",
+                                "{{ pro_com[0] }}", "{{ pro_com[11] }}", "{{ pro_com[12] }}", "{{ pro_com[13] }}", "{{ pro_com[14] }}",
+                                "{{ car_completo[5] }}", "{{ car_completo[3] }}", "{{ car_completo[4] }}", "{{ pro_com[15] }}", "{{ pro_com[16] }}",
                                 condition
                             );
                         });
                     </script>
+                        
                 {% endfor %}
             {% endfor %}    
         {% endfor %}

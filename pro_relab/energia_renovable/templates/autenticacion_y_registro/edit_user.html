@@ -77,11 +77,11 @@
                                                         <div class="row">
                                                             <div class="form-group mb-3 col">
                                                                 <label for="nom_usu"><h6><b>Nombres: </b></h6></label>
-                                                                <input type="text" class="form-control" id="nom_usu" name="nom_usu" maxlength="50" placeholder="Escribe tu nombre." value="{{usuario[1]}}" required>
+                                                                <input type="text" class="form-control" id="nom_usu" name="nom_usu" maxlength="50" placeholder="Escribe tu nombre." value="{{usuario[1]}}" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"    title="Solo se permiten letras y espacios."  required>
                                                             </div>
                                                             <div class="form-group mb-3 col">
                                                                 <label for="ape_usu"><h6><b>Apellidos: </b></h6></label>
-                                                                <input type="text" class="form-control" id="ape_usu" name="ape_usu" maxlength="50" placeholder="Escribe tus apellidos." value="{{usuario[2]}}" required>
+                                                                <input type="text" class="form-control" id="ape_usu" name="ape_usu" maxlength="50" placeholder="Escribe tus apellidos." value="{{usuario[2]}}" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"    title="Solo se permiten letras y espacios."  required>
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
@@ -94,7 +94,7 @@
                                                         </div>
                                                         <div class="form-group" style="margin-top: 1rem;">
                                                             <label for="doc_usu"><h6><b>Número de documento: </b></h6></label>
-                                                            <input type="text" class="form-control" id="doc_usu" name="doc_usu" maxlength="10" pattern="[0-9]+" placeholder="Escribe número de documento." value="{{usuario[5]}}" required>
+                                                            <input type="text" class="form-control" id="doc_usu" name="doc_usu" maxlength="10" pattern="[0-9]+" placeholder="Escribe número de documento." value="{{usuario[5]}}" title="Solo se permiten números." required>
                                                         </div>
                                                         <div class="form-group" style="margin-top: 1rem;">
                                                             <label for="cor_usu"><h6><b>Ingresa tu correo electrónico: </b></h6></label>

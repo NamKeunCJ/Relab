@@ -1,9 +1,9 @@
 <div class="modal fade" id="projectTanque" tabindex="-1" role="dialog" aria-labelledby="ProjectArregloModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega la capacidad del tanque de agua</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="form-ser-pan" method="POST" action="/hidrica/add_tanque_project">
                 <input type="hidden" name="id_pro" value="{{info[0]}}">   

@@ -57,38 +57,45 @@
     // Llama a la función updateTable periódicamente
     setInterval(updateTable, 10000); // Configura el intervalo para que coincida con la frecuencia de actualización de tus datos
 </script>
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
-    <div class="card-body" style="overflow-x: auto;">
-        <h3>Datos de Irradiancia - Davis</h3>
-        {% if db_irr is not none %}
-        <table id="tablaG" class="table table-responsive ">
-            <thead>
-                <tr>
-                    <th style="width: 12rem;">Fecha y Hora</th>
-                    <th>Radiacion (W/m²)</th>
-                    <th>Radiacion Alta (W/m²)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for db_irr in db_irr %}
-                <tr>
-                    <td class="time_irradiance">{{db_irr[2]}}</td>
-                    <td class="avg_irradiance">{{db_irr[0]}}</td>
-                    <td class="highest_irradiance">{{db_irr[1]}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        {% else %}
-        <p class="text-danger ">Error: No se encontraron datos de irradiancia.</p>
-        {% endif %}
+<!-- Aquí comienza el contenedor encapsulado -->
+<div class="irradiancia-card-container">
 
+    <div class="card custom-card shadow-lg mb-4">
+        <div class="card-body" style="overflow-x: auto;">
+            <h3>📊 Datos de Irradiancia - Davis</h3>
+            {% if db_irr is not none %}
+            <table id="tablaG" class="table table-hover table-striped table-borderless">
+                <thead>
+                    <tr>
+                        <th style="min-width: 12rem;">Fecha y Hora</th>
+                        <th>Radiación (W/m²)</th>
+                        <th>Radiación Alta (W/m²)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for db_irr in db_irr %}
+                    <tr>
+                        <td class="time_irradiance">{{ db_irr[2] }}</td>
+                        <td class="avg_irradiance">{{ db_irr[0] }}</td>
+                        <td class="highest_irradiance">{{ db_irr[1] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-danger">⚠️ Error: No se encontraron datos de irradiancia.</p>
+            {% endif %}
+        </div>
     </div>
-</div>
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;" >
-    <div id="myChart" ></div>
-    <button id="exportCSVG" class="btn btn-secondary mt-3" style="opacity: 0.5;">Exportar a CSV</button>
+
+    <div class="card custom-card shadow-lg mb-4">
+        <div class="card-body">
+            <h3>📈 Gráfico de Irradiancia</h3>
+            <div id="myChart"></div>
+            <button id="exportCSVG" class="btn btn-export btn-secondary mt-3">⬇️ Exportar a CSV</button>
+        </div>
+    </div>
+
 </div>
 <script>
     // Obtener los datos de la tabla y convertirlos en arrays de objetos

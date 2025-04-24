@@ -1,6 +1,7 @@
 <script>
     var lastData = null;
     var table;
+    var id_pro = '{{ pro_com[0] }}';
 
     $(document).ready(function() {
         // Inicializa DataTable y guarda la referencia
@@ -30,103 +31,185 @@
         // Inicia la actualización periódica de la tabla
         setInterval(updateTable, 10000); // Intervalo de actualización en milisegundos
     });
+    function updateTable() {
+        $.ajax({
+            url: '/hidrica/get_latest_proyecto_data/' + id_pro,
+            type: 'GET',
+            success: function(data) {
+                if (data && !areObjectsEqual(data, lastData)) {
+                    data.forEach(function(item) {
+                        // Verifica si el 'created_at' ya está en la tabla
+                        if (!isRowInTable(item.created_at)) {
+                            var newRow = [
+                                item.created_at,   // Fecha y Hora
+                                item.alt_ene,      // Altura
+                                item.pre_ene,      // presion
+                                item.cau_ene,        // Caudal
+                                item.pot_ene,       // Potencia
+                                item.vsal_ene,      // Corriente Salida
+                                item.csal_ene,      // Voltaje DC salida
+                                item.efi_ene      // Eficiencia Energia
+                                
+                            ];
+                            table.row.add(newRow).draw(false); // Agrega la nueva fila
+                        }
+                    });
+                    lastData = data; // Actualiza lastData
+                }
+            },
+            error: function() {
+                console.error("Error al obtener los datos.");
+            }
+        });
+    }
+
+    function areObjectsEqual(obj1, obj2) {
+        // Compara los objetos para verificar si son iguales
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    }
+
+    function isRowInTable(createdAt) {
+        // Recorre las filas de la tabla y verifica si 'created_at' ya existe
+        var rows = table.rows().data().toArray();
+        return rows.some(function(row) {
+            return row[0] === createdAt; // Compara el campo 'Fecha y Hora'
+        });
+    }
+    // 🔌 Función para obtener voltaje actual desde el backend
+    async function obtenerVoltaje() {
+        try {
+            const res = await fetch('/api/voltaje_actual');
+            const data = await res.json();
+            document.getElementById('voltaje').textContent = data.voltaje.toFixed(1) + " V";
+        } catch (error) {
+            console.error("Error al obtener el voltaje:", error);
+        }
+    }
 </script>
 
-
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
-    <div class="card-body" style="overflow-x: auto;">
-        <h3>Sistema Hidrico Ejecutandose</h3>
-        {% if result_proyect_ene is not none %}
-        <table id="tablaP" class="table table-responsive">
-            <thead>
-                <tr>
-                    <th style="width: 12rem;">Fecha y Hora</th>
-                    <th>Altura</th>
-                    <th>Caudal</th>
-                    <th>Potencia total (Kw)</th>
-                    <th>Eficiencia Energia</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for eje_pro in result_proyect_ene %}
-                <tr>
-                    <td class="time_irradiance">{{eje_pro[3]}}</td>
-                    <td class="alt_ene">{{eje_pro[5]}}</td>
-                    <td class="cau_ene">{{eje_pro[6]}}</td>
-                    <td class="parr_ene">{{eje_pro[2]}}</td>
-                    <td class="efi_ene">{{eje_pro[1]}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
-        {% endif %}
-    </div>
-    <!-- Formulario centrado -->
-    <form id="irradiance-form" action="/hidrica/inicio_proyecto_hidrica?num_info=4&id_pro={{ pro_com[0] }}" method="post" class="d-flex justify-content-center" style="margin-top: 2rem;">
-        <div class="d-flex align-items-end gap-3">
-            <div class="col-auto">
-                <label for="start_date" class="form-label"><b>Fecha Inicio</b></label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                    <input type="date" class="form-control form-control-sm" id="start_date" name="start_date" required>
-                </div>
-            </div>
-            <div class="col-auto">
-                <label for="end_date" class="form-label"><b>Fecha Final</b></label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                    <input type="date" class="form-control form-control-sm" id="end_date" name="end_date" required>
-                </div>
-            </div>
-            <div class="col-auto" style="padding-top: 1.8rem;">
-                <button type="submit" class="tooltip_btn btn btn-primary" 
-                data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-custom-class="custom-tooltip"
-                data-bs-title="Asegurate de buscar los dias correctamente;">Buscar</button>
-            </div>
+<div class="irradiancia-card-container">
+    <div class="card custom-card shadow-lg mb-4">
+        <div class="card-body" style="overflow-x: auto;">
+            <h3>Sistema Hidrico Ejecutandose</h3>
+            {% if result_proyect_ene is not none %}
+            <table id="tablaP" class="table table-hover table-striped table-borderless">
+                <thead>
+                    <tr>
+                        <th style="width: 12rem;">Fecha y Hora</th>
+                        <th>Altura</th>
+                        <th>Presion</th>
+                        <th>Caudal</th>
+                        <th>Potencia total (Kw)</th>
+                        <th>Voltaje DC</th>
+                        <th>Corriente</th>
+                        <th>Eficiencia Energia</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eje_pro in result_proyect_ene %}
+                    <tr>
+                        <td class="time_irradiance">{{eje_pro[3]}}</td>
+                        <td class="alt_ene">{{eje_pro[5]}}</td>
+                        <td class="pre_ene">{{eje_pro[7]}}</td>
+                        <td class="cau_ene">{{eje_pro[6]}}</td>
+                        <td class="pot_ene">{{eje_pro[2]}}</td>
+                        <td class="vsal_ene">{{eje_pro[8]}}</td>
+                        <td class="csal_ene">{{eje_pro[9]}}</td>
+                        <td class="efi_ene">{{eje_pro[1]}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
+            {% endif %}
         </div>
-    </form>
-    
-</div>
+        <!-- Formulario centrado -->
+        <form id="irradiance-form" action="/hidrica/inicio_proyecto_hidrica?num_info=4&id_pro={{ pro_com[0] }}" method="post" class="d-flex justify-content-center" style="margin-top: 2rem;">
+            <div class="d-flex align-items-end gap-3">
+                <div class="row g-3">
+                    <div class="col-12 col-md-auto">
+                        <label for="start_date" class="form-label"><b>Fecha Inicio</b></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                            <input type="date" class="form-control form-control-sm" id="start_date" name="start_date" required>
+                        </div>
+                    </div>
+                
+                    <div class="col-12 col-md-auto">
+                        <label for="end_date" class="form-label"><b>Fecha Final</b></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                            <input type="date" class="form-control form-control-sm" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                
+                    <div class="col-12 col-md-auto d-flex align-items-end">
+                        <button type="submit" class="tooltip_btn btn btn-primary w-100"
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            data-bs-title="Asegurate de buscar los días correctamente.">Buscar</button>
+                    </div>
+                </div>                
+            </div>
+        </form>
+        
+    </div>
 
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
-    <div id="myChartPro"></div>
-    <button id="exportCSVButton" class="btn btn-secondary mt-3" style="opacity: 0.5;">Exportar a CSV</button>
+    <div class="card custom-card shadow-lg mb-4">
+        <div class="card-body" style="overflow-x: auto;">
+            <div id="myChartPro"></div>
+            <button id="exportCSVButton" class="btn btn-export btn-secondary mt-3">⬇️ Exportar a CSV</button>
+        </div>
+    </div>
 </div>
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var energiaData = []; // Almacenará la información completa
 
         document.querySelectorAll('#tablaP tbody tr').forEach(function(row) {
             var timeElement = row.querySelector('.time_irradiance');
-            var potenciaElement = row.querySelector('.parr_ene');
+            var potenciaElement = row.querySelector('.pot_ene');
             var eficienciaElement = row.querySelector('.efi_ene');
             var alturaElement = row.querySelector('.alt_ene');
             var caudalElement = row.querySelector('.cau_ene');
+            var presionElement = row.querySelector('.pre_ene');
+            var voltajeElement = row.querySelector('.vsal_ene');
+            var corrienteElement = row.querySelector('.csal_ene');
 
-            if (timeElement && potenciaElement && eficienciaElement && alturaElement && caudalElement) {
-                var timeText = timeElement.innerText;
-                var time = new Date(timeText).getTime();
+            if (
+                timeElement && potenciaElement && eficienciaElement &&
+                alturaElement && caudalElement && presionElement &&
+                voltajeElement && corrienteElement
+            ) {
+                var time = new Date(timeElement.innerText).getTime();
 
                 var potencia = parseFloat(potenciaElement.innerText.replace(/,/g, ''));
                 var eficiencia = parseFloat(eficienciaElement.innerText.replace(/,/g, ''));
                 var altura = parseFloat(alturaElement.innerText.replace(/,/g, ''));
                 var caudal = parseFloat(caudalElement.innerText.replace(/,/g, ''));
+                var presion = parseFloat(presionElement.innerText.replace(/,/g, ''));
+                var voltaje = parseFloat(voltajeElement.innerText.replace(/,/g, ''));
+                var corriente = parseFloat(corrienteElement.innerText.replace(/,/g, ''));
 
-                if (!isNaN(time) && !isNaN(potencia) && !isNaN(eficiencia) && !isNaN(altura) && !isNaN(caudal)) {
+                if (!isNaN(time) && !isNaN(potencia) && !isNaN(eficiencia) &&
+                    !isNaN(altura) && !isNaN(caudal) && !isNaN(presion) &&
+                    !isNaN(voltaje) && !isNaN(corriente)) {
+                        
                     energiaData.push({ 
                         x: time, 
-                        y: potencia, 
-                        eficiencia: eficiencia,
-                        altura: altura,
-                        caudal: caudal
+                        y:potencia, 
+                        eficiencia,
+                        altura,
+                        caudal,
+                        presion,
+                        voltaje,
+                        corriente
                     });
                 }
             }
         });
+
 
         console.log(energiaData); // Verificar los datos extraídos
 
@@ -134,12 +217,13 @@
         function exportToCSV(data, filename) {
             var csvContent = "data:text/csv;charset=utf-8,";
 
-            // Añadir encabezados
-            csvContent += "Fecha y Hora,Potencia Total (Kw),Eficiencia (%),Altura (m),Caudal (m3/s)\n";
+            // Encabezados completos
+            csvContent += "Fecha y Hora,Potencia Total (Kw),Eficiencia (%),Altura (m),Caudal (m3/s),Presion (Pa),Voltaje (V),Corriente (A)\n";
 
-            // Añadir cada fila de datos
             data.forEach(function(row) {
-                csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},${row.y.toFixed(2)},${row.eficiencia.toFixed(2)},${row.altura.toFixed(2)},${row.caudal.toFixed(2)}\n`;
+                csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},` +
+                            `${row.potencia.toFixed(2)},${row.eficiencia.toFixed(2)},${row.altura.toFixed(2)},` +
+                            `${row.caudal.toFixed(2)},${row.presion.toFixed(2)},${row.voltaje.toFixed(2)},${row.corriente.toFixed(2)}\n`;
             });
 
             var encodedUri = encodeURI(csvContent);
@@ -150,6 +234,7 @@
             link.click();
             document.body.removeChild(link);
         }
+
 
         // Asociar el evento de clic al botón para exportar a CSV
         document.getElementById("exportCSVButton").addEventListener("click", function() {
@@ -175,6 +260,9 @@
                                 <li>Eficiencia Energética:<b> ${data.eficiencia.toFixed(2)}%</b></li>
                                 <li>Altura:<b> ${data.altura.toFixed(2)} m</b></li>
                                 <li>Caudal:<b> ${data.caudal.toFixed(2)} m³/s</b></li>
+                                <li>Presion:<b> ${data.presion.toFixed(2)} m³/s</b></li>
+                                <li>Voltaje:<b> ${data.voltaje.toFixed(2)} m³/s</b></li>
+                                <li>Corriente:<b> ${data.corriente.toFixed(2)} m³/s</b></li>
                             </ul>
                         </div></small>
                     `;

@@ -1,9 +1,9 @@
 <div class="modal fade" id="projectCargah{{ pcar[0] }}" tabindex="-1" role="dialog" aria-labelledby="ProjectArregloModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Selecciona la Potencia de la carga {{ pcar[2] }}</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="form-ser-pan" method="POST" action="/hidrica/modal_carga_pot_hidrica">
                 <input type="hidden" name="id_pcar_h" value="{{ pcar[0] }}"> 

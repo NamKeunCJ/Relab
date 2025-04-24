@@ -22,66 +22,87 @@
     });
 </script>
 <div class="modal fade" id="projectGenerador" tabindex="-1" role="dialog" aria-labelledby="ProjectGeneradorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega un generador a tú proyecto</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info text-white">
+                <h1 class="modal-title fs-5">Agrega un generador a tu proyecto</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+
             {% if pro %}
             <form method="POST" action="/hidrica/add_generador_project">
-                <div class="modal-body">
-                    <h5 style="margin-bottom: 1rem;"><b> Informacion del Generador:  </b></h5>
-                    {%if info is not none %} 
-                    {% if info[19]==false %}
-                        <div class="alert alert-danger">El generador {{info[12]}} con identificacion {{info[18]}} se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro generador.</div>
+                <div class="modal-body p-4">
+                    <h5 class="mb-3"><strong>Información del generador:</strong></h5>
+
+                    {% if info is not none %}
+                        {% if info[19] == false %}
+                            <div class="alert alert-danger mb-4">
+                                El generador <strong>{{ info[12] }}</strong> con identificación <strong>{{ info[18] }}</strong> se encuentra deshabilitado. Si deseas continuar con el proyecto, utiliza otro generador.
+                            </div>
+                        {% endif %}
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered text-center align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Referencia</th>
+                                                <th>Potencia Máxima (Pmax)</th>
+                                                <th>Voltaje Máxima de Entrada (Vme)</th>
+                                                <th>Velocidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ info[12] }}</td>
+                                                <td>{{ info[13] }}</td>
+                                                <td>{{ info[14] }}</td>
+                                                <td>{{ info[15] }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay información para mostrar en este momento.</p>
                     {% endif %}
-                    <table class="table table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Referencia Generador</th>
-                                <th>Potencia Máxima (Pmax)</th>
-                                <th>Voltaje Máxima de Entrada (Vme)</th>
-                                <th>Velocidad Generador</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{{info[12]}}</td>
-                                <td>{{info[13]}}</td>
-                                <td>{{info[14]}}</td>
-                                <td>{{info[15]}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% else %} No hay informacion para mostrar en este momento. {%endif%} 
+
                     <input type="hidden" name="id_pro" value="{{ pro[0] }}">
-                    <h5 style="margin-bottom: 3rem; margin-top: 3rem; "><b> •Nombre del proyecto ({{ pro[1] }}) </b></h5>
-                    <table id="tabla" class="table table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Referencia Generador</th>
-                                <th>Potencia Máxima (Pmax)</th>
-                                <th>Voltaje Máxima de Entrada (Vme)</th>
-                                <th>Velocidad Generador</th> 
-                                <th>-</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {%for gen in gen %}
-                            <tr>
-                                <td>{{gen[1]}}</td>
-                                <td>{{gen[2]}}</td>
-                                <td>{{gen[3]}}</td>
-                                <td>{{gen[4]}}</td>
-                                <td><input class="form-check-input" type="radio" name="id_gen" id="id_gen" value="{{gen[0]}}" required></td>
-                            </tr>
-                            {%endfor%}
-                        </tbody>
-                    </table>
+
+                    <h5 class="mt-5 mb-4"><strong>• Nombre del proyecto ({{ pro[1] }})</strong></h5>
+
+                    <div class="table-responsive">
+                        <table id="tabla" class="table table-hover text-center align-middle">
+                            <thead class="table-info">
+                                <tr>
+                                    <th>Referencia</th>
+                                    <th>Potencia Máxima (Pmax)</th>
+                                    <th>Voltaje Máxima de Entrada (Vme)</th>
+                                    <th>Velocidad</th>
+                                    <th>Seleccionar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for gen in gen %}
+                                <tr>
+                                    <td>{{ gen[1] }}</td>
+                                    <td>{{ gen[2] }}</td>
+                                    <td>{{ gen[3] }}</td>
+                                    <td>{{ gen[4] }}</td>
+                                    <td>
+                                        <input class="form-check-input" type="radio" name="id_gen" value="{{ gen[0] }}" required>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Seleccionar</button>
                 </div>
             </form>

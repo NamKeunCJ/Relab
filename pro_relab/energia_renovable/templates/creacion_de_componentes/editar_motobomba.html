@@ -18,130 +18,174 @@
                     "next": "Siguiente",
                     "previous": "Anterior"
                 }
-            }
+            },
+            "pageLength": 5,
+            "lengthMenu": [5, 10, 25, 50], 
         });
     });
 </script>
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;height: 80vh;">
-    <div class="card-body" style="overflow-x: auto;">
-        <h5 class="title-components " style="margin-bottom: 3rem;"><b> MOTOBOMBAS AGREGADOS </b></h5>
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: auto; background-color: #f8f9fa;">
+    <div class="card-body" style="overflow-x: auto; height: 35rem;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <h5 class="fw-bold" style="color: #13447c; margin-bottom: 0;"><b>MOTOBOMBAS AGREGADAS</b></h5>
+            <a class="btn btn-outline-primary hover_color_azul" style="border-color: #13447c; color: #13447c;" id="modal_motobomba" href="/hidrica/ver_modal_motobomba" data-bs-toggle="modal" data-bs-target="#modalMotobomba" title="Agrega una motobomba">
+                <i class="bi bi-plus-circle me-2"></i>Crear motobomba
+            </a>                                            
+        </div>
+
         {% if success=="1" %}
         <div id="successMessage" class="alert alert-success">Los datos de la motobomba se han guardado exitosamente.</div>
         {% elif error=="2" %}
         <div id="errorMessage" class="alert alert-danger">Los datos de la motobomba no se han podido guardar, revisa el margen de error.</div>
         {% endif %}
+
         <script>
-            // Función para ocultar el mensaje de éxito después de 5 segundos
-            setTimeout(function() {
-                document.getElementById("successMessage").style.display = "none";
-            }, 5000); // 5000 milisegundos (5 segundos)
+            document.addEventListener("DOMContentLoaded", function () {
+                setTimeout(() => {
+                    const successMsg = document.getElementById("successMessage");
+                    if (successMsg) successMsg.style.display = "none";
+        
+                    const errorMsg = document.getElementById("errorMessage");
+                    if (errorMsg) errorMsg.style.display = "none";
+                }, 5000);
+            });
         </script>
-        <table id="tabla" class="table table-responsive">
-            <thead>
-                <tr>
-                    <th>Identificacion Inventario</th>
-                    <th>Referencia de la Motobomba</th>
-                    <th>Voltaje Motobomba (V)</th>
-                    <th>Caudal Maximo de agua</th>
-                    <th>Potencia Motobomba(W)</th>
-                    <th>Estado de la Motobomba</th>
-                    <th>Editar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {%for motobomba in mot_usu%}
-                <tr>
-                    <td>{{motobomba[10]}}</td>
-                    <td>{{motobomba[1]}}</td>
-                    <td>{{motobomba[3]}}</td>
-                    <td>{{motobomba[4]}}</td>
-                    <td>{{motobomba[2]}}</td>
-                    {% if motobomba[11] == true %}
-                        <td>Habilitado</td>
-                    {% else %}
-                        <td>Deshabilitado</td>
-                    {% endif %}
-                    <td><button type="button" style="color: rgb(47, 133, 204);" id="edit{{motobomba[0]}}" class="btn icon" data-bs-toggle="modal" data-bs-target="#editar_motobomba_{{motobomba[0]}}"><i class="bi bi-pencil-square"></i></button></td>
-                </tr>                    
-                <div class="modal fade" id="editar_motobomba_{{motobomba[0]}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">¿Desea editar esta motobomba?</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="table-responsive">
+            <table id="tabla" class="table table-bordered table-hover align-middle text-center">
+                <thead style="background-color: #13447c; color: #ffffff;">
+                    <tr>
+                        <th>ID Inventario</th>
+                        <th>Referencia de la Motobomba</th>
+                        <th>Voltaje Motobomba (V)</th>
+                        <th>Caudal Maximo de agua</th>
+                        <th>Potencia Motobomba(W)</th>
+                        <th>Estado de la Motobomba</th>
+                        <th>Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for motobomba in mot_usu%}
+                    <tr>
+                        <td>{{motobomba[10]}}</td>
+                        <td>{{motobomba[1]}}</td>
+                        <td>{{motobomba[3]}}</td>
+                        <td>{{motobomba[4]}}</td>
+                        <td>{{motobomba[2]}}</td>
+                        {% if motobomba[11] == true %}
+                            <td>Habilitado</td>
+                        {% else %}
+                            <td>Deshabilitado</td>
+                        {% endif %}
+                        <td><button type="button" style="color: rgb(47, 133, 204);" id="edit{{motobomba[0]}}" class="btn icon" data-bs-toggle="modal" data-bs-target="#editar_motobomba_{{motobomba[0]}}"><i class="bi bi-pencil-square"></i></button></td>
+                    </tr>                    
+                    <div class="modal fade" id="editar_motobomba_{{motobomba[0]}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header" style="background-color: #13447c; color: #ffffff;">
+                                    <h5 class="modal-title">Editar Motobomba</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form method="POST" action="/hidrica/update_motobomba">
+                                    <div class="modal-body">
+                                        <input type="hidden" id="id_mot" name="id_mot" value="{{motobomba[0]}}">
+                    
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="ref_mot">Referencia de la motobomba:</label>
+                                                <input type="text" class="form-control" id="ref_mot" name="ref_mot" maxlength="100" value="{{motobomba[1]}}" required>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="idu_mot">Identificación Código Universidad:</label>
+                                                <input type="text" class="form-control" id="idu_mot" name="idu_mot" pattern="[0-9]*" inputmode="numeric" minlength="9" maxlength="9" value="{{motobomba[10]}}" disabled>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="pot_mot">Potencia (Kw):</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="pot_mot" name="pot_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[2]}}" required>
+                                                    <span class="input-group-text">Kw</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="vol_mot">Voltaje (V):</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="vol_mot" name="vol_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[3]}}" required>
+                                                    <span class="input-group-text">V</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="fre_mot">Frecuencia (Hz):</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="fre_mot" name="fre_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[7]}}" required>
+                                                    <span class="input-group-text">Hz</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="pre_mot">Presión (Bar):</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="pre_mot" name="pre_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[8]}}" required>
+                                                    <span class="input-group-text">bar</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="dent_mot">Diámetro de Entrada:</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="dent_mot" name="dent_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[5]}}" required>
+                                                    <span class="input-group-text">mm</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="dsal_mot">Diámetro de Salida:</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="dsal_mot" name="dsal_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[6]}}" required>
+                                                    <span class="input-group-text">mm</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="cau_mot">Caudal (L/m):</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="cau_mot" name="cau_mot" min="0.1" max="9999" step="0.01" value="{{motobomba[4]}}" required>
+                                                    <span class="input-group-text">L/m</span>
+                                                </div>
+                                            </div>
+                    
+                                            <div class="col-md-6">
+                                                <label for="est_mot">Estado:</label>
+                                                <select class="form-control" id="est_mot" name="est_mot" required>
+                                                    {% if motobomba[11] == true %}
+                                                        <option value="True" selected>Habilitado</option>
+                                                        <option value="False">Deshabilitado</option>
+                                                    {% else %}
+                                                        <option value="False" selected>Deshabilitado</option>
+                                                        <option value="True">Habilitado</option>
+                                                    {% endif %}
+                                                </select>
+                                                <div class="form-text">Si no está en un proyecto, será eliminado si es deshabilitado.</div>
+                                            </div>
+                                        </div>
+                    
+                                        <div id="alerta" class="mt-3"></div>
+                                    </div>
+                    
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn" style="background-color: #13447c; color: #ffffff;">Guardar</button>
+                                    </div>
+                                </form>
                             </div>
-                            <form method="POST" action="/hidrica/update_motobomba">
-                                <div class="modal-body">
-                                    <input type="hidden" id="id_mot" name="id_mot" value="{{motobomba[0]}}">
-                                    <div class="form-group mb-3">
-                                        <label for="ref_mot">Referencia de la motobomba:</label>
-                                        <input type="text" class="form-control" id="ref_mot" name="ref_mot" maxlength="100" value="{{motobomba[1]}}" required>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label for="idu_mot">Identificacion Codigo Universidad:</label>
-                                        <input type="text" class="form-control" id="idu_mot" name="idu_mot" pattern="[0-9]*" inputmode="numeric" minlength="9" maxlength="9" value="{{motobomba[10]}}" disabled>
-                                    </div>
-                                    <label for="pot_mot">Potencia motobomba (Kw):</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="pot_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="pot_mot" step="0.01" value="{{motobomba[2]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">Kw</span>
-                                    </div>
-                                    <label for="vol_mot">Voltaje motobomba (V):</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="vol_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="vol_mot" step="0.01" value="{{motobomba[3]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">V</span>
-                                    </div>
-                                    <label for="fre_mot">Frecuencua Motobomba (Hz):</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="fre_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="fre_mot" step="0.01" value="{{motobomba[7]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">Hz</span>
-                                    </div>
-                                    <label for="pre_mot">Presion Motobomba (Bar):</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="pre_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="pre_mot" step="0.01" value="{{motobomba[8]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">bar</span>
-                                    </div>
-                                    <label for="dent_mot">Diametro de Entrada:</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="dent_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="dent_mot" step="0.01" value="{{motobomba[5]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">mm</span>
-                                    </div>
-                                    <label for="dsal_mot">Diametro de Salida:</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="dsal_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="dsal_mot" step="0.01" value="{{motobomba[6]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">mm</span>
-                                    </div>
-                                    <label for="cau_mot">Caudal motobomba (L/m):</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="cau_mot" aria-describedby="basic-addon2" min="0.1" max="9999" name="cau_mot" step="0.01" value="{{motobomba[4]}}" required>
-                                        <span class="input-group-text" id="basic-addon2">L/m</span>
-                                    </div>                    
-                                    <div class="form-group" style="margin-top: 1rem;">
-                                        <label for="est_mot">Estado de la motobomba:</label>
-                                        <select class="form-control" id="est_mot" name="est_mot" required>                                              
-                                            {% if motobomba[11] == true %}
-                                                <option value="{{ motobomba[11] }}" selected>Habilitado</option>
-                                            {% else %}
-                                                <option value="{{ motobomba[11] }}" selected>Deshabilitado</option>
-                                            {% endif %}
-                                            <option value="True">Habilitado</option>
-                                            <option value="False">Deshabilitado</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-text" id="basic-addon4">Si el componente no se encuentra en ningún proyecto, será eliminado si es deshabilitado.</div>
-                                    <div id="alerta"></div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary" id="guardarPanel">Guardar</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
-                </div>
-                {%endfor%}
-            </tbody>
-        </table>
+                    
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-<a class="btn btn-primary" style="width: 20rem;" id="modal_motobomba" href="/hidrica/ver_modal_motobomba" data-toggle="modal" data-target="#modalMotobomba" title="Agrega una motobomba">Crear motobomba</a>

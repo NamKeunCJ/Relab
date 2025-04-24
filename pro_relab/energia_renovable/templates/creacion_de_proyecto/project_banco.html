@@ -1,9 +1,9 @@
 <div class="modal fade" id="projectBanco" tabindex="-1" role="dialog" aria-labelledby="ProjectBancoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega un nuevo banco a tú proyecto</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             {% if pro %}
             <form method="POST" action="/add_banco_project">

@@ -1,22 +1,22 @@
-import psycopg2
+import psycopg2 # type: ignore
 import hashlib
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify # type: ignore
 from datetime import datetime, timedelta
 import threading
 import time
-import requests # elementos para datos davis
-import pandas as pd #Extrer los datos del archivo plano
+import requests # type: ignore elementos para datos davis
+import pandas as pd # type: ignore Extrer los datos del archivo plano
 #import tensorflow as tf
 ###############################################################################
 #LIBRERIAS PARA EL MODELO DE PREDICCION
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-import tensorflow as tf
+import pandas as pd # type: ignore
+import numpy as np # type: ignore
+from sklearn.preprocessing import MinMaxScaler # type: ignore
+import tensorflow as tf # type: ignore
 
 #########################################################################################################################
 ###### IR A hidrica.py ##### 
-from hidrica import hidrica_bp  # Importa el Blueprint
+from hidrica import hidrica_bp, procesar_datos_hidrica  # Importa el Blueprint
 #########################################################################################################################
 
 
@@ -28,13 +28,25 @@ app.config['SECRET_KEY'] = 'unicesmag'
 #app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
 app.register_blueprint(hidrica_bp, url_prefix='/hidrica')
 # Asegurar que las cookies solo se envíen por HTTPS y no accesibles por JavaScript
-app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365*10)
 # Configurar los parámetros de la base de datos
 app.config['DB_HOST'] = 'localhost'  # El host donde se encuentra la base de datos
 app.config['DB_NAME'] = 'relab'  # El nombre de la base de datos
 app.config['DB_USER'] = 'postgres'  # El usuario de la base de datos
 app.config['DB_PASSWORD'] = 'unicesmag'  # La contraseña del usuario de la base de datos
+
+voltaje_VCA_inversor_fotovoltaica = 0.0  # <-- ¡esto es lo que faltaba!
+codigo_VCA_inversor_fotovoltaica = 0.0  # <-- ¡esto es lo que faltaba!
+voltaje_VDC_hidrica = 0.0  # <-- ¡esto es lo que faltaba!
+codigo_VDC_hidrica = 0.0  # <-- ¡esto es lo que faltaba!
+caudal_hidrica = 0.0  # <-- ¡esto es lo que faltaba!
+presion_hidrica = 0.0  # <-- ¡esto es lo que faltaba!
+corriente_hidrica = 0.0  # <-- ¡esto es lo que faltaba!
+
+lock = threading.Lock()
 
 # Definir una función para obtener la conexión a la base de datos
 def get_db_connection():
@@ -80,6 +92,7 @@ def login():
                 user = cur.fetchone()  # Obtener el primer resultado de la consulta        
         # Verificar si se encontró un usuario con las credenciales proporcionadas
         if user is not None:
+            session.permanent = True
             session['user_id'] = user[0]  # Guardar el ID del usuario en la sesión
             session['user_rol'] = user[1]  # Guardar el rol del usuario en la sesión
             return 'success'  # Devolver 'success' si el inicio de sesión es exitoso
@@ -140,6 +153,13 @@ def inicio_principal():
 #Cerrar Sesion        
 @app.route('/logout')
 def logout():
+    # Pausar la recolecta de datos
+    user_id = session.get('user_id') 
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('UPDATE proyecto_fotovoltaica SET eje_pro = %s WHERE id_usu = %s;', (False,user_id))
+            cur.execute('UPDATE proyecto_hidrica SET eje_pro = %s WHERE id_usu = %s;', (False,user_id))
+            conn.commit()
     # Borrar la información de la sesión
     session.clear()
     # Redireccionar a la página de inicio o a donde prefieras
@@ -331,8 +351,7 @@ def davis():
                                 VALUES (%s, %s, %s)
                                 ON CONFLICT (created_at) DO NOTHING
                             """, [(prom, max_, created_at) for (prom, max_), created_at in db_data])
-
-                    
+                            conn.commit()
                 elif response.status_code == 400:
                     print("Error 400: Solicitud incorrecta", response.json())
 
@@ -342,8 +361,8 @@ def davis():
             end_timestamp = current_start - 1
         print("Datos guardados en la base de datos.")
         # Revisar y completar datos faltantes en los últimos 30 días
-        revisar_completar_datos_faltantes()
-        ejecutar_proyecto() 
+        revisar_completar_datos_faltantes() 
+        ejecutar_proyecto()
         time.sleep(300)
 
 # Función para revisar y completar datos faltantes en los últimos 30 días
@@ -399,9 +418,10 @@ def revisar_completar_datos_faltantes():
                     VALUES (%s, %s, %s)
                     ON CONFLICT (created_at) DO NOTHING
                 """, interpolated_data)
-        #print("Datos interpolados añadidos a la base de datos.")
-    #else:
-        #print("No se encontraron datos faltantes para interpolar.")
+                conn.commit()
+
+    ejecutar_proyecto()
+
 
 # Función para obtener datos del año anterior para un timestamp específico
 def get_previous_year_data(ts):
@@ -1274,7 +1294,7 @@ def add_proyecto():
     # Conectar a la base de datos y buscar si el proyecto ya existe
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('SELECT id_pro FROM proyecto_fotovoltaica WHERE nom_pro = %s AND id_usu = %s;', (nom_pro, user_id))
+            cur.execute('SELECT id_pro FROM proyecto_fotovoltaica WHERE nom_pro = %s AND id_usu = %s AND status = %s;', (nom_pro, user_id, True))
             proyecto = cur.fetchone()
 
             # Verificar si el proyecto ya existe
@@ -1294,7 +1314,7 @@ def add_proyecto():
 #Cambiar el estado del proyecto cuando no existe algun componente
 def estado_proyecto(proyecto_completo, cant_componentes):
     for proyecto in proyecto_completo:
-        if (proyecto[20] != 0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 and ((proyecto[32] == 'No' and proyecto[35] is not None) or proyecto[32] == 'Si') and proyecto[45] != 0.0 and proyecto[62] != 0.0 and proyecto[45] is not None and proyecto[62] is not None):
+        if (proyecto[20] != 0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 and ((proyecto[32] == 'No' and proyecto[35] is not None) or proyecto[32] == 'Si') and proyecto[45] != 0.0 and proyecto[62] != 0.0 and proyecto[45] is not None and proyecto[62] is not None ):
             eje_pro=None
             break
         else:
@@ -1309,16 +1329,25 @@ def estado_proyecto(proyecto_completo, cant_componentes):
                     # Commit para guardar los cambios en la base de datos
                     conn.commit()
             eje_pro=False
-            
-    
     return eje_pro
+
 #Iniciar Proyecto
 @app.route('/inicio_proyecto_fotovoltaica', methods=['GET', 'POST'])
 def inicio_proyecto_fotovoltaica(): 
+    global codigo_VCA_inversor_fotovoltaica
+    
     num_info = request.args.get('num_info') 
+    eje_arg = request.args.get('eje') 
+
+    if eje_arg == 'True':
+        ejecutar = True
+    elif eje_arg == 'False':
+        ejecutar = False
+    else:
+        ejecutar = None
+
     id_pro = request.args.get('id_pro')
     user_id = session.get('user_id')
-    
     if user_id is None:
         # Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
         return redirect(url_for('inicio_sesion')) 
@@ -1327,19 +1356,39 @@ def inicio_proyecto_fotovoltaica():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             result_proyect_ene=[]
-            if num_info=='4':
-                start_date,end_date=None,None
-                if request.method == 'POST':
-                    start_date = request.form['start_date']
-                    end_date = request.form['end_date'] 
-                    start_date = f"{start_date} 06:00:00"  # Agrega hora 06:00:00 a la fecha de inicio
-                    end_date = f"{end_date} 19:00:00"      # Agrega hora 19:00:00 a la fecha final               
-                cur.execute('''
-                    UPDATE proyecto_fotovoltaica SET eje_pro = %s WHERE id_pro = %s;
-                ''', (True, id_pro))
-                conn.commit()
-                ejecutar_proyecto()
-                result_proyect_ene = mostrar_ejecucion_proyecto(id_pro,start_date,end_date)            
+            if num_info == '4':
+                start_date = end_date = None
+
+                if request.method == 'POST':                    
+                    start_date = request.form.get('start_date')
+                    end_date = request.form.get('end_date')
+                    codigo = int(request.form.get('cod_sen'))
+                    if start_date and end_date:
+                        start_date = f"{start_date} 06:00:00"
+                        end_date = f"{end_date} 19:00:00"
+                # Solo actualizar si ejecutar no es None
+                if ejecutar is False:
+                    print("Entro")
+                    cur.execute('''
+                        UPDATE proyecto_fotovoltaica SET eje_pro = %s WHERE id_pro = %s;
+                    ''', (ejecutar, id_pro))
+                    conn.commit()
+                    num_info = None
+                
+                elif ejecutar is True and codigo==codigo_VCA_inversor_fotovoltaica:
+                    print(codigo,"==",codigo_VCA_inversor_fotovoltaica)
+                    cur.execute('''
+                        UPDATE proyecto_fotovoltaica SET eje_pro = %s WHERE id_pro = %s;
+                    ''', (ejecutar, id_pro))
+                    conn.commit()
+                    
+                if ejecutar is not None:
+                    num_info = None
+                elif ejecutar is None:
+                    print("ENTRO none")
+                    result_proyect_ene = mostrar_ejecucion_proyecto(id_pro, start_date, end_date)
+                    
+            
             # Hacemos una única consulta para obtener todos los datos relacionados
             cur.execute('''
                 SELECT * FROM proyecto_fotovoltaica p
@@ -2132,6 +2181,34 @@ def ver_modal_del_ban():
         # Renderizar la plantilla para mostrar el modal de eliminación
         return render_template('creacion_de_proyecto/delete_banco_project.html', ban=ban)
 
+#Eliminar inversor
+@app.route('/ver_modal_del_inv')
+def ver_modal_del_inv():
+    from app import get_db_connection
+    id_pro = request.args.get('id_pro')
+    id_inv_del = request.args.get('id_inv_del')
+    if id_inv_del is not None:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:            
+                # Ejecutamos la eliminación del inversor del proyecto
+                cur.execute('''
+                    UPDATE proyecto_fotovoltaica SET id_inv = %s, xinv_pro=%s, yinv_pro=%s, id_reg = %s, xreg_pro=%s, yreg_pro=%s  WHERE id_pro = %s;
+                ''', (None, 319, 116, None, 494, 340, id_pro,))
+                conn.commit()
+        
+        # Redirigir al inicio del proyecto
+        return redirect(url_for('inicio_proyecto_fotovoltaica', id_pro=id_pro))
+    
+    else:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Obtener los detalles del inversor que se esta usando en el proyecto
+                cur.execute('SELECT id_inv,id_pro FROM proyecto_fotovoltaica WHERE id_pro = %s;', (id_pro,))
+                inv = cur.fetchone()
+        
+        # Renderizar la plantilla para mostrar el modal de eliminación
+        return render_template('creacion_de_proyecto/delete_inversor_project.html', inv=inv)
+
 #Modal para agregar potencia a la carga
 @app.route('/modal_carga_pot', methods=['GET', 'POST'])
 def modal_carga_pot():
@@ -2168,15 +2245,20 @@ def modal_carga_pot():
 ################################################################################################################################################
 
 def ejecutar_proyecto():
+    global voltaje_VCA_inversor_fotovoltaica 
+    if voltaje_VCA_inversor_fotovoltaica == 0:
+        voltaje_VCA_inversor_fotovoltaica=121.11
+        
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''SELECT sum(a.ptot_arr) as tot_arr, avg(a.efi_arr) as tot_efi, a.id_pro, sum(a.area_arr) as tot_area  
-                           FROM arreglo_de_paneles a 
-                           JOIN proyecto_fotovoltaica p ON a.id_pro = p.id_pro 
-                           WHERE p.eje_pro = %s
-                           GROUP BY a.id_pro;''', (True,))
+                        FROM arreglo_de_paneles a 
+                        JOIN proyecto_fotovoltaica p ON a.id_pro = p.id_pro 
+                        WHERE p.eje_pro = %s
+                        GROUP BY a.id_pro;''', (True,))
             w_tot_rows = cur.fetchall()  # Obtener todas las filas
-            cur.execute('SELECT id_irr, prom_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
+            cur.execute('''SELECT id_irr, prom_irr, created_at FROM dato_irradiancia ORDER BY created_at desc limit 3;''')
+            #cur.execute('SELECT id_irr, prom_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
             irr = cur.fetchall()
             
             for w_tot in w_tot_rows:
@@ -2195,22 +2277,39 @@ def ejecutar_proyecto():
                         tot_efi=0                        
                     else:   
                         tot_efi =(resultadoW/(Area_pro*prom_irr))*100
+                    
                     cur.executemany("""
-                        INSERT INTO energia_arreglo (id_pro, parr_ene, id_irr, efi_ene, w_ene, kw_ene, created_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        INSERT INTO energia_arreglo (id_pro, parr_ene, id_irr, efi_ene, w_ene, kw_ene, created_at, vinv_ene)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (id_pro, created_at) DO NOTHING
-                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadokwh, created_at)])
+                    """, [(id_pro, tot_arr, id_irr, tot_efi, resultadoW, resultadokwh, created_at, voltaje_VCA_inversor_fotovoltaica)])
                     conn.commit() 
-         
+
+                    voltaje_VCA_inversor_fotovoltaica=round(voltaje_VCA_inversor_fotovoltaica-0.1,2)
+
+#mostrar modal para establecer conexion sesores fotovoltaica
+@app.route('/modal_conexion_sensor')
+def modal_conexion_sensor():    
+    from app import get_db_connection
+    id_pro = request.args.get('id_pro')
+    num_info = request.args.get('num_info')
+    eje = request.args.get('eje')
+    # Obtener detalles del proyecto usando SQLAlchemy con la conexión abierta
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('select * from proyecto_fotovoltaica where id_pro= %s ;', (id_pro,))
+            pro = cur.fetchone() 
+    return render_template('creacion_de_proyecto/conexion_sensor_fotovoltaica.html', pro = pro, num_info=num_info,eje=eje)
+            
 #Mostrar datos de proyecto generacion de energia
 def mostrar_ejecucion_proyecto(id_pro,start_date,end_date):
     print(start_date,'-',end_date)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date is None and end_date is None:
-                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro   FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro where e.created_at::date = CURRENT_DATE and e.id_pro=%s ORDER BY e.created_at;''', (id_pro,))
+                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro, e.vinv_ene   FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro where e.id_pro=%s ORDER BY e.created_at desc limit 257;''', (id_pro,))
             else:
-                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro   WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
+                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro, e.vinv_ene  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro   WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
             result_proyect_ene = cur.fetchall()# Obtener el id_pro de la carga
 
             return result_proyect_ene
@@ -2219,12 +2318,11 @@ def mostrar_ejecucion_proyecto(id_pro,start_date,end_date):
 # Ruta para obtener los últimos datos del proyecto en formato JSON
 @app.route('/get_latest_proyecto_data/<int:id_pro>', methods=['GET'])
 def get_latest_proyecto_data(id_pro):
-    # Suponiendo que tienes una función para obtener la conexión a la base de datos
     with get_db_connection() as conn:  
         with conn.cursor() as cur:  
             # Ejecuta la consulta usando id_pro como parámetro
             cur.execute('''
-                SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at  
+                SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.vinv_ene, e.created_at  
                 FROM energia_arreglo e 
                 JOIN dato_irradiancia irr ON e.id_irr = irr.id_irr 
                 WHERE e.id_pro = %s 
@@ -2240,13 +2338,55 @@ def get_latest_proyecto_data(id_pro):
         'efi_ene': f"{float(row[3]):.3f}",
         'w_ene': f"{float(row[4]):.3f}",
         'kw_ene': f"{float(row[5]):.3f}",
-        'created_at': row[6].strftime('%Y-%m-%d %H:%M:%S')
+        'vinv_ene': f"{float(row[6]):.3f}",
+        'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S')
     } for row in db_irr]
     
-    print("Datos enviados:", data)
-
     return jsonify(data)  # Devuelve los datos en formato JSON
 
+
+###### CONEXION SENSORES ########
+@app.route('/api/voltaje', methods=['POST'])
+def recibir_voltaje():
+    global voltaje_VCA_inversor_fotovoltaica, codigo_VCA_inversor_fotovoltaica
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No se recibió JSON'}), 400
+
+    dispositivo = data.get("dispositivo")
+
+    if dispositivo == "fotovoltaica":
+        if 'voltaje' in data and 'codigo' in data:
+            with lock:
+                voltaje_VCA_inversor_fotovoltaica = data['voltaje']
+                codigo_VCA_inversor_fotovoltaica = data['codigo']
+                print(f"⚡ Fotovoltaica -> V: {data['voltaje']} V | Código: {data['codigo']}")
+                ejecutar_proyecto()
+
+            return jsonify({'message': 'Datos recibidos correctamente'}), 200
+        else:
+            return jsonify({'error': 'Datos incompletos de fotovoltaica'}), 400
+
+    elif dispositivo == "hidrica":
+        print("ENTRA 1")
+        success = procesar_datos_hidrica(data)
+        if success:
+            return jsonify({'message': 'Datos recibidos correctamente'}), 200
+        else:
+            return jsonify({'error': 'Datos incompletos de hidráulica'}), 400
+
+    return jsonify({'error': 'Dispositivo desconocido'}), 400
+
+
+
+    
+# API para obtener voltaje actual
+@app.route('/api/voltaje_actual', methods=['GET'])
+def get_voltaje_actual():
+    with lock:
+        return jsonify({'voltaje': voltaje_VCA_inversor_fotovoltaica})
+    
 ################################################################################################################################################
 #---------------------------------------------------------INFORMES------------------------------------------------------------------------------------------------------------------------------------------------
 ################################################################################################################################################
@@ -2263,12 +2403,11 @@ def informes():
     if user_rol=='Administrador':
         with get_db_connection() as conn:  
             with conn.cursor() as cur:  
-                # Ejecuta la consulta usando id_pro como parámetro
+                # Ejecuta la consulta 
                 cur.execute('''
-                    select p.created_at, p.nom_pro, avg(e.w_ene)as w_ene, avg(e.efi_ene)as efi_ene
+                    select p.created_at, p.nom_pro, avg(e.w_ene)as w_ene, avg(e.efi_ene)as efi_ene, p.eje_pro
                     from energia_arreglo e join proyecto_fotovoltaica p
-                    on e.id_pro=p.id_pro where p.eje_pro=true group by p.created_at, p.nom_pro order by avg(e.w_ene) desc limit 30;
-
+                    on e.id_pro=p.id_pro group by p.created_at, p.nom_pro, p.eje_pro order by p.created_at desc limit 30;
                 ''')
                 sist_optima = cur.fetchall()  # Obtiene todos los resultados de la consulta
                 if request.method == 'POST':
@@ -2277,7 +2416,7 @@ def informes():
                     start_date = f"{start_date} 00:00:00"  # Agrega hora 06:00:00 a la fecha de inicio
                     end_date = f"{end_date} 23:59:59"
                     print('DAMOS INFORMES',start_date,'-',end_date)
-                    # Ejecuta la consulta usando id_pro como parámetro
+                    # Ejecuta la consulta 
                     cur.execute('''
                         SELECT p.id_pro, p.created_at,  p.nom_pro, 
                         (SELECT COUNT(id_inv) FROM inversor WHERE id_inv = p.id_inv) AS cant_inv,
@@ -2292,7 +2431,7 @@ def informes():
                     ''', (start_date, end_date,))
                 else:
                     print('DAMOS INFORMES',start_date,'-',end_date)
-                    # Ejecuta la consulta usando id_pro como parámetro
+                    # Ejecuta la consulta 
                     cur.execute('''
                         SELECT p.id_pro, p.created_at,  p.nom_pro, 
                         (SELECT COUNT(id_inv) FROM inversor WHERE id_inv = p.id_inv) AS cant_inv,
@@ -2313,4 +2452,4 @@ def informes():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

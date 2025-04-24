@@ -204,6 +204,77 @@
                     </div>
                 {% endif %}
             {% endif %}
+            {% if num_info == '5' %}
+                {% if tub_com %}
+                <div class="container mt-4">
+                    <div class="card shadow border-0 rounded-3 mt-4">
+                        <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                            <h5 class="mb-0">Información Tuberia</h5>
+                        </div>
+                        <div class="card-body bg-light p-4 rounded-bottom">
+                            <table class="table table-hover table-bordered rounded">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Tuberia</th>
+                                        <th>Datos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td>Cantidad Tubos</td>
+                                        <td>{{ tub_com[-1][6] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cantidad Codos</td>
+                                        <td>{{ tub_com[-1][5] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Diametro Inyector</td>
+                                        <td>{{ tub_com[-1][3] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Caudal</td>
+                                        <td>{{ tub_com[-1][4] }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>       
+                    <div class="card shadow border-0 rounded-3 mt-4">
+                        <div class="card-header text-white text-center rounded-top" style="background-color: #13447c;">
+                            <h5 class="mb-0">Información por Tubo</h5>
+                        </div>
+                        <div class="card-body bg-light p-4 rounded-bottom">
+                            <table class="table table-hover table-bordered rounded">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Tubo</th>
+                                        <th>Longitud</th>
+                                        <th>Codo</th>
+                                        <th>Orientacion</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tub_com in tub_com %}
+                                    <tr>
+                                        <td>{{ tub_com[7] }}</td>
+                                        <td>{{ tub_com[0] }}</td>
+                                        <td>{{ tub_com[2] }}</td>
+                                        <td>{{ tub_com[1] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center mt-4">
+                        Este proyecto no cuenta con tuberías que conecten la motobomba al generador.
+                    </div>
+                {% endif %}
+            {% endif %}
+            
         </div>
     </div>
 {% endif %}

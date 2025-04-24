@@ -23,10 +23,10 @@
 </script>
 <div class="modal fade" id="projectTurbina" tabindex="-1" role="dialog" aria-labelledby="ProjectTurbinaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-s">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega una turbina a tú proyecto</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             {% if pro %}
             <form method="POST" action="/hidrica/add_turbina_project">

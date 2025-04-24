@@ -1,0 +1,24 @@
+<div class="modal fade" id="conexionSensorF" tabindex="-1" role="dialog" aria-labelledby="conexion_sensor_fotovoltaicaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header color_modal_info">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Digita el código para vincular</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-ser-pan" method="POST" action="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro[0] }}&eje=True">
+                <div class="modal-body" style="height: 7rem;">
+                    <label for="cod_sen">El Código es: </label>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="cod_sen" name="cod_sen" maxlength="6" pattern="[0-9]+" min="100000" max="999999" step="1" maxlength="6" required aria-describedby="basic-addon2">
+                        <span class="input-group-text" id="basic-addon2">Cod</span>
+                    </div>
+
+                </div>                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Conectar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

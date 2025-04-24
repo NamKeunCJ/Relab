@@ -25,7 +25,7 @@
 <div class="col-sm-4">
     <h5 class="title-subpro"> • {{ pro_h[1] }}</h5>
 </div>
-<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem; height: 80vh; position: relative;">
+<div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10 rounded-4" style="padding: 1rem; height: 80vh; position: relative;">
     <div id="scrollContainer" class="card-body" style="overflow-x: auto; overflow-y: auto; position: relative; height: 100%;">
         <style>
             .icon_table {
@@ -34,6 +34,12 @@
                 position: absolute;
                 z-index: 10;
                 cursor: move;
+            }
+            .icon_table_sin_move {
+                border-collapse: collapse;
+                width: 150px;
+                position: absolute;
+                z-index: 10;
             }
 
             .linea {
@@ -61,163 +67,169 @@
                 background-color: rgb(0, 160, 253);
                 transform-origin: 0 0; /* La rotación ocurre desde el inicio de la línea */
             }
-        </style>
-        {% if pro_com[3] is not none %}
-            <table class="motobomba icon_table" draggable="true">
-                <tr>
-                    <td>
-                        <a class="enlace-link del_mot" href="/hidrica/ver_modal_del_mot?id_pro={{  pro_com[0] }}" title="Eliminar motobomba">
-                            <i class="bi bi-trash3-fill"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="col d-flex align-items-end justify-content-center ">                        
-                            <a class="nav-link tooltip_btn project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip" data-bs-title="{{ pro_com[12] }}">
-                                <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 7rem;">
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        {% endif %}  
 
-        
-        
-           
-        {% if pro_com[27] is not none and pro_com[32] is not none %}
-            <table class="generador icon_table" draggable="true">
-                <tr>
-                    <td>
-                        <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[26] }}" title="Eliminar Generador">
-                            <i class="bi bi-trash3-fill"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr><td>
-                    <div class="d-flex flex-column align-items-center">
-                        <!-- Contenedor para las dos imágenes en la misma fila -->
-                        <div class="d-flex justify-content-center align-items-center">
-                            <!-- Primera imagen (Caudalímetro) -->
-                            <a class="nav-link tooltip_btn project_caudalimetro" style="margin-top: 5.5rem;"
-                            href="/hidrica/modal_caudalimetro_project?id_pro={{ pro_com[0] }}" 
-                            data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip"
-                            data-bs-title="Ingresa Valor Caudalimetro">
-                                <img src="{{ url_for('static', filename='images/caudalimetro.png') }}" 
-                                    class="imagen-iluminada" 
-                                    style="width: 1.7rem; margin-top: 0;">
-                            </a>
-                            
-                            <!-- Segunda imagen (Generador) -->
-                            <a class="nav-link tooltip_btn project_generador" 
-                            href="/hidrica/modal_generador_project?id_pro={{ pro_com[0] }}" 
-                            data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip"
-                            data-bs-title="{{ pro_com[35] }}">
-                                <img src="{{ url_for('static', filename='images/generador.png') }}" 
-                                    class="imagen-iluminada" 
-                                    style="width: 5rem;">
-                            </a>
-                        </div>
-                        {% set turbina_data = {
-                            "Pelton": "turbina1.png",
-                            "Michell-Banki": "turbina2.png"
-                        } %}
-                        
-                        {% if pro_com[65] in turbina_data %}
-                        <!-- Contenedor para la última imagen (Turbina debajo en la base) -->
-                        <div class="d-flex justify-content-center align-items-center" style="margin-top: -2.1rem;">
-                            <a class="nav-link tooltip_btn project_turbina_alabes" 
-                            href="/hidrica/modal_turbina_alabes_project?id_pro={{ pro_com[0] }}" 
-                            data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip"
-                            data-bs-title="Turbina {{ pro_com[65] }}">
-                                <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[65]]) }}" 
-                                    class="imagen-iluminada" 
-                                    style="width: 6.7rem; margin-top: 0;">
-                            </a>
-                        </div>
-                        {% endif %} 
-                                            
-                    </div>                    
-                </td></tr>
-            </table>
-        {% endif %}
-        {% if pro_com[47] != 0 %}
-            <table class="tanque icon_table" draggable="true">
-                <tr>
-                    <td>
-                        <a class="enlace-link del_tan" href="/hidrica/ver_modal_del_tan?id_tan={{  pro_com[46] }}" title="Eliminar Tanque">
-                            <i class="bi bi-trash3-fill"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr><td>
-                    <div class="col d-flex align-items-end justify-content-center"> 
-                        {% set ranges = [
-                            (0, 10, 'tanque0.png'),
-                            (10, 25, 'tanque1.png'),
-                            (25, 50, 'tanque2.png'),
-                            (50, 75, 'tanque3.png'),
-                            (75, 100, 'tanque4.png'),
-                            (100, 9999999999, 'tanque5.png')
-                        ] %}
-                        
-                        {% for range in ranges %}
-                            {% if pro_com[47] >= range[0] and pro_com[47] < range[1] %}
-                                <a class="nav-link tooltip_btn project_tanque" href="/hidrica/modal_tanque_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                                data-bs-custom-class="custom-tooltip"
-                                data-bs-title="{{ pro_com[47] }} L/m³">
-                                    <img src="{{ url_for('static', filename='images/' + range[2]) }}" class="imagen-iluminada" style="width: 6rem;">
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </td></tr>
-            </table>
-        {% endif %}
-        {% if car_com[0][7]!=0 %}
-            {% for car_com in car_com %}
-                <table class="carga_{{ car_com[0] }} icon_table" draggable="true" style="text-align: center;">
+            #mainContent {
+                display: none;
+            }
+
+        </style>
+        <div id="mainContent">
+            {% if pro_com[3] is not none %}
+                <table class="motobomba icon_table" draggable="true" style="padding: 2rem;">
                     <tr>
-                        {% if car_com[1] == "Lineal" and car_com[8]==0.0 %} 
-                            {% set carga_img='bombillo-none.png' %}
-                        {% elif car_com[1] == "Lineal" and car_com[8]!=0.0 and pro_com[4]==False %} 
-                            {% set carga_img = 'bombillo-off.png' %} 
-                        {% elif car_com[1] == "Lineal" and car_com[8]!=0.0 and pro_com[4]==True %} 
-                            {% set carga_img = 'bombillo.png' %} 
-                        {% elif car_com[1] == "Inductiva" and car_com[8]==0.0 %} 
-                            {% set carga_img='motor-none.png' %} 
-                        {% elif car_com[1] == "Inductiva" and car_com[8]!=0.0 and pro_com[4]==False %} 
-                            {% set carga_img= 'motor-off.png' %} 
-                        {% elif car_com[1] == "Inductiva" and car_com[8]!=0.0 and pro_com[4]==True %} 
-                            {% set carga_img= 'motor.png' %} 
-                        {% elif car_com[1] == "No Lineal" and car_com[8]==0.0%}  
-                            {% set carga_img='pc-none.png' %} 
-                        {% elif car_com[1] == "No Lineal" and car_com[8]!=0.0 and pro_com[4]==False %} 
-                            {% set carga_img = 'pc-off.png' %} 
-                        {% elif car_com[1] == "No Lineal" and car_com[8]!=0.0 and pro_com[4]==True %} 
-                            {% set carga_img = 'pc.png' %} 
-                        {% endif %}
                         <td>
-                            <div class="col d-flex align-items-end justify-content-center ">  
-                                <a class="nav-link tooltip_btn" id="projectCargah_{{ car_com[0] }}" href="/hidrica/modal_carga_pot_hidrica?id_pcar={{car_com[0]}}" data-bs-toggle="tooltip" data-bs-placement="top"
-                                data-bs-custom-class="custom-tooltip"
-                                data-bs-title="{{ car_com[1]  }}">
-                                    <img src="{{ url_for('static', filename='images/' + carga_img) }}" class="imagen-iluminada" style="width: {% if car_com[1] == 'Lineal' %}1.6rem{% else %}4rem{% endif %};">
+                            <a class="enlace-link del_mot" href="/hidrica/ver_modal_del_mot?id_pro={{  pro_com[0] }}" title="Eliminar motobomba">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="col d-flex align-items-end justify-content-center text-center">                        
+                                <a class="nav-link tooltip_btn project_motobomba" href="/hidrica/modal_motobomba_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                                data-bs-custom-class="custom-tooltip" data-bs-title="{{ pro_com[12] }}">
+                                    <img src="{{ url_for('static', filename='images/motobomba.png') }}" class="imagen-iluminada" style="width: 7rem;">
                                 </a>
                             </div>
-                        </td>                        
+                        </td>
                     </tr>
                 </table>
-            {% endfor %}
-        {% endif %}
-        <div id="canvas"></div>
-        <div class="linea_h"></div>
-        
+            {% endif %}  
+
+            
+            
+            
+            {% if pro_com[27] is not none and pro_com[32] is not none %}
+                <table class="generador icon_table_sin_move" draggable="true">
+                    <tr>
+                        <td>
+                            <a class="enlace-link del_gen" href="/hidrica/ver_modal_del_gen?id_pgen={{  pro_com[26] }}" title="Eliminar Generador">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr><td>
+                        <div class="d-flex flex-column align-items-center">
+                            <!-- Contenedor para las dos imágenes en la misma fila -->
+                            <div class="d-flex justify-content-center align-items-center">
+                                <!-- Primera imagen (Caudalímetro) -->
+                                <a class="nav-link tooltip_btn project_caudalimetro" style="margin-top: 5.5rem;"
+                                href="/hidrica/modal_caudalimetro_project?id_pro={{ pro_com[0] }}" 
+                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                data-bs-custom-class="custom-tooltip"
+                                data-bs-title="Ingresa Valor Caudalimetro">
+                                    <img src="{{ url_for('static', filename='images/caudalimetro.png') }}" 
+                                        class="imagen-iluminada" 
+                                        style="width: 1.7rem; margin-top: 0;">
+                                </a>
+                                
+                                <!-- Segunda imagen (Generador) -->
+                                <a class="nav-link tooltip_btn project_generador" 
+                                href="/hidrica/modal_generador_project?id_pro={{ pro_com[0] }}" 
+                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                data-bs-custom-class="custom-tooltip"
+                                data-bs-title="{{ pro_com[35] }}">
+                                    <img src="{{ url_for('static', filename='images/generador.png') }}" 
+                                        class="imagen-iluminada" 
+                                        style="width: 5rem;">
+                                </a>
+                            </div>
+                            {% set turbina_data = {
+                                "Pelton": "turbina1.png",
+                                "Michell-Banki": "turbina2.png"
+                            } %}
+                            
+                            {% if pro_com[65] in turbina_data %}
+                            <!-- Contenedor para la última imagen (Turbina debajo en la base) -->
+                            <div class="d-flex justify-content-center align-items-center" style="margin-top: -2.1rem;">
+                                <a class="nav-link tooltip_btn project_turbina_alabes" 
+                                href="/hidrica/modal_turbina_alabes_project?id_pro={{ pro_com[0] }}" 
+                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                data-bs-custom-class="custom-tooltip"
+                                data-bs-title="Turbina {{ pro_com[65] }}">
+                                    <img src="{{ url_for('static', filename='images/' + turbina_data[pro_com[65]]) }}" 
+                                        class="imagen-iluminada" 
+                                        style="width: 6.7rem; margin-top: 0;">
+                                </a>
+                            </div>
+                            {% endif %} 
+                                                
+                        </div>                    
+                    </td></tr>
+                </table>
+            {% endif %}
+            {% if pro_com[47] != 0 %}
+                <table class="tanque icon_table" draggable="true">
+                    <tr>
+                        <td>
+                            <a class="enlace-link del_tan" href="/hidrica/ver_modal_del_tan?id_tan={{  pro_com[46] }}" title="Eliminar Tanque">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr><td>
+                        <div class="col d-flex align-items-end justify-content-center"> 
+                            {% set ranges = [
+                                (0, 10, 'tanque0.png'),
+                                (10, 25, 'tanque1.png'),
+                                (25, 50, 'tanque2.png'),
+                                (50, 75, 'tanque3.png'),
+                                (75, 100, 'tanque4.png'),
+                                (100, 9999999999, 'tanque5.png')
+                            ] %}
+                            
+                            {% for range in ranges %}
+                                {% if pro_com[47] >= range[0] and pro_com[47] < range[1] %}
+                                    <a class="nav-link tooltip_btn project_tanque" href="/hidrica/modal_tanque_project?id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    data-bs-custom-class="custom-tooltip"
+                                    data-bs-title="{{ pro_com[47] }} L/m³">
+                                        <img src="{{ url_for('static', filename='images/' + range[2]) }}" class="imagen-iluminada" style="width: 6rem;">
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </td></tr>
+                </table>
+            {% endif %}
+            {% if car_com[0][7]!=0 %}
+                {% for car_com in car_com %}
+                    <table class="carga_{{ car_com[0] }} icon_table" draggable="true" style="text-align: center;">
+                        <tr>
+                            {% if car_com[1] == "Lineal" and car_com[8]==0.0 %} 
+                                {% set carga_img='bombillo-none.png' %}
+                            {% elif car_com[1] == "Lineal" and car_com[8]!=0.0 and pro_com[4]==False %} 
+                                {% set carga_img = 'bombillo-off.png' %} 
+                            {% elif car_com[1] == "Lineal" and car_com[8]!=0.0 and pro_com[4]==True %} 
+                                {% set carga_img = 'bombillo.png' %} 
+                            {% elif car_com[1] == "Inductiva" and car_com[8]==0.0 %} 
+                                {% set carga_img='motor-none.png' %} 
+                            {% elif car_com[1] == "Inductiva" and car_com[8]!=0.0 and pro_com[4]==False %} 
+                                {% set carga_img= 'motor-off.png' %} 
+                            {% elif car_com[1] == "Inductiva" and car_com[8]!=0.0 and pro_com[4]==True %} 
+                                {% set carga_img= 'motor.png' %} 
+                            {% elif car_com[1] == "No Lineal" and car_com[8]==0.0%}  
+                                {% set carga_img='pc-none.png' %} 
+                            {% elif car_com[1] == "No Lineal" and car_com[8]!=0.0 and pro_com[4]==False %} 
+                                {% set carga_img = 'pc-off.png' %} 
+                            {% elif car_com[1] == "No Lineal" and car_com[8]!=0.0 and pro_com[4]==True %} 
+                                {% set carga_img = 'pc.png' %} 
+                            {% endif %}
+                            <td>
+                                <div class="col d-flex align-items-end justify-content-center ">  
+                                    <a class="nav-link tooltip_btn" id="projectCargah_{{ car_com[0] }}" href="/hidrica/modal_carga_pot_hidrica?id_pcar={{car_com[0]}}" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    data-bs-custom-class="custom-tooltip"
+                                    data-bs-title="{{ car_com[1]  }}">
+                                        <img src="{{ url_for('static', filename='images/' + carga_img) }}" class="imagen-iluminada" style="width: {% if car_com[1] == 'Lineal' %}1.6rem{% else %}4rem{% endif %};">
+                                    </a>
+                                </div>
+                            </td>                        
+                        </tr>
+                    </table>
+                {% endfor %}
+            {% endif %}
+            <div id="canvas"></div>
+            <div class="linea_h"></div>
+        </div>
         <script>                           
             document.addEventListener("DOMContentLoaded", function () {
                 const tubComData = JSON.parse('{{ tub_com | tojson | safe }}');
@@ -237,37 +249,56 @@
                     return { x: endX, y: endY };
                 }
 
-                function drawFromTuples(data) {
-                    let [x, y, angle] = [xmot + 115, ymot + 50, 0];
+                function drawFromTuples(data, x_inicio = xmot + 115, y_inicio = ymot + 50) {
+                    canvas.querySelectorAll(".line").forEach(el => el.remove());
+                    let [x, y, angle] = [x_inicio, y_inicio, 0];
+                    const converted = data.length > 0 ? [[0.3, 0, 'Continua'], ...data.map(([l, o, a]) => [l * 10, a > 0 && a <= 180 ? 180 - a : a, o])] : [];
 
-                    data.forEach(([l, relAngle, o]) => {
+                    converted.forEach(([l, relAngle, o]) => {
                         angle += o === 'Derecha' ? -relAngle : relAngle;
                         ({ x, y } = drawLine(x, y, l, angle));
                     });
-                    [window.lastX, window.lastY] = [x, y];
+
+                    return [x, y];
                 }
+
 
                 function init() {
                     const data = tubComData.length > 0 ? [[0.3, 0, 'Continua'], ...tubComData.map(([l, o, a]) => [l, a, o])] : [];
                     drawFromTuples(data.map(([l, a, o]) => [l * 10, a > 0 && a <= 180 ? 180 - a : a, o]));
                 }
 
-                init();
+                
 
-                function waitForCoordinates(callback) {
-                    window.lastX !== undefined && window.lastY !== undefined ? callback() : setTimeout(() => waitForCoordinates(callback), 100);
+                function startWhenReady(fn) {
+                    const check = () => {
+                        const canvasReady = !!document.getElementById("canvas");
+                        if (canvasReady) {
+                            requestAnimationFrame(fn);
+                        } else {
+                            requestAnimationFrame(check);
+                        }
+                    };
+                    check();
                 }
+                window.onload = function () {
+                    // Mostrar el contenido
+                    document.getElementById("mainContent").style.display = "block";
 
-                {% for car_com in car_com %}
-                waitForCoordinates(() => {
-                    initIcono(
-                        window.lastX -7, window.lastY - 123, "{{ pro_com[53] }}", "{{ pro_com[54] }}",
-                        "{{ pro_com[0] }}", "{{ pro_com[9] }}", "{{ pro_com[10] }}",
-                        "{{ car_com[0] }}", "{{ car_com[9] }}", "{{ car_com[10] }}"
-                    );
-                });
-                {% endfor %}
+                    // Aquí llamas a las funciones que dibujan tuberías y líneas
+                    init();
 
+                    {% for car_com in car_com %}
+                    startWhenReady(() => {
+                        const [x, y] = drawFromTuples(tubComData);
+                        initIcono(
+                            x - 7, y - 123, "{{ pro_com[53] }}", "{{ pro_com[54] }}",
+                            "{{ pro_com[0] }}", "{{ pro_com[9] }}", "{{ pro_com[10] }}",
+                            "{{ car_com[0] }}", "{{ car_com[9] }}", "{{ car_com[10] }}"
+                        );
+                    });
+                    {% endfor %}
+                };
                 function initIcono(x_gen, y_gen, x_tan, y_tan, id_pro, x_mot, y_mot, pcar_id, x_pcar, y_pcar) {
                     const elements = {
                         generador: document.querySelector(".generador"),
@@ -315,40 +346,69 @@
                         actualizarLinea(lineas.generadorCarga, elements.generador, elements.carga);
                     }
 
-                    document.addEventListener("dragstart", (e) => draggedElement = e.target);
+                    document.addEventListener('dragstart', e => {
+                        // Ignora si no es un div o lo que tú quieras
+                        if (e.target.tagName.toLowerCase() === 'img') {
+                            e.preventDefault();
+                            return;
+                        }
+
+                        // Asegúrate que solo puedas mover estos elementos:
+                        const target = e.target.closest(" .motobomba, .tanque, [class^='carga_']");
+                        
+                        if (target) {
+                            draggedElement = target;
+                        } else {
+                            e.preventDefault(); // bloquea el drag si no es uno de los elementos válidos
+                        }
+                    });
+
                     document.addEventListener("dragover", (e) => e.preventDefault());
                     document.addEventListener("drop", (e) => {
                         e.preventDefault();
                         if (!draggedElement) return;
                         
                         const { left, top } = elements.scrollContainer.getBoundingClientRect();
-                        const [x, y] = [
-                            Math.max(0, e.clientX - left - draggedElement.offsetWidth / 2 + elements.scrollContainer.scrollLeft),
-                            Math.max(0, e.clientY - top - draggedElement.offsetHeight / 2 + elements.scrollContainer.scrollTop)
-                        ];
                         
-                        switch (draggedElement) {
-                            case elements.motobomba:
+                        const x = Math.max(0, e.clientX - left - draggedElement.offsetWidth / 2 + elements.scrollContainer.scrollLeft);
+                        const y = Math.max(0, e.clientY - top - draggedElement.offsetHeight / 2 + elements.scrollContainer.scrollTop);
+                        
+                        if (draggedElement.classList.contains("motobomba")) {
                             [x_mot, y_mot] = [x, y];
                             actualizarTuberia();
-                            break;
-                            case elements.generador: [x_gen, y_gen] = [x, y]; break;
-                            case elements.tanque: [x_tan, y_tan] = [x, y]; break;
-                            case elements.carga: [x_pcar, y_pcar] = [x, y];  break;
+                        } else if (draggedElement.classList.contains("generador")) {
+                            [x_gen, y_gen] = [x, y];
+                        } else if (draggedElement.classList.contains("tanque")) {
+                            [x_tan, y_tan] = [x, y];
+                        } else if (draggedElement.classList.contains("carga_" + pcar_id)) {
+                            [x_pcar, y_pcar] = [x, y];
                         }
                         
                         Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
                         actualizarLineas();
-                        actualizarTuberia();
+                        
                         
                         fetch("/hidrica/update_coordinates_hidrica", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ x: x_gen, y: y_gen, pro_id: id_pro, x_mot, y_mot, x_tan, y_tan, pcar_id, x_pcar, y_pcar }),
+                            body: JSON.stringify({
+                                x: x_gen,
+                                y: y_gen,
+                                pro_id: id_pro,
+                                x_mot,
+                                y_mot,
+                                x_tan,
+                                y_tan,
+                                pcar_id,
+                                x_pcar,
+                                y_pcar
+                            }),
                         })
                         .then(res => res.json())
                         .then(data => console.log(data.success ? "Coordenadas actualizadas" : "Error al actualizar"))
                         .catch(console.error);
+                        actualizarTuberia();
+                        draggedElement = null;
                     });
                     
                     function actualizarTuberia() {
@@ -387,9 +447,80 @@
                     setPos(elements.tanque, x_tan, y_tan);
                     setPos(elements.carga, x_pcar, y_pcar);
                     actualizarLineas();
+
+                    // Soporte para táctil
+                    let draggedElement = null;
+                    let touchOffsetX = 0;
+                    let touchOffsetY = 0;
+
+                    // TOUCH START
+                    elements.scrollContainer.addEventListener('touchstart', e => {
+                        const touch = e.touches[0];
+                        const target = e.target.closest(".motobomba, .tanque, .carga_" + pcar_id);
+                        if (!target) return;
+
+                        draggedElement = target;
+                        const rect = draggedElement.getBoundingClientRect();
+                        touchOffsetX = touch.clientX - rect.left;
+                        touchOffsetY = touch.clientY - rect.top;
+                    }, { passive: true });
+
+                    // TOUCH MOVE
+                    elements.scrollContainer.addEventListener('touchmove', e => {
+                        if (!draggedElement) return;
+                        e.preventDefault();
+
+                        const touch = e.touches[0];
+                        const { left: containerLeft, top: containerTop } = elements.scrollContainer.getBoundingClientRect();
+
+                        const x = Math.max(0, touch.clientX - containerLeft - touchOffsetX + elements.scrollContainer.scrollLeft);
+                        const y = Math.max(0, touch.clientY - containerTop - touchOffsetY + elements.scrollContainer.scrollTop);
+
+                        if (draggedElement.classList.contains("motobomba")) {
+                            [x_mot, y_mot] = [x, y];
+                            actualizarTuberia();
+                        } else if (draggedElement.classList.contains("generador")) {
+                            [x_gen, y_gen] = [x, y];
+                        } else if (draggedElement.classList.contains("tanque")) {
+                            [x_tan, y_tan] = [x, y];
+                        } else if (draggedElement.classList.contains("carga_" + pcar_id)) {
+                            [x_pcar, y_pcar] = [x, y];
+                        }
+
+                        Object.assign(draggedElement.style, { left: `${x}px`, top: `${y}px` });
+                        actualizarLineas();
+                    }, { passive: false });
+
+                    // TOUCH END
+                    elements.scrollContainer.addEventListener('touchend', () => {
+                        if (!draggedElement) return;
+
+                        fetch("/hidrica/update_coordinates_hidrica", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                x: x_gen,
+                                y: y_gen,
+                                pro_id: id_pro,
+                                x_mot,
+                                y_mot,
+                                x_tan,
+                                y_tan,
+                                pcar_id,
+                                x_pcar,
+                                y_pcar
+                            }),
+                        })
+                        .then(res => res.json())
+                        .then(data => console.log(data.success ? "Coordenadas actualizadas (touch)" : "Error al actualizar (touch)"))
+                        .catch(console.error);
+
+                        draggedElement = null;
+                    });
+
                 }
             });
-        </script>           
+        </script>            
     </div>
 </div>
 

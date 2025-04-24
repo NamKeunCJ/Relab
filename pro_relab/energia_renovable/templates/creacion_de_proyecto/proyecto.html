@@ -30,46 +30,71 @@
                             <a href="/inicio_proyecto_fotovoltaica?num_info=3&id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Información Banco de Baterias">
                                 Información Banco de Baterias
                             </a>
-                        </li>
-                        {% if num_info is not none%}
-                            <li class="list-group-item">
-                                <a href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_com[0] }}" class="nav-link text-dark nav-color" title="Proyecto Fotovoltaico">
-                                    <b>Regresar al Proyecto</b>
-                                </a>
-                            </li>
-                        {% endif%}                        
-                    </ul>                    
-                    {% for proyecto in proyecto_completo %}
-                        {% if loop.index == 1 and proyecto[20] !=0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 
-                            and ((pro_com[32] == 'No' and proyecto[35] is not none) or pro_com[32] == 'Si') and proyecto[45] !=0.0 and proyecto[62] !=0.0 and proyecto[45] is not none and proyecto[62] is not none %}
-
-                            <hr class="border border-dark border-1 opacity-75">
-                            <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>EJECUTAR PROYECTO</b></label>
-                            <a class="btn btn-primary tooltip_btn" href="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                        </li>   
+                                     
+                    </ul> 
+                    <li class="list-group-item" style="margin-bottom: 1rem;">
+                        <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 w-100 py-2 fs-6 shadow-sm rounded-3 tooltip_btn"
+                            href="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro_com[0] }}"
+                            data-bs-toggle="tooltip" data-bs-placement="right"
                             data-bs-custom-class="custom-tooltip"
-                            data-bs-title="Ejecuta la estructura y recolecta datos.">Ejecutar</a>
-
-                            <!--<hr class="border border-dark border-1 opacity-75">
-                            <label for="end_date" class="form-label" style="margin-bottom: 1rem;"><b>CONECTAR A ESTRUCTURA FISICA</b></label>
-                            <a class="btn btn-primary tooltip_btn" href="/inicio_proyecto_fotovoltaica?num_info=5&id_pro={{ pro_com[0] }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip"
-                            data-bs-title="Compara datos con una estructura física.">Conectar</a> --> 
-                            <!-- Alerta que se muestra por 5 segundos debajo del nombre del proyecto -->
-                            <div id="alerta-proyecto" class="alert alert-info custom-alert" style="display: none;margin-top: 2rem;">
-                                <small>¡Proyecto listo para ejecutar! Presiona <strong>EJECUTAR PROYECTO</strong> para iniciar la recolección de datos en tiempo real.</small>
-                            </div>
-                            <script>
-                                // Mostrar la alerta
-                                document.getElementById("alerta-proyecto").style.display = "block";
-
-                                // Ocultar la alerta después de 7 segundos
-                                setTimeout(function() {
-                                    document.getElementById("alerta-proyecto").style.display = "none";
-                                }, 5000);
-                            </script>                        
+                            data-bs-title="Visualizar datos del proyecto.">                                    
+                            <span class="fw-semibold">Visualizar Datos</span>
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        {% if num_info is not none %}
+                            <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 w-100 py-2 fs-6 shadow-sm rounded-3 tooltip_btn"
+                               href="/inicio_proyecto_fotovoltaica?id_pro={{ pro_com[0] }}"
+                               data-bs-toggle="tooltip" data-bs-placement="right"
+                               data-bs-custom-class="custom-tooltip"
+                               data-bs-title="Volver a la Estructuración del Proyecto.">                                    
+                                <span class="fw-semibold">Regresar al Proyecto</span>
+                            </a>
                         {% endif %}
-                    {% endfor %}
-                    
+                    </li>
+                    {% if eje_pro == False %}
+                        {% for proyecto in proyecto_completo %}
+                            {% if loop.index == 1 and proyecto[20] != 0.0 and cant_componentes[4] != 0 and cant_componentes[5] != 0 
+                                and ((pro_com[32] == 'No' and proyecto[35] is not none) or pro_com[32] == 'Si') 
+                                and proyecto[45] != 0.0 and proyecto[62] != 0.0 and proyecto[45] is not none and proyecto[62] is not none %}
+
+                                <hr class="border border-secondary">
+
+                                <label class="form-label fw-bold text-dark mb-3">Ejecutar Proyecto</label>
+                                <a class="btn btn-outline-primary d-flex align-items-center gap-2 tooltip_btn conexion_sensor_f" 
+                                href="/modal_conexion_sensor?num_info=4&id_pro={{ pro_com[0] }}&eje=True" 
+                                data-bs-toggle="tooltip" data-bs-placement="right"
+                                data-bs-custom-class="custom-tooltip"
+                                data-bs-title="Ejecuta la estructura y recolecta datos.">
+                                    <i class="bi bi-play-fill"></i> Ejecutar
+                                </a>
+
+                                <div id="alerta-proyecto" class="alert alert-primary mt-3" style="display: none;">
+                                    <small>⚡ <strong>Proyecto listo:</strong> Presiona <strong>Ejecutar Proyecto</strong> para iniciar la recolección de datos.</small>
+                                </div>
+
+                                <script>
+                                    document.getElementById("alerta-proyecto").style.display = "block";
+                                    setTimeout(function() {
+                                        document.getElementById("alerta-proyecto").style.display = "none";
+                                    }, 5000);
+                                </script>
+
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <hr class="border border-secondary">
+                        <label class="form-label fw-bold text-dark mb-3">Finalizar Ejecución</label>
+                        <a class="btn btn-outline-secondary d-flex align-items-center gap-2 tooltip_btn" 
+                        href="/inicio_proyecto_fotovoltaica?num_info=4&id_pro={{ pro_com[0] }}&eje=False" 
+                        data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-custom-class="custom-tooltip"
+                        data-bs-title="Finaliza la ejecución de recopilación de datos.">
+                            <i class="bi bi-stop-circle"></i> Finalizar
+                        </a>
+                    {% endif %}
+
                 </div>
             </div>              
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">

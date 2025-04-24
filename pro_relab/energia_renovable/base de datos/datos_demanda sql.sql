@@ -70,4 +70,32 @@ SELECT setval(pg_get_serial_sequence('trayectoria_tubo', 'id_tra'), 1, false);
 delete from proyecto_hidrica;
 SELECT setval(pg_get_serial_sequence('proyecto_hidrica', 'id_pro'), 1, false);
 
+---NO EJECUTAR
+delete from energia_arreglo;
+SELECT setval(pg_get_serial_sequence('energia_arreglo', 'id_ene'), 1, false);
+delete from serie_arreglo;
+SELECT setval(pg_get_serial_sequence('serie_arreglo', 'id_sarr'), 1, false);
+delete from paralelo_arreglo;
+SELECT setval(pg_get_serial_sequence('paralelo_arreglo', 'id_parr'), 1, false);
+delete from arreglo_de_paneles;
+SELECT setval(pg_get_serial_sequence('arreglo_de_paneles', 'id_arr'), 1, false);
+delete from serie_banco;
+SELECT setval(pg_get_serial_sequence('serie_banco', 'id_sban'), 1, false);
+delete from paralelo_banco;
+SELECT setval(pg_get_serial_sequence('paralelo_banco', 'id_pban'), 1, false);
+delete from banco_de_baterias;
+SELECT setval(pg_get_serial_sequence('banco_de_baterias', 'id_ban'), 1, false);
+delete from proyecto_carga;
+SELECT setval(pg_get_serial_sequence('proyecto_carga', 'id_pcar'), 1, false);
+delete from proyecto_fotovoltaica;
+SELECT setval(pg_get_serial_sequence('proyecto_fotovoltaica', 'id_pro'), 1, false);
 
+
+delete from panel;
+SELECT setval(pg_get_serial_sequence('panel', 'id_pan'), 1, false);
+delete from bateria;
+SELECT setval(pg_get_serial_sequence('bateria', 'id_bat'), 1, false);
+delete from inversor;
+SELECT setval(pg_get_serial_sequence('inversor', 'id_inv'), 1, false);
+delete from regulador;
+SELECT setval(pg_get_serial_sequence('regulador', 'id_reg'), 1, false);

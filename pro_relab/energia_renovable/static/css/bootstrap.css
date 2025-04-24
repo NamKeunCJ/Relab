@@ -4256,8 +4256,8 @@ fieldset:disabled .btn {
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-    color: var(--bs-dropdown-link-hover-color);
-    background-color: var(--bs-dropdown-link-hover-bg);
+    color: #fff;
+    background-color: #0b3049;
 }
 
 .dropdown-item.active,
@@ -4452,6 +4452,75 @@ fieldset:disabled .btn {
 .nav-span {    
     color: #215975;    
 }
+/*CARD DE TABLAS IRRADIANCIA ETC PROFESIONAL*/
+.irradiancia-card-container .custom-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background: linear-gradient(145deg, #f4f4f4, #ffffff);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.irradiancia-card-container .custom-card:hover {
+    transform: scale(1.01);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.irradiancia-card-container h3 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.irradiancia-card-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.irradiancia-card-container thead {
+    background-color: #f0f2f5;
+}
+
+.irradiancia-card-container th,
+.irradiancia-card-container td {
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.irradiancia-card-container tbody tr:hover {
+    background-color: #f9f9f9;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.irradiancia-card-container .btn-export {
+    opacity: 0.8;
+    transition: 0.3s;
+}
+
+.irradiancia-card-container .btn-export:hover {
+    opacity: 1;
+    transform: scale(1.03);
+}
+
+.irradiancia-card-container #myChart canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+/*CARD DE TABLAS IRRADIANCIA ETC PROFESIONAL*/
+.color_modal_info{
+    background-color: #13447c;
+    border: #13447c;
+    color: #ffffff;
+}
+
+.hover_color_azul:hover {
+    color: white !important;
+    background-color: #13447c !important;
+    border-color: #13447c !important;
+}
+
 .enlace-link {
     display: block;
     padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);

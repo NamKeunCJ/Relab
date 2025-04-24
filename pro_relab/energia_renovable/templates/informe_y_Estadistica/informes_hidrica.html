@@ -21,7 +21,7 @@
                 }
             },
             "order": [
-                [1, "desc"]
+                [2, "desc"]
             ],
             "pageLength": 5,
             "lengthMenu": [5, 10, 25, 50], 
@@ -63,260 +63,266 @@
                 </div>
             </div> 
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="container" data-aos="fade-up">
-                    <div class="row" style="margin-bottom: 2rem; margin-top: 2rem;">                          
-                        <div class="col-lg-12 col-sm-12 ms-sm-auto">
-                            <div  class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
-                                <div class="card-body" style="overflow-x: auto;">
-                                    <h3>Recursos por Proyecto</h3>
-                                        {% if estructuras is not none %}                        
-                                        <table id="tabla" class="table table-responsive table table-hover" >
+                <div class="irradiancia-card-container">
+                    <div class="container" data-aos="fade-up">
+                        <div class="row" style="margin-bottom: 2rem; margin-top: 2rem;">                          
+                            <div class="col-lg-12 col-sm-12 ms-sm-auto">
+                                <div class="card custom-card shadow-lg mb-4">
+                                    <div class="card-body" style="overflow-x: auto;">
+                                        <h3>Recursos por Proyecto</h3>
+                                            {% if estructuras is not none %}                        
+                                            <table id="tabla" class="table table-hover table-striped table-borderless">
+                                                <thead class="table-primary">
+                                                    <tr>
+                                                        <th>Nombre Proyecto</th>
+                                                        <th>Fecha y Hora</th>                                                    
+                                                        <th>Motobomba</th>
+                                                        <th>Generador</th>
+                                                        <th>Turbina</th>
+                                                        <th>Tanque</th>
+                                                        <th>Cargas</th>
+                                                        <th>Energía Promedio Generada (kWh)</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for estructuras in estructuras %}
+                                                    <tr>
+                                                        <td class='Nombre_Proyecto'>{{estructuras[2]}}</td>
+                                                        <td class='Fecha_Hora'>{{estructuras[1]}}</td>                                                    
+                                                        <td class='Inversor'>{{estructuras[3]}}</td>
+                                                        <td class='Regulador'>{{estructuras[4]}}</td>
+                                                        <td class='Arreglo_Paneles'>{{estructuras[5]}}</td>
+                                                        <td class='Banco_Bateria'>{{estructuras[6]}}</td>
+                                                        <td class='Carga'>{{estructuras[7]}}</td>
+                                                        <td class='Energia'> {% if estructuras[8] is none %} Sin Ejecutarse {% else %} {{estructuras[8]}} {% endif %} </td>
+                                                        <td class='Estado'> {% if estructuras[9] == false %} Eliminado {% else %} Activo  {% endif %} </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% else %}
+                                        <p class="text-danger ">Error: No se encontraron datos de proyectos hidricos.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 ms-sm-auto">
+                                <div class="card custom-card shadow-lg mb-4">
+                                    <div class="card-body" style="overflow-x: auto;">
+                                        <h3>Rendimiento Energético por Proyecto</h3>
+                                        {% if sist_optima is not none %}
+                                        <table id="tabla" class="table table-hover table-striped table-borderless">
                                             <thead class="table-primary">
                                                 <tr>
+                                                    <th>Fecha y Hora</th>
                                                     <th>Nombre Proyecto</th>
-                                                    <th>Fecha y Hora</th>                                                    
-                                                    <th>Motobomba</th>
-                                                    <th>Generador</th>
-                                                    <th>Turbina</th>
-                                                    <th>Tanque</th>
-                                                    <th>Cargas</th>
-                                                    <th>Energía Promedio Generada (kWh)</th>
-                                                    <th>Estado</th>
+                                                    <th>Energia Generada</th>
+                                                    <th>Eficiencia Proyecto</th>
+                                                    <th>Ejecutandose</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for estructuras in estructuras %}
+                                                {% for sist_optima in sist_optima %}
                                                 <tr>
-                                                    <td class='Nombre_Proyecto'>{{estructuras[2]}}</td>
-                                                    <td class='Fecha_Hora'>{{estructuras[1]}}</td>                                                    
-                                                    <td class='Inversor'>{{estructuras[3]}}</td>
-                                                    <td class='Regulador'>{{estructuras[4]}}</td>
-                                                    <td class='Arreglo_Paneles'>{{estructuras[5]}}</td>
-                                                    <td class='Banco_Bateria'>{{estructuras[6]}}</td>
-                                                    <td class='Carga'>{{estructuras[7]}}</td>
-                                                    <td class='Energia'> {% if estructuras[8] is none %} Sin Ejecutarse {% else %} {{estructuras[8]}} {% endif %} </td>
-                                                    <td class='Estado'> {% if estructuras[9] == false %} Eliminado {% else %} Activo  {% endif %} </td>
+                                                    <td class="time">{{sist_optima[0]}}</td>
+                                                    <td class="nombre">{{sist_optima[1]}}</td>
+                                                    <td class="energia_generada">{{sist_optima[2]}}</td>
+                                                    <td class="eficiencia_proyecto">{{sist_optima[3]}}</td>
+                                                    <td class="ejecutandose">{% if sist_optima[4]==false %} No {% else %} Si  {% endif %} </td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
                                         </table>
-                                    {% else %}
-                                    <p class="text-danger ">Error: No se encontraron datos de proyectos hidricos.</p>
-                                    {% endif %}
+                                        {% else %}
+                                        <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-12 col-sm-12 ms-sm-auto">
-                            <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
-                                <div class="card-body" style="overflow-x: auto;">
-                                    <h3>Rendimiento Energético por Proyecto</h3>
-                                    {% if sist_optima is not none %}
-                                    <table id="tabla" class="table table-responsive table table-hover">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th>Fecha y Hora</th>
-                                                <th>Nombre Proyecto</th>
-                                                <th>Energia Generada</th>
-                                                <th>Eficiencia Proyecto</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for sist_optima in sist_optima %}
-                                            <tr>
-                                                <td class="time">{{sist_optima[0]}}</td>
-                                                <td class="nombre">{{sist_optima[1]}}</td>
-                                                <td class="energia_generada">{{sist_optima[2]}}</td>
-                                                <td class="eficiencia_proyecto">{{sist_optima[3]}}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                    {% else %}
-                                    <p class="text-danger">Error: No se encontraron datos de irradiancia.</p>
-                                    {% endif %}
+                                
+                                <!-- Sección del gráfico -->
+                                <div class="card custom-card shadow-lg mb-4">
+                                    <div class="card-body">
+                                        <div id="chartEfi"></div>
+                                        <!-- Botón para exportar a CSV -->
+                                        <button id="exportCSVButton" class="btn btn-export btn-secondary mt-3">⬇️ Exportar a CSV</button>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Sección del gráfico -->
-                            <div class="card shadow-lg card-flush h-md-50 mb-5 mb-xl-10" style="padding: 1rem;">
-                                <div id="chartEfi"></div>
-                                <!-- Botón para exportar a CSV -->
-                                <button id="exportCSVButton" class="btn btn-secondary mt-3" style="opacity: 0.5;">Exportar a CSV</button>
-                            </div>
-                            
-                        </div>                         
-                    </div>                 
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            var energiaW = []; // Almacenará toda la información para el tooltip
-                    
-                            // Seleccionamos las filas de la nueva tabla
-                            document.querySelectorAll('#tabla tbody tr').forEach(function(row) {
-                                var timeElement = row.querySelector('.time');
-                                var nombreElement = row.querySelector('.nombre');
-                                var energiaElement = row.querySelector('.energia_generada');
-                                var eficienciaElement = row.querySelector('.eficiencia_proyecto');
-                    
-                                if (timeElement && nombreElement && energiaElement && eficienciaElement) {
-                                    var timeText = timeElement.innerText;
-                                    var time = new Date(timeText).getTime();
-                    
-                                    var energia = parseFloat(energiaElement.innerText.replace(/,/g, ''));
-                                    var eficiencia = parseFloat(eficienciaElement.innerText.replace(/,/g, ''));
-                    
-                                    // Añadir los datos al arreglo si no son NaN
-                                    if (!isNaN(time) && !isNaN(energia) && !isNaN(eficiencia)) {
-                                        energiaW.push({ 
-                                            x: time, 
-                                            y: energia, 
-                                            nombre: nombreElement.innerText,
-                                            eficiencia: eficiencia
-                                        });
-                                    }
-                                }
-                            });
-                    
-                            console.log(energiaW); // Verificar los datos extraídos
-                    
-                            // Función para exportar datos a CSV
-                            function exportToCSV(data, filename) {
-                                var csvContent = "data:text/csv;charset=utf-8,";
-                    
-                                // Añadir encabezados
-                                csvContent += "Fecha y Hora,Nombre Proyecto,Energía Generada (W),Eficiencia (%)\n";
-                    
-                                // Añadir cada fila de datos
-                                data.forEach(function(row) {
-                                    csvContent += `${new Date(row.x).toLocaleString()},${row.nombre},${row.y},${row.eficiencia}\n`;
-                                });
-                    
-                                var encodedUri = encodeURI(csvContent);
-                                var link = document.createElement("a");
-                                link.setAttribute("href", encodedUri);
-                                link.setAttribute("download", filename);
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }
-                    
-                            // Asociar el evento de clic al botón para exportar a CSV (asegúrate de tener un botón con id "exportCSVButton")
-                            document.getElementById("exportCSVButton").addEventListener("click", function() {
-                                exportToCSV(energiaW, "energia_generada_sistemas_fotovoltaicos.csv");
-                            });
-                    
-                            // Configuración del gráfico
-                            var options = {
-                                tooltip: {
-                                    shared: false,
-                                    custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                                        var data = w.config.series[seriesIndex].data[dataPointIndex];
-                                        var date = new Date(data.x).toLocaleString();
-                                        
-                                        return `
-                                            <small><div class="card-header bg-secundary p-2 bg-opacity-55">
-                                                    ${date}
-                                                </div>
-                                            <div class="card-body">  
-                                                Detalles del Proyecto                          
-                                                <ul class="text-dark">
-                                                    <li>Nombre del Proyecto:<b> ${data.nombre}</b></li>
-                                                    <li>Eficiencia del Proyecto:<b> ${data.eficiencia.toFixed(2)}%</b></li>
-                                                    <li>Energía Generada (W):<b> ${data.y.toFixed(0)} W</b></li>
-                                                </ul>
-                                            </div></small>
-                                        `;
-                                    },
-                                    x: {
-                                        formatter: function (val) {
-                                            return new Date(val).toLocaleString();
+                                
+                            </div>                         
+                        </div>                 
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                var energiaW = []; // Almacenará toda la información para el tooltip
+                        
+                                // Seleccionamos las filas de la nueva tabla
+                                document.querySelectorAll('#tabla tbody tr').forEach(function(row) {
+                                    var timeElement = row.querySelector('.time');
+                                    var nombreElement = row.querySelector('.nombre');
+                                    var energiaElement = row.querySelector('.energia_generada');
+                                    var eficienciaElement = row.querySelector('.eficiencia_proyecto');
+                        
+                                    if (timeElement && nombreElement && energiaElement && eficienciaElement) {
+                                        var timeText = timeElement.innerText;
+                                        var time = new Date(timeText).getTime();
+                        
+                                        var energia = parseFloat(energiaElement.innerText.replace(/,/g, ''));
+                                        var eficiencia = parseFloat(eficienciaElement.innerText.replace(/,/g, ''));
+                        
+                                        // Añadir los datos al arreglo si no son NaN
+                                        if (!isNaN(time) && !isNaN(energia) && !isNaN(eficiencia)) {
+                                            energiaW.push({ 
+                                                x: time, 
+                                                y: energia, 
+                                                nombre: nombreElement.innerText,
+                                                eficiencia: eficiencia
+                                            });
                                         }
                                     }
-                                },
-                    
-                                series: [
-                                    {
-                                        name: 'Energía Generada',
-                                        data: energiaW
-                                    }
-                                ],
-                                chart: {
-                                    type: 'bar',
-                                    height: 300,
-                                    zoom: {
-                                        type: 'x',
-                                        enabled: true,
-                                        autoScaleYaxis: true
+                                });
+                        
+                                console.log(energiaW); // Verificar los datos extraídos
+                        
+                                // Función para exportar datos a CSV
+                                function exportToCSV(data, filename) {
+                                    var csvContent = "data:text/csv;charset=utf-8,";
+                        
+                                    // Añadir encabezados
+                                    csvContent += "Fecha y Hora,Nombre Proyecto,Energia Generada (W),Eficiencia (%)\n";
+                        
+                                    // Añadir cada fila de datos
+                                    data.forEach(function(row) {
+                                        csvContent += `${new Date(row.x).toLocaleString()},${row.nombre},${row.y.toFixed(2)},${row.eficiencia.toFixed(2)}\n`;
+                                    });
+                        
+                                    var encodedUri = encodeURI(csvContent);
+                                    var link = document.createElement("a");
+                                    link.setAttribute("href", encodedUri);
+                                    link.setAttribute("download", filename);
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                }
+                        
+                                // Asociar el evento de clic al botón para exportar a CSV (asegúrate de tener un botón con id "exportCSVButton")
+                                document.getElementById("exportCSVButton").addEventListener("click", function() {
+                                    exportToCSV(energiaW, "energia_generada_sistemas_hidricos.csv");
+                                });
+                        
+                                // Configuración del gráfico
+                                var options = {
+                                    tooltip: {
+                                        shared: false,
+                                        custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                                            var data = w.config.series[seriesIndex].data[dataPointIndex];
+                                            var date = new Date(data.x).toLocaleString();
+                                            
+                                            return `
+                                                <small><div class="card-header bg-secundary p-2 bg-opacity-55">
+                                                        ${date}
+                                                    </div>
+                                                <div class="card-body">  
+                                                    Detalles del Proyecto                          
+                                                    <ul class="text-dark">
+                                                        <li>Nombre del Proyecto:<b> ${data.nombre}</b></li>
+                                                        <li>Eficiencia del Proyecto:<b> ${data.eficiencia.toFixed(2)}%</b></li>
+                                                        <li>Energía Generada (W):<b> ${data.y.toFixed(0)} W</b></li>
+                                                    </ul>
+                                                </div></small>
+                                            `;
+                                        },
+                                        x: {
+                                            formatter: function (val) {
+                                                return new Date(val).toLocaleString();
+                                            }
+                                        }
                                     },
-                                    toolbar: {
-                                        autoSelected: 'zoom',
-                                        export: {
-                                            csv: {
-                                                filename: 'energia_generada_sistemas_fotovoltaicos',
-                                                columnDelimiter: ',',
-                                                headerCategory: 'Fecha y Hora',
-                                                headerValue: 'Energía Generada',
-                                                categoryFormatter(x) {
-                                                    return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+                        
+                                    series: [
+                                        {
+                                            name: 'Energía Generada',
+                                            data: energiaW
+                                        }
+                                    ],
+                                    chart: {
+                                        type: 'line',
+                                        height: 300,
+                                        zoom: {
+                                            type: 'x',
+                                            enabled: true,
+                                            autoScaleYaxis: true
+                                        },
+                                        toolbar: {
+                                            autoSelected: 'zoom',
+                                            export: {
+                                                csv: {
+                                                    filename: 'energia_generada_sistemas_hidricos',
+                                                    columnDelimiter: ',',
+                                                    headerCategory: 'Fecha y Hora',
+                                                    headerValue: 'Energía Generada',
+                                                    categoryFormatter(x) {
+                                                        return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+                                                    },
+                                                    valueFormatter(y) {
+                                                        return y.toFixed(2);
+                                                    }
                                                 },
-                                                valueFormatter(y) {
-                                                    return y.toFixed(2);
-                                                }
+                                                svg: { filename: 'grafico_energia_generada' },
+                                                png: { filename: 'grafico_energia_generada' }
                                             },
-                                            svg: { filename: 'grafico_energia_generada' },
-                                            png: { filename: 'grafico_energia_generada' }
-                                        },
-                                    }
-                                },
-                                dataLabels: {
-                                    enabled: false
-                                },
-                                markers: {
-                                    size: 0,
-                                },
-                                title: {
-                                    text: 'Rendimiento Energético por Proyecto',
-                                    align: 'left'
-                                },
-                                fill: {
-                                    type: 'solid',
-                                    gradient: {
-                                        shadeIntensity: 1,
-                                        inverseColors: false,
-                                        opacityFrom: 0.5,
-                                        opacityTo: 0,
-                                        stops: [0, 90, 100]
+                                        }
                                     },
-                                },
-                                stroke: {
-                                    width: 2,
-                                    curve: 'straight'
-                                },
-                                yaxis: {
-                                    labels: {
-                                        formatter: function (val) {
-                                            return val.toFixed(0);
-                                        },
+                                    dataLabels: {
+                                        enabled: false
+                                    },
+                                    markers: {
+                                        size: 0,
                                     },
                                     title: {
-                                        text: 'Energía Generada'
+                                        text: 'Rendimiento Energético por Proyecto',
+                                        align: 'left'
                                     },
-                                },
-                                xaxis: {
-                                    type: 'datetime',
-                                    labels: {
-                                        formatter: function (value) {
-                                            return new Date(value).toLocaleDateString();
+                                    fill: {
+                                        type: 'solid',
+                                        gradient: {
+                                            shadeIntensity: 1,
+                                            inverseColors: false,
+                                            opacityFrom: 0.5,
+                                            opacityTo: 0,
+                                            stops: [0, 90, 100]
+                                        },
+                                    },
+                                    stroke: {
+                                        width: 2,
+                                        curve: 'straight'
+                                    },
+                                    yaxis: {
+                                        labels: {
+                                            formatter: function (val) {
+                                                return val.toFixed(0);
+                                            },
+                                        },
+                                        title: {
+                                            text: 'Energía Generada'
+                                        },
+                                    },
+                                    xaxis: {
+                                        type: 'datetime',
+                                        labels: {
+                                            formatter: function (value) {
+                                                return new Date(value).toLocaleDateString();
+                                            }
                                         }
-                                    }
-                                },            
-                            };
-                    
-                            // Crear y renderizar el gráfico
-                            var chart = new ApexCharts(document.querySelector("#chartEfi"), options);
-                            chart.render();
-                        });
-                    </script>
-                                    
+                                    },            
+                                };
+                        
+                                // Crear y renderizar el gráfico
+                                var chart = new ApexCharts(document.querySelector("#chartEfi"), options);
+                                chart.render();
+                            });
+                        </script>
+                                        
+                    </div>
                 </div>
             </main> 
         </div> 

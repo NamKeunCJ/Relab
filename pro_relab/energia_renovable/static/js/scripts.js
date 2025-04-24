@@ -362,6 +362,34 @@ $(document).ready(function() {
     });
 });
 
+//modal eliminar inversor del projecto
+$(document).ready(function() {
+    $('.del_inv').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.del_inv').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#delInv').modal('show');
+            });
+        }
+    });
+});
+
+//modal conexion sensor fotovoltaica
+$(document).ready(function() {
+    $('.conexion_sensor_f').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.conexion_sensor_f').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#conexionSensorF').modal('show');
+            });
+        }
+    });
+});
+
 //modal proyecto motobomba
 $(document).ready(function() {
     $('.project_motobomba').off('click').on('click', function(event) {
@@ -488,7 +516,19 @@ $(document).ready(function() {
         }
     });
 });
-
+//modal conexion sensor hidrica
+$(document).ready(function() {
+    $('.conexion_sensor_h').off('click').on('click', function(event) {
+        event.preventDefault();
+        // Abre el modal si no está ya visible
+        if (!$('.conexion_sensor_h').hasClass('show')) {
+            $.get($(this).attr('href'), function(data) {
+                $('#modalContent').html(data);
+                $('#conexionSensorH').modal('show');
+            });
+        }
+    });
+});
 //modal eliminar generador del projecto
 $(document).ready(function() {
     $('.del_gen').off('click').on('click', function(event) {
