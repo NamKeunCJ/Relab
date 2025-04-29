@@ -2,23 +2,19 @@
     <div class="modal-dialog">
         <div class="modal-content shadow-lg rounded-4">
             <div class="modal-header color_modal_info">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Agrega el valor del caudalímetro</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Valor del caudalímetro</h1>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="form-ser-pan" method="POST" action="/hidrica/add_caudalimetro_project">
-                <input type="hidden" name="id_pro" value="{{info[0]}}">   
-                <div class="modal-body" style="height: 7rem;">
-                    <label for="cau_pgen">El valo del caudalímetro es:</label>
-                    <div class="input-group mb-3">
-                        <input type="number" class="form-control" id="cau_pgen" aria-describedby="basic-addon2" min="1" max="1900" name="cau_pgen" step="0.01" value="{{info[1] }}" required>
-                        <span class="input-group-text" id="basic-addon2">m³/s</span>
-                    </div>
-                </div>                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Seleccionar</button>
+            </div>              
+            <div class="modal-body d-flex flex-column justify-content-center align-items-center" style="height: 10rem;">
+                <label class="mb-3 text-secondary">El valor del caudal es:</label>
+                <div class="border border-secondary rounded-4 p-3 bg-light text-dark fw-bold fs-6">
+                    {{ info[1] }} m³/s
                 </div>
-            </form>
+            </div>                
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
         </div>
     </div>
 </div>
+

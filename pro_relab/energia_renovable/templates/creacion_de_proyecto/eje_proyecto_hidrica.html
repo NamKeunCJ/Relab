@@ -45,7 +45,7 @@
                                 item.alt_ene,      // Altura
                                 item.pre_ene,      // presion
                                 item.cau_ene,        // Caudal
-                                item.pot_ene,       // Potencia
+                                item.tot_ene,       // energia
                                 item.vsal_ene,      // Corriente Salida
                                 item.csal_ene,      // Voltaje DC salida
                                 item.efi_ene      // Eficiencia Energia
@@ -97,9 +97,9 @@
                     <tr>
                         <th style="width: 12rem;">Fecha y Hora</th>
                         <th>Altura</th>
-                        <th>Presion</th>
-                        <th>Caudal</th>
-                        <th>Potencia total (Kw)</th>
+                        <th>Presion (Pa)</th>
+                        <th>Caudal (m³/s)</th>
+                        <th>Energia Generada (W)</th>
                         <th>Voltaje DC</th>
                         <th>Corriente</th>
                         <th>Eficiencia Energia</th>                        
@@ -112,7 +112,7 @@
                         <td class="alt_ene">{{eje_pro[5]}}</td>
                         <td class="pre_ene">{{eje_pro[7]}}</td>
                         <td class="cau_ene">{{eje_pro[6]}}</td>
-                        <td class="pot_ene">{{eje_pro[2]}}</td>
+                        <td class="tot_ene">{{eje_pro[2]}}</td>
                         <td class="vsal_ene">{{eje_pro[8]}}</td>
                         <td class="csal_ene">{{eje_pro[9]}}</td>
                         <td class="efi_ene">{{eje_pro[1]}}</td>
@@ -169,7 +169,7 @@
 
         document.querySelectorAll('#tablaP tbody tr').forEach(function(row) {
             var timeElement = row.querySelector('.time_irradiance');
-            var potenciaElement = row.querySelector('.pot_ene');
+            var EnergiaElement = row.querySelector('.tot_ene');
             var eficienciaElement = row.querySelector('.efi_ene');
             var alturaElement = row.querySelector('.alt_ene');
             var caudalElement = row.querySelector('.cau_ene');
@@ -178,13 +178,13 @@
             var corrienteElement = row.querySelector('.csal_ene');
 
             if (
-                timeElement && potenciaElement && eficienciaElement &&
+                timeElement && EnergiaElement && eficienciaElement &&
                 alturaElement && caudalElement && presionElement &&
                 voltajeElement && corrienteElement
             ) {
                 var time = new Date(timeElement.innerText).getTime();
 
-                var potencia = parseFloat(potenciaElement.innerText.replace(/,/g, ''));
+                var energia = parseFloat(EnergiaElement.innerText.replace(/,/g, ''));
                 var eficiencia = parseFloat(eficienciaElement.innerText.replace(/,/g, ''));
                 var altura = parseFloat(alturaElement.innerText.replace(/,/g, ''));
                 var caudal = parseFloat(caudalElement.innerText.replace(/,/g, ''));
@@ -192,13 +192,13 @@
                 var voltaje = parseFloat(voltajeElement.innerText.replace(/,/g, ''));
                 var corriente = parseFloat(corrienteElement.innerText.replace(/,/g, ''));
 
-                if (!isNaN(time) && !isNaN(potencia) && !isNaN(eficiencia) &&
+                if (!isNaN(time) && !isNaN(energia) && !isNaN(eficiencia) &&
                     !isNaN(altura) && !isNaN(caudal) && !isNaN(presion) &&
                     !isNaN(voltaje) && !isNaN(corriente)) {
                         
                     energiaData.push({ 
                         x: time, 
-                        y:potencia, 
+                        y:energia, 
                         eficiencia,
                         altura,
                         caudal,
@@ -218,13 +218,14 @@
             var csvContent = "data:text/csv;charset=utf-8,";
 
             // Encabezados completos
-            csvContent += "Fecha y Hora,Potencia Total (Kw),Eficiencia (%),Altura (m),Caudal (m3/s),Presion (Pa),Voltaje (V),Corriente (A)\n";
+            csvContent += "Fecha y Hora,Energia Generada (Kw),Eficiencia (%),Altura (m),Caudal (m3/s),Presion (Pa),Voltaje (V),Corriente (A)\n";
 
             data.forEach(function(row) {
                 csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},` +
-                            `${row.potencia.toFixed(2)},${row.eficiencia.toFixed(2)},${row.altura.toFixed(2)},` +
-                            `${row.caudal.toFixed(2)},${row.presion.toFixed(2)},${row.voltaje.toFixed(2)},${row.corriente.toFixed(2)}\n`;
+                            `${row.y.toFixed(3)},${row.eficiencia.toFixed(3)},${row.altura.toFixed(3)},` +
+                            `${row.caudal.toFixed(5)},${row.presion.toFixed(3)},${row.voltaje.toFixed(3)},${row.corriente.toFixed(3)}\n`;
             });
+
 
             var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
@@ -256,13 +257,13 @@
                         <div class="card-body">  
                             Detalles de Generación                          
                             <ul class="text-dark">
-                                <li>Potencia Total:<b> ${data.y.toFixed(0)} Kw</b></li>
-                                <li>Eficiencia Energética:<b> ${data.eficiencia.toFixed(2)}%</b></li>
-                                <li>Altura:<b> ${data.altura.toFixed(2)} m</b></li>
-                                <li>Caudal:<b> ${data.caudal.toFixed(2)} m³/s</b></li>
-                                <li>Presion:<b> ${data.presion.toFixed(2)} m³/s</b></li>
-                                <li>Voltaje:<b> ${data.voltaje.toFixed(2)} m³/s</b></li>
-                                <li>Corriente:<b> ${data.corriente.toFixed(2)} m³/s</b></li>
+                                <li>Energia Generada:<b> ${data.y.toFixed(3)} Kw</b></li>
+                                <li>Eficiencia Energética:<b> ${data.eficiencia.toFixed(3)}%</b></li>
+                                <li>Altura:<b> ${data.altura.toFixed(3)} m</b></li>
+                                <li>Caudal:<b> ${data.caudal.toFixed(5)} m³/s</b></li>
+                                <li>Presion:<b> ${data.presion.toFixed(3)} pa</b></li>
+                                <li>Voltaje:<b> ${data.voltaje.toFixed(3)} V</b></li>
+                                <li>Corriente:<b> ${data.corriente.toFixed(3)} A</b></li>
                             </ul>
                         </div></small>
                     `;
@@ -303,8 +304,12 @@
                                 return y.toFixed(2);
                             }
                         },
-                        svg: { filename: 'grafico_energia_generada' },
-                        png: { filename: 'grafico_energia_generada' }
+                        svg: {
+                            filename: undefined,
+                        },
+                        png: {
+                            filename: undefined,
+                        }
                     },
                 }
             },
@@ -333,14 +338,9 @@
                 curve: 'straight'
             },
             yaxis: {
-                labels: {
-                    formatter: function (val) {
-                        return val.toFixed(0);
-                    },
-                },
                 title: {
                     text: 'Energía Generada'
-                },
+                }
             },
             xaxis: {
                 type: 'datetime',

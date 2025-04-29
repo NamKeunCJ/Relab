@@ -278,7 +278,7 @@ def add_proyecto_h():
 #Cambiar el estado del proyecto cuando no existe algun componente
 def estado_proyecto_hidrica(proyecto,carga_completa):
     from app import get_db_connection
-    if (proyecto[3] is not None and proyecto[27] != 0 and proyecto[32] is not None and proyecto[64] is not None and proyecto[72] != 0 and carga_completa[0][7] != 0 and len(list(filter(lambda x: x[8] != 0, carga_completa))) > 0 and proyecto[47] != 0):
+    if (proyecto[3] is not None and proyecto[32] is not None and proyecto[64] is not None and proyecto[72] != 0 and carga_completa[0][7] != 0 and len(list(filter(lambda x: x[8] != 0, carga_completa))) > 0 and proyecto[47] != 0):
         eje_pro=None
     else:
         # Obtener detalles del proyecto
@@ -384,22 +384,17 @@ def inicio_proyecto_hidrica():
             ''', (id_pro,id_pro,))  # La coma final es necesaria para formar una tupla
             car_com = cur.fetchall()
             # Obtenemos el proyecto principal en cuestion de las tuberias
-            cur.execute('''SELECT tub.lon_tub, tub.ori_tub, cod.ang_cod, tra.dia_tra, g.cau_ene, count(tub.id_cod) OVER () as total_codos, count(tub.id_tub) OVER () as total_tubos, row_number() OVER (ORDER BY tub.created_at) as fila
-                FROM 
-                    proyecto_hidrica pro
-                    JOIN trayectoria_tubo tra ON pro.id_pro = tra.id_pro
-                    JOIN tubo tub ON pro.id_pro = tub.id_pro 
-                    JOIN codo cod ON cod.id_cod = tub.id_cod
-                    JOIN energia_generada g ON pro.id_pro = g.id_pro
-                WHERE 
-                    pro.id_pro = %s 
-                    AND g.created_at = (
-                        SELECT MAX(created_at) 
-                        FROM energia_generada 
-                        WHERE id_pro = %s
-                    )
-                ORDER BY tub.created_at ASC;
-            ''', (id_pro,id_pro,))  # La coma final es necesaria para formar una tupla
+            cur.execute('''SELECT 
+                    tub.lon_tub, tub.ori_tub, cod.ang_cod, tra.dia_tra, g.cau_ene,
+                    count(*) OVER () AS total_tubos,
+                    row_number() OVER (ORDER BY tub.created_at) AS fila
+                FROM tubo tub
+                JOIN codo cod ON cod.id_cod = tub.id_cod
+                LEFT JOIN (SELECT id_pro, dia_tra FROM trayectoria_tubo WHERE id_pro = %s LIMIT 1) tra ON tub.id_pro = tra.id_pro
+                LEFT JOIN (SELECT id_pro, cau_ene FROM energia_generada WHERE id_pro = %s ORDER BY created_at DESC LIMIT 1) g ON tub.id_pro = g.id_pro
+                WHERE tub.id_pro = %s
+                ORDER BY tub.created_at;
+            ''', (id_pro,id_pro,id_pro,))  # La coma final es necesaria para formar una tupla
             tub_com = cur.fetchall()
             # Obtenemos el proyecto principal
             cur.execute('SELECT * FROM proyecto_hidrica WHERE id_pro = %s AND id_usu = %s AND status = true;', (id_pro, user_id))
@@ -600,22 +595,6 @@ def modal_caudalimetro_project():
             info = cur.fetchone() 
     return render_template('creacion_de_proyecto/project_caudalimetro.html', pro = pro, info=info)
 
-#agregar el caudalimetro alproyecto
-@hidrica_bp.route('/add_caudalimetro_project', methods=['POST'])
-def add_caudalimetro_project():     
-    from app import get_db_connection
-    id_pro = request.form['id_pro']
-    cau_pgen = request.form['cau_pgen']
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute('''
-                UPDATE proyecto_generador
-                SET cau_pgen = %s 
-                WHERE id_pro = %s;
-            ''', (cau_pgen, id_pro))
-            conn.commit()
-    return redirect(url_for('hidrica.inicio_proyecto_hidrica', id_pro=id_pro))
-
 ################################################################################################################################################
 #mostrar modal para agregar cargas alproyecto
 @hidrica_bp.route('/modal_carga_project')
@@ -752,27 +731,15 @@ def add_tuberia_project():
             ''', (id_pro,))
             
             tub_com = cur.fetchall()
-
-            # Obtener datos para el cálculo de la altura
-            cur.execute('''
-                SELECT mot.pre_mot, tra.alt_tra
-                FROM proyecto_hidrica pro
-                JOIN motobomba mot ON pro.id_mot = mot.id_mot
-				JOIN trayectoria_tubo tra ON pro.id_pro = tra.id_tra
-                WHERE pro.id_pro = %s
-            ''', (id_pro,))
             
-            mot_alt = cur.fetchone()
-            print("mot",mot_alt)
-            # Calcular la altura             
-            if mot_alt[1]==0:
-                alt_tra=mot_alt[0]*10.2
-            else:
-                alt_tra = sum(l * math.sin(math.radians(a)) * (-1 if o == 'Derecha' else 1) for l, a, o in tub_com)
-                if alt_tra<0:
-                    alt_tra = -(alt_tra)
+            alt_tra = sum(
+                l * math.sin(math.radians(0 if a == "No Aplica" else float(a))) * (-1 if o == 'Derecha' else 1)
+                for l, a, o in tub_com
+            )
 
-            print("alt",alt_tra)
+            if alt_tra<0:
+                alt_tra = -(alt_tra)
+
             
             # Actualizar la trayectoria del tubo con la nueva altura
             cur.execute('''
@@ -1085,55 +1052,90 @@ def informes_hidrica():
 
 def ejecutar_proyecto_hidrica():
     from app import get_db_connection
-    global caudal_hidrica
-    global presion_hidrica
+    
     global corriente_hidrica
     global voltaje_VDC_hidrica
     global fechahora_dato
     print("ENTREA 2 HIHI")
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            # Obtener los datos iniciales
+            # Obtener todos los proyectos con eje_pro = True
             cur.execute('''
-                SELECT t.alt_tra, p.id_pro, g.id_pgen, gen.pot_gen
+                SELECT t.alt_tra, p.id_pro, g.id_pgen, gen.pot_gen, mot.pre_mot, t.dia_tra
                 FROM trayectoria_tubo t 
                 JOIN proyecto_hidrica p ON t.id_pro = p.id_pro 
                 JOIN proyecto_generador g ON g.id_pro = p.id_pro 
                 JOIN generador gen ON gen.id_gen = g.id_gen
-                WHERE p.eje_pro = %s GROUP BY p.id_pro, t.alt_tra, p.id_pro, g.id_pgen, gen.pot_gen;
+				JOIN motobomba mot ON mot.id_mot = p.id_mot
+                WHERE p.eje_pro = %s
+                GROUP BY p.id_pro, t.alt_tra, g.id_pgen, gen.pot_gen, mot.pre_mot, t.dia_tra;
             ''', (True,))
             
-            w_tot_rows = cur.fetchone()
-            if not w_tot_rows:
-                print("No se encontraron datos para el proyecto.")
-                return
+            proyectos = cur.fetchall()
             
-            tot_alt,  id_pro, id_pgen, pot_gen= w_tot_rows
-            potencia_hidrica=presion_hidrica*caudal_hidrica
+            for tot_alt, id_pro, id_pgen, pot_gen, pre_mot, dia_tra in proyectos:
 
-            cur.execute('SELECT created_at FROM energia_generada where id_pro=%s ORDER BY created_at desc limit 1;', (id_pro,))
-            fecha_dato = cur.fetchone()[0]
+                # Buscar última fecha de registro de energía
+                cur.execute('SELECT created_at FROM energia_generada WHERE id_pro = %s ORDER BY created_at DESC LIMIT 1;', (id_pro,))
+                fecha = cur.fetchone()
+                fecha_dato = fecha[0] if fecha else None  # Puede que no exista aún
+                
+                gravedad=9.8#Gravedad como constante
+                densidad_agua=997#Densidad del agua
+                area=math.pi*((dia_tra*0.01)**2/4)# Calculo de area transversal
 
-            if fecha_dato!=fechahora_dato:
-                # Insertar nueva medición
+                if tot_alt>0:# en caso de que que la altura fuera menor que 0
+                    presion = round(densidad_agua * gravedad * tot_alt,2)
+                    velocidad= math.sqrt(2*gravedad*tot_alt)
+                else:
+                    presion = pre_mot * 100000 #conversion de bar a pascales
+                    velocidad= math.sqrt(2*presion/densidad_agua)
+                print("presion",presion)
+                print("densidad",densidad_agua)
+                print("velocidad",velocidad)
+                # Caudal en m³/s
+                caudal_m3s = area*velocidad
+
+                # Potencia hidráulica real en W
+                potencia_hidrica = round((presion * caudal_m3s),2)
+
+                potencia_electrica = round((voltaje_VDC_hidrica * corriente_hidrica),2)
+
+                print("potencia_electrica: ",potencia_electrica,"potencia_hidrica: ",potencia_hidrica)
+                print("Proyecto:", id_pro)
+                print("Altura:", tot_alt)
+                print("Area:", area," * velocidad:", velocidad,"=",area*velocidad)
+                print("Presión calculada:", presion," * caudal calculada:", caudal_m3s,"=",presion*caudal_m3s)
+                print("Última fecha:", fecha_dato, "- Nueva fecha:", fechahora_dato)
+
+                # Calcular eficiencia energética
+                efi_ene = round((potencia_electrica / potencia_hidrica) * 100,2) if pot_gen else 0
+                print("potencia_electrica: ",potencia_electrica,"potencia_hidrica: ",potencia_hidrica,"Eficiencia: ",efi_ene)
+                # Buscar energía acumulada anterior
+                cur.execute('SELECT tot_ene FROM energia_generada WHERE id_pro = %s ORDER BY created_at DESC LIMIT 1;', (id_pro,))
+                resultado = cur.fetchone()
+                energia_prev = resultado[0] if resultado else 0
+
+                # Calcular energía generada en el intervalo de 5 minutos (en kWh)
+                energia_intervalo = (potencia_hidrica / 1000.0) * (5 / 60.0)  # 5 min = 1/12 h
+                energia_total = round(energia_prev + energia_intervalo, 3)
+
+                # Insertar si es una nueva medición
+                if not fecha_dato or str(fecha_dato) != str(fechahora_dato):
+                    print("Inserta nueva medición")
+                    cur.execute('''
+                        INSERT INTO energia_generada (id_pro, tot_ene, id_pgen, efi_ene, cau_ene, alt_ene, pre_ene, vsal_ene, csal_ene, created_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ''', (id_pro, energia_total, id_pgen, efi_ene, caudal_m3s, tot_alt, presion, voltaje_VDC_hidrica, corriente_hidrica, fechahora_dato))
+                    conn.commit()
+                
                 cur.execute('''
-                    INSERT INTO energia_generada (id_pro, tot_ene, id_pgen, efi_ene, cau_ene, alt_ene, pre_ene, vsal_ene, csal_ene, created_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ''', (id_pro, potencia_hidrica, id_pgen, 0, caudal_hidrica, tot_alt, presion_hidrica, voltaje_VDC_hidrica, corriente_hidrica, fechahora_dato))
+                    UPDATE proyecto_generador SET cau_pgen = %s WHERE id_pro = %s ;
+                ''', (caudal_m3s, id_pro))
                 conn.commit()
-                    
-            # Calcular eficiencia energética
-            efi_ene = (pot_gen / potencia_hidrica) *100 if pot_gen else 0
-            
-            # Actualizar la eficiencia energética
-            cur.execute('''
-                UPDATE energia_generada
-                SET efi_ene = %s
-                WHERE id_pro = %s AND tot_ene = %s AND id_pgen = %s AND alt_ene = %s AND cau_ene = %s AND pre_ene = %s;
-            ''', (efi_ene, id_pro, potencia_hidrica, id_pgen, tot_alt, caudal_hidrica, presion_hidrica))
-            conn.commit()
-            
-            print(f"Registro actualizado para id_pro {id_pro} con eficiencia {efi_ene:.2f}%")
+
+                print(f"Registro actualizado para id_pro {id_pro} con eficiencia {efi_ene:.2f}%\n")
+
 
 #mostrar modal para establecer conexion sesores hidrica
 @hidrica_bp.route('/modal_conexion_sensor_hidrica')
@@ -1184,7 +1186,7 @@ def get_latest_proyecto_data(id_pro):
 
     # Estructura los datos en una lista de diccionarios con formato ajustado
     data = [{
-        'pot_ene': f"{float(row[1]):.3f}",        
+        'tot_ene': f"{float(row[1]):.3f}",        
         'efi_ene': f"{float(row[2]):.2f}",
         'cau_ene': f"{float(row[3]):.3f}",
         'alt_ene': f"{float(row[4]):.3f}",
@@ -1209,7 +1211,7 @@ def procesar_datos_hidrica(data):
             print(f"Código: {codigo_VDC_hidrica}")
             ahora = datetime.now()
             print("AHORA", ahora)
-            if ahora.minute % 5 == 0 :  
+            if ahora.minute % 5 == 0:  
                 ahora = ahora.replace(second=0)
                 fechahora_dato=ahora.timestamp() 
                 print(fechahora_dato)

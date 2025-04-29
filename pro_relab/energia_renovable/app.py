@@ -340,17 +340,17 @@ def davis():
                     for sensor in data:
                         for inner_data in sensor.get('data', []):
                             ts = inner_data.get('ts')
-                            avg, hi = inner_data.get('solar_rad_avg'), inner_data.get('solar_rad_hi')
-                            db_data.append(((avg, hi), datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')))
+                            avg, hi, temp_avg = inner_data.get('solar_rad_avg'), inner_data.get('solar_rad_hi'),round((inner_data.get('temp_out') - 32) * 5.0 / 9.0, 1)
+                            db_data.append(((avg, hi, temp_avg), datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')))
 
                     # Guardar los datos en la base de datos
                     with get_db_connection() as conn:
                         with conn.cursor() as cursor:
                             cursor.executemany("""
-                                INSERT INTO dato_irradiancia (prom_irr, max_irr, created_at)
-                                VALUES (%s, %s, %s)
+                                INSERT INTO dato_irradiancia (prom_irr, max_irr, temp_irr, created_at)
+                                VALUES (%s, %s, %s,%s)
                                 ON CONFLICT (created_at) DO NOTHING
-                            """, [(prom, max_, created_at) for (prom, max_), created_at in db_data])
+                            """, [(prom, max_,temp, created_at) for (prom, max_, temp), created_at in db_data])
                             conn.commit()
                 elif response.status_code == 400:
                     print("Error 400: Solicitud incorrecta", response.json())
@@ -462,9 +462,9 @@ def irradiance_display():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date and end_date:
-                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE (created_at >= %s and created_at <= %s) ORDER BY created_at;', (start_date, end_date))
+                cur.execute('SELECT prom_irr, max_irr, created_at,temp_irr FROM dato_irradiancia WHERE (created_at >= %s and created_at <= %s) ORDER BY created_at;', (start_date, end_date))
             else:
-                cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
+                cur.execute('SELECT prom_irr, max_irr, created_at,temp_irr FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
             db_irr = cur.fetchall()
             
     return render_template('informe_y_Estadistica/date_davis.html', db_irr=db_irr)
@@ -475,11 +475,11 @@ def get_latest_irradiance_data():
     # Suponiendo que tienes una función para obtener la conexión a la base de datos
     with get_db_connection() as conn:  
         with conn.cursor() as cur:  
-            cur.execute('SELECT prom_irr, max_irr, created_at FROM dato_irradiancia ORDER BY created_at DESC LIMIT 1')  # Ordena por fecha de creación
+            cur.execute('SELECT prom_irr, max_irr, created_at, temp_irr FROM dato_irradiancia ORDER BY created_at DESC LIMIT 1')  # Ordena por fecha de creación
             db_irr = cur.fetchall()  # Obtiene todos los resultados de la consulta
             
     # Estructura los datos en una lista de diccionarios
-    data = [{'prom_irr': f"{float(row[0]):.1f}", 'max_irr': f"{float(row[1]):.1f}", 'created_at': row[2].strftime('%Y-%m-%d %H:%M:%S')} for row in db_irr]
+    data = [{'prom_irr': f"{float(row[0]):.1f}", 'max_irr': f"{float(row[1]):.1f}", 'created_at': row[2].strftime('%Y-%m-%d %H:%M:%S'), 'temp_out': f"{float(row[3]):.1f}"} for row in db_irr]
     
     return jsonify(data)  # Devuelve los datos en formato JSON
 

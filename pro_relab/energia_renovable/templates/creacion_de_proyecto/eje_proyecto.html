@@ -204,11 +204,11 @@
             var csvContent = "data:text/csv;charset=utf-8,";
 
             // Añadir encabezados
-            csvContent += "Fecha y Hora,Potencia Total (W),Irradiancia,Eficiencia (%),Energia (W),Energia (KW)\n";
+            csvContent += "Fecha y Hora,Potencia Total (W),Irradiancia (W/m²),Eficiencia (%),Energia (W),Energia (KW),Voltaje AC Inversor\n";
 
             // Añadir cada fila de datos
             data.forEach(function(row) {
-                csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},${row.potencia},${row.irradiance},${row.eficiencia},${row.y},${row.energiaKW}\n`;
+                csvContent += `${new Date(row.x).toLocaleDateString()} ${new Date(row.x).toLocaleTimeString()},${row.potencia},${row.irradiance},${row.eficiencia},${row.y},${row.energiaKW},${row.vac_inversor}\n`;
             });
 
             var encodedUri = encodeURI(csvContent);
@@ -287,8 +287,12 @@
                                 return y.toFixed(2);
                             }
                         },
-                        svg: { filename: 'grafico_energia_generada' },
-                        png: { filename: 'grafico_energia_generada' }
+                        svg: {
+                            filename: undefined,
+                        },
+                        png: {
+                            filename: undefined,
+                        }
                     },
                 }
             },

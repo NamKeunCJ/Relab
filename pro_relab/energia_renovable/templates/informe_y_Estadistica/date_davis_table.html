@@ -39,7 +39,7 @@
                     } else {
                         // Actualiza la DataTable con los nuevos datos
                         data.forEach(function(item) {
-                            var newRow = [item.created_at, item.prom_irr, item.max_irr];
+                            var newRow = [item.created_at, item.prom_irr, item.max_irr, item.temp_out];
                             table.row.add(newRow).draw(false);
                         });
                         lastData = data; // Actualiza lastData
@@ -70,6 +70,7 @@
                         <th style="min-width: 12rem;">Fecha y Hora</th>
                         <th>Radiación (W/m²)</th>
                         <th>Radiación Alta (W/m²)</th>
+                        <th>Temperatura C°</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,6 +79,7 @@
                         <td class="time_irradiance">{{ db_irr[2] }}</td>
                         <td class="avg_irradiance">{{ db_irr[0] }}</td>
                         <td class="highest_irradiance">{{ db_irr[1] }}</td>
+                        <td class="temp_out">{{ db_irr[3] }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -102,11 +104,14 @@
     var dates = [];
     var radiancionData = [];
     var radiacionAltaData = [];
+    var temperaturaData = [];
+
     
     document.querySelectorAll('#tablaG tbody tr').forEach(function(row, index) {
         var timeElement = row.querySelector('.time_irradiance');
         var radiancionElement = row.querySelector('.avg_irradiance');
         var radiacionAltaElement = row.querySelector('.highest_irradiance');
+        var tempOutElement = row.querySelector('.temp_out');
         
         if (timeElement && radiancionElement && radiacionAltaElement ) {
             var timeText = timeElement.innerText;
@@ -114,11 +119,13 @@
 
             var radiancion = parseFloat(radiancionElement.innerText.replace(/,/g, ''));
             var radiacionAlta = parseFloat(radiacionAltaElement.innerText.replace(/,/g, ''));
+            var tempOut = parseFloat(tempOutElement.innerText.replace(/,/g, ''));
             
             if (!isNaN(time) && !isNaN(radiancion) && !isNaN(radiacionAlta) ) {
                 dates.push(time);
                 radiancionData.push({ x: time, y: radiancion });
                 radiacionAltaData.push({ x: time, y: radiacionAlta });
+                temperaturaData.push({ x: time, y: tempOut });
             } 
         } 
     });
@@ -136,6 +143,10 @@
             {
                 name: 'Radiacion Alta',
                 data: radiacionAltaData
+            },
+            {
+                name: 'Temperatura (°C)',
+                data: temperaturaData
             }
         ],
         chart: {
@@ -216,16 +227,22 @@
         tooltip: {
             shared: false,
             y: {
-                formatter: function (val) {
-                    return val.toFixed(0) + ' W/m²'; // Muestra los valores en el tooltip
+                formatter: function (val, opts) {
+                    const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
+                    if (seriesName.includes("Temperatura")) {
+                        return val.toFixed(1) + ' °C';
+                    } else {
+                        return val.toFixed(0) + ' W/m²';
+                    }
                 }
             },
             x: {
                 formatter: function (val) {
-                    return new Date(val).toLocaleString(); // Muestra la fecha y hora en el tooltip
+                    return new Date(val).toLocaleString();
                 }
             }
         }
+
     };
 
     // Crear y renderizar el gráfico
@@ -237,7 +254,7 @@
         let csvContent = "data:text/csv;charset=utf-8,";
 
         // Encabezados del CSV
-        csvContent += "Fecha y Hora,Radiacion,Radiacion Alta\n";
+        csvContent += "Fecha y Hora,Radiacion,Radiacion Alta,Temperatura (°C)\n";
 
         // Exportar los datos de las series de la gráfica (radiancionData y radiacionAltaData)
         radiancionData.forEach(function (item, index) {
@@ -245,9 +262,10 @@
             const time = new Date(item.x).toLocaleDateString() + ' ' + new Date(item.x).toLocaleTimeString(); // Formatear la fecha
             const radiacion = item.y.toFixed(2);  // Ajuste de los valores numéricos
             const radiacionAlta = radiacionAltaData[index] ? radiacionAltaData[index].y.toFixed(2) : '';  // Aseguramos que haya datos para 'Radiación Alta'
+            const temperatura = temperaturaData[index] ? temperaturaData[index].y.toFixed(2) : '';
 
             // Añadir la fila al CSV
-            csvContent += `${time},${radiacion},${radiacionAlta}\n`;
+            csvContent += `${time},${radiacion},${radiacionAlta},${temperatura}\n`;
         });
 
         // Crear un enlace para descargar el CSV

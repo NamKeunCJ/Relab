@@ -13,9 +13,12 @@ ZMPT101B voltageSensor(SENSOR_PIN, 50.0);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // 🌐 WiFi Config
-const char* ssid = "ADMON";
-const char* password = "803iu91z";
-const char* serverUrl = "http://172.18.14.183:5000/api/voltaje";
+const char* ssid = "FAMILIA-RUEDA";
+const char* password = "Uchiha20162025";
+const char* serverUrl = "http://192.168.101.13:5000/api/voltaje";
+//const char* ssid = "ADMON";
+//const char* password = "803iu91z";
+//const char* serverUrl = "http://172.18.14.183:5000/api/voltaje";
 int codigoGenerado = 0;  // Código persistente durante toda la ejecución
 
 float readVoltage(int samples = 100) {

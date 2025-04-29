@@ -2,9 +2,11 @@
 #include <HTTPClient.h>
 
 // 🌐 WiFi Config
-const char* ssid = "ADMON";
-const char* password = "803iu91z";
-const char* serverUrl = "http://172.18.9.230:5000/api/voltaje";
+//const char* ssid = "ADMON";
+//const char* password = "803iu91z";
+const char* ssid = "FAMILIA-RUEDA";
+const char* password = "Uchiha20162025";
+const char* serverUrl = "http://192.168.101.13:5000/api/voltaje";
 
 // 🔢 Código único
 int codigoGenerado = 0;
@@ -28,15 +30,14 @@ void connectWiFi() {
     Serial.print(".");
   }
   Serial.println("\nWiFi conectado!");
+  codigoGenerado = generarCodigo();
+  Serial.printf("Código único: %d\n", codigoGenerado);
 }
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
   randomSeed(analogRead(39)); // Para código aleatorio
-  codigoGenerado = generarCodigo();
-  Serial.printf("Código único: %d\n", codigoGenerado);
-
   connectWiFi();
 }
 
@@ -84,14 +85,14 @@ void loop() {
   }
 
   // Aumentar valores simulados
-  voltaje_dc_hidrica = random(11000, 22000) / 100.0;   // 110.00 - 220.00 V
+  voltaje_dc_hidrica = random(4800, 5400) / 100.0; // 48.00V - 54.00V
 
   // Calcular amperaje estimado con una resistencia de ~24.2 ohm
-  float resistenciaCarga = 24.2;
-  amperios = voltaje_dc_hidrica / resistenciaCarga;
+  amperios = voltaje_dc_hidrica / 24.2;
+
 
   // Caudal y presión simulados con rango razonable
-  caudalLitrosMin = random(1000, 3000) / 100.0;        // 10.00 – 30.00 L/min
+  caudalLitrosMin = random(1000, 4000) / 100.0;        // 10.00 – 40.00 L/min
   presionBar = random(80, 150) / 10.0;                 // 8.0 – 15.0 bar
 
 
