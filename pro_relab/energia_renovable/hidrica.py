@@ -1056,6 +1056,7 @@ def ejecutar_proyecto_hidrica():
     global corriente_hidrica
     global voltaje_VDC_hidrica
     global fechahora_dato
+    global caudal_hidrica
     print("ENTREA 2 HIHI")
     with get_db_connection() as conn:
         with conn.cursor() as cur:
@@ -1094,10 +1095,10 @@ def ejecutar_proyecto_hidrica():
                 print("densidad",densidad_agua)
                 print("velocidad",velocidad)
                 # Caudal en m³/s
-                caudal_m3s = area*velocidad
+                # caudal_m3s = area*velocidad
 
                 # Potencia hidráulica real en W
-                potencia_hidrica = round((presion * caudal_m3s),2)
+                potencia_hidrica = round((presion * caudal_hidrica),2)
 
                 potencia_electrica = round((voltaje_VDC_hidrica * corriente_hidrica),2)
 
@@ -1105,7 +1106,7 @@ def ejecutar_proyecto_hidrica():
                 print("Proyecto:", id_pro)
                 print("Altura:", tot_alt)
                 print("Area:", area," * velocidad:", velocidad,"=",area*velocidad)
-                print("Presión calculada:", presion," * caudal calculada:", caudal_m3s,"=",presion*caudal_m3s)
+                print("Presión calculada:", presion," * caudal calculada:", caudal_hidrica,"=",presion*caudal_hidrica)
                 print("Última fecha:", fecha_dato, "- Nueva fecha:", fechahora_dato)
 
                 # Calcular eficiencia energética
@@ -1126,12 +1127,12 @@ def ejecutar_proyecto_hidrica():
                     cur.execute('''
                         INSERT INTO energia_generada (id_pro, tot_ene, id_pgen, efi_ene, cau_ene, alt_ene, pre_ene, vsal_ene, csal_ene, created_at)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ''', (id_pro, energia_total, id_pgen, efi_ene, caudal_m3s, tot_alt, presion, voltaje_VDC_hidrica, corriente_hidrica, fechahora_dato))
+                    ''', (id_pro, energia_total, id_pgen, efi_ene, caudal_hidrica, tot_alt, presion, voltaje_VDC_hidrica, corriente_hidrica, fechahora_dato))
                     conn.commit()
                 
                 cur.execute('''
                     UPDATE proyecto_generador SET cau_pgen = %s WHERE id_pro = %s ;
-                ''', (caudal_m3s, id_pro))
+                ''', (caudal_hidrica, id_pro))
                 conn.commit()
 
                 print(f"Registro actualizado para id_pro {id_pro} con eficiencia {efi_ene:.2f}%\n")
@@ -1209,6 +1210,8 @@ def procesar_datos_hidrica(data):
             corriente_hidrica = data['corriente']
             presion_hidrica = data['presion']
             print(f"Código: {codigo_VDC_hidrica}")
+            print(f"Caudal: {caudal_hidrica}")
+            print(f"Voltaje: {voltaje_VDC_hidrica}")
             ahora = datetime.now()
             print("AHORA", ahora)
             if ahora.minute % 5 == 0:  
