@@ -1057,7 +1057,8 @@ def ejecutar_proyecto_hidrica():
     global voltaje_VDC_hidrica
     global fechahora_dato
     global caudal_hidrica
-    print("ENTREA 2 HIHI")
+    global presion_hidrica
+    print("ENTREA 2 HIHI", presion_hidrica)
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             # Obtener todos los proyectos con eje_pro = True
@@ -1080,11 +1081,12 @@ def ejecutar_proyecto_hidrica():
                 cur.execute('SELECT created_at FROM energia_generada WHERE id_pro = %s ORDER BY created_at DESC LIMIT 1;', (id_pro,))
                 fecha = cur.fetchone()
                 fecha_dato = fecha[0] if fecha else None  # Puede que no exista aún
-                
+
+                '''
                 gravedad=9.8#Gravedad como constante
                 densidad_agua=997#Densidad del agua
                 area=math.pi*((dia_tra*0.01)**2/4)# Calculo de area transversal
-
+                
                 if tot_alt>0:# en caso de que que la altura fuera menor que 0
                     presion = round(densidad_agua * gravedad * tot_alt,2)
                     velocidad= math.sqrt(2*gravedad*tot_alt)
@@ -1093,25 +1095,24 @@ def ejecutar_proyecto_hidrica():
                     velocidad= math.sqrt(2*presion/densidad_agua)
                 print("presion",presion)
                 print("densidad",densidad_agua)
-                print("velocidad",velocidad)
+                print("velocidad",velocidad)'''
                 # Caudal en m³/s
                 # caudal_m3s = area*velocidad
 
                 # Potencia hidráulica real en W
-                potencia_hidrica = round((presion * caudal_hidrica),2)
+                potencia_hidrica = round((presion_hidrica * caudal_hidrica),2)
 
                 potencia_electrica = round((voltaje_VDC_hidrica * corriente_hidrica),2)
 
-                print("potencia_electrica: ",potencia_electrica,"potencia_hidrica: ",potencia_hidrica)
+                '''print("potencia_electrica: ",potencia_electrica,"potencia_hidrica: ",potencia_hidrica)
                 print("Proyecto:", id_pro)
                 print("Altura:", tot_alt)
                 print("Area:", area," * velocidad:", velocidad,"=",area*velocidad)
                 print("Presión calculada:", presion," * caudal calculada:", caudal_hidrica,"=",presion*caudal_hidrica)
-                print("Última fecha:", fecha_dato, "- Nueva fecha:", fechahora_dato)
+                print("Última fecha:", fecha_dato, "- Nueva fecha:", fechahora_dato)'''
 
                 # Calcular eficiencia energética
                 efi_ene = round((potencia_electrica / potencia_hidrica) * 100,2) if pot_gen else 0
-                print("potencia_electrica: ",potencia_electrica,"potencia_hidrica: ",potencia_hidrica,"Eficiencia: ",efi_ene)
                 # Buscar energía acumulada anterior
                 cur.execute('SELECT tot_ene FROM energia_generada WHERE id_pro = %s ORDER BY created_at DESC LIMIT 1;', (id_pro,))
                 resultado = cur.fetchone()
@@ -1127,7 +1128,7 @@ def ejecutar_proyecto_hidrica():
                     cur.execute('''
                         INSERT INTO energia_generada (id_pro, tot_ene, id_pgen, efi_ene, cau_ene, alt_ene, pre_ene, vsal_ene, csal_ene, created_at)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ''', (id_pro, energia_total, id_pgen, efi_ene, caudal_hidrica, tot_alt, presion, voltaje_VDC_hidrica, corriente_hidrica, fechahora_dato))
+                    ''', (id_pro, potencia_hidrica, id_pgen, efi_ene, caudal_hidrica, tot_alt, presion_hidrica, voltaje_VDC_hidrica, corriente_hidrica, fechahora_dato))
                     conn.commit()
                 
                 cur.execute('''
@@ -1212,6 +1213,7 @@ def procesar_datos_hidrica(data):
             print(f"Código: {codigo_VDC_hidrica}")
             print(f"Caudal: {caudal_hidrica}")
             print(f"Voltaje: {voltaje_VDC_hidrica}")
+            print(f"presion: {presion_hidrica}")
             ahora = datetime.now()
             print("AHORA", ahora)
             if ahora.minute % 5 == 0:  

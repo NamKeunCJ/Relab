@@ -315,33 +315,54 @@
                         
                                 const conexiones = [];
 
-                                const crearLinea = (tipo, el1, el2) => {
-                                    if (el1 && el2) {
-                                        const idLinea = `linea_${tipo}_${el1.className}_${el2.className}`.replace(/\s/g, '');
-                                        if (document.getElementById(idLinea)) return; // Ya existe, no se crea de nuevo
+                                const createdLines = window.__createdLines || (window.__createdLines = new Set());
 
-                                        const linea = document.createElement('div');
-                                        linea.classList.add('linea');
-                                        linea.dataset.tipo = tipo;
-                                        linea.id = idLinea;
-                                        scrollContainer.appendChild(linea);
-                                        conexiones.push({ linea, el1, el2 });
+                                const crearLinea = (tipo, id1, id2, el1, el2) => {
+                                    // si no existen los elementos no crear nada
+                                    if (!el1 || !el2) return;
+
+                                    // normalizamos la pareja para que order no importe (evita duplicados 1_2 y 2_1)
+                                    const a = String(id1), b = String(id2);
+                                    const pair = [a, b].sort();
+                                    const key = `${tipo}::${pair.join('::')}`; // clave única para el Set
+                                    const lineId = `linea_${tipo}_${pair.join('_')}`;
+
+                                    // si ya existe la clave, añadimos la línea existente a conexiones (si existe)
+                                    if (createdLines.has(key)) {
+                                        const existing = document.getElementById(lineId);
+                                        if (existing) conexiones.push({ linea: existing, el1, el2 });
+                                        return;
                                     }
+
+                                    // crear línea nueva
+                                    const linea = document.createElement('div');
+                                    linea.classList.add('linea');
+                                    linea.dataset.tipo = tipo;
+                                    linea.id = lineId;
+                                    scrollContainer.appendChild(linea);
+
+                                    // registrar para actualización y en el Set para evitar duplicados
+                                    conexiones.push({ linea, el1, el2 });
+                                    createdLines.add(key);
                                 };
 
 
                         
                                 if (condition === 'No') {
-                                    crearLinea('linea1', arreglo, regulador);
-                                    crearLinea('linea2', regulador, banco);
-                                    crearLinea('linea3', banco, inversor);
+                                    // arreglo <-> regulador, regulador <-> banco, banco <-> inversor
+                                    crearLinea('linea1', arr_id, 'regulador', arreglo, regulador);
+                                    crearLinea('linea2', 'regulador', ban_id, regulador, banco);
+                                    crearLinea('linea3', ban_id, 'inversor', banco, inversor);
                                 } else {
-                                    crearLinea('linea1', arreglo, inversor);
-                                    crearLinea('linea2', inversor, banco);
+                                    // arreglo <-> inversor, inversor <-> banco
+                                    crearLinea('linea1', arr_id, 'inversor', arreglo, inversor);
+                                    crearLinea('linea2', 'inversor', ban_id, inversor, banco);
                                 }
-                        
-                                crearLinea('linea4', inversor, carga);
-                                crearLinea('linea5', inversor, red);
+
+                                // siempre: inversor <-> carga, inversor <-> red
+                                crearLinea('linea4', 'inversor', pcar_id, inversor, carga);
+                                crearLinea('linea5', 'inversor', 'red', inversor, red);
+
                         
                                 setPos(arreglo, x_arr, y_arr);
                                 setPos(inversor, x_inv, y_inv);
