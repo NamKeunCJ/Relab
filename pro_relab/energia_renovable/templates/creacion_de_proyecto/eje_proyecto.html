@@ -2,6 +2,10 @@
     var lastData = null;
     var table;
     var id_pro = '{{ pro_com[0] }}'; // Suponiendo que id_pro se pasa desde el backend
+    // 🔹 gráfico y dataset en scope global
+    var chart;
+    var energiaW = [];
+
 
     $(document).ready(function() {
         // Inicializa DataTable y guarda la referencia
@@ -38,6 +42,7 @@
             type: 'GET',
             success: function(data) {
                 if (data && !areObjectsEqual(data, lastData)) {
+                    
                     data.forEach(function(item) {
                         // Verifica si el 'created_at' ya está en la tabla
                         if (!isRowInTable(item.created_at)) {
@@ -51,8 +56,28 @@
                                 item.vinv_ene      // Inversor Voltaje CA (KW)
                             ];
                             table.row.add(newRow).draw(false); // Agrega la nueva fila
+                            // 🔹 Agregar también a energiaW
+                            energiaW.push({
+                                x: new Date(item.created_at).getTime(),
+                                y: parseFloat(item.w_ene),
+                                potencia: parseFloat(item.parr_ene),
+                                irradiance: parseFloat(item.prom_irr),
+                                eficiencia: parseFloat(item.efi_ene),
+                                energiaKW: parseFloat(item.kw_ene),
+                                vac_inversor: parseFloat(item.vinv_ene)
+                            });
+
+                            // 🔹 Ordenar por tiempo
+                            energiaW.sort((a, b) => a.x - b.x);
+
+                            chart.updateSeries([{
+                                name: 'Energía Generada',
+                                data: energiaW
+                            }]);
+
                         }
-                    });
+                    });                   
+                    
                     lastData = data; // Actualiza lastData
                 }
             },
@@ -160,7 +185,7 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var energiaW = []; // Almacenará toda la información para el tooltip
+        energiaW = []; // Almacenará toda la información para el tooltip
 
         document.querySelectorAll('#tablaP tbody tr').forEach(function(row) {
             var timeElement = row.querySelector('.time_irradiance');
@@ -225,8 +250,9 @@
             exportToCSV(energiaW, "energia_generada_completo.csv");
         });
 
-        // Configuración del gráfico
-        var options = {
+        window.crear_grafica = function() {
+            // Configuración del gráfico
+            var options = {
             tooltip: {
                 shared: false,
                 custom: function({ series, seriesIndex, dataPointIndex, w }) {
@@ -339,9 +365,11 @@
                 }
             },            
         };
-
-        // Crear y renderizar el gráfico
-        var chart = new ApexCharts(document.querySelector("#myChartPro"), options);
-        chart.render();
+            // Crear y renderizar el gráfico
+            chart = new ApexCharts(document.querySelector("#myChartPro"), options);
+            chart.render();
+        }
+        crear_grafica();
+        
     });
 </script>

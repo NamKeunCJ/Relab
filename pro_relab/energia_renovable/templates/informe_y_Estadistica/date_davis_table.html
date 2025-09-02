@@ -1,6 +1,12 @@
 <script>
     var lastData = null;
     var table;
+    var chart;
+
+    // Arrays para los datos del gráfico
+    var radiancionData = [];
+    var radiacionAltaData = [];
+    var temperaturaData = [];
 
     $(function() {
         // Inicializa DataTable y guarda la referencia
@@ -37,12 +43,32 @@
                     if (lastData === null) {
                         lastData = data; // Actualiza lastData
                     } else {
-                        // Actualiza la DataTable con los nuevos datos
                         data.forEach(function(item) {
+                            // Agregar fila a la tabla
                             var newRow = [item.created_at, item.prom_irr, item.max_irr, item.temp_out];
                             table.row.add(newRow).draw(false);
+
+                            // 🔹 Agregar también al dataset de la gráfica
+                            var time = new Date(item.created_at).getTime();
+
+                            radiancionData.push({ x: time, y: parseFloat(item.prom_irr) });
+                            radiacionAltaData.push({ x: time, y: parseFloat(item.max_irr) });
+                            temperaturaData.push({ x: time, y: parseFloat(item.temp_out) });
                         });
-                        lastData = data; // Actualiza lastData
+
+                        // 🔹 Ordenar por tiempo
+                        radiancionData.sort((a, b) => a.x - b.x);
+                        radiacionAltaData.sort((a, b) => a.x - b.x);
+                        temperaturaData.sort((a, b) => a.x - b.x);
+
+                        // 🔹 Actualizar gráfica una sola vez
+                        chart.updateSeries([
+                            { name: 'Radiacion', data: radiancionData },
+                            { name: 'Radiacion Alta', data: radiacionAltaData },
+                            { name: 'Temperatura (°C)', data: temperaturaData }
+                        ]);
+
+                        lastData = data; // actualizar referencia
                     }
                 }
             }
@@ -102,9 +128,9 @@
 <script>
     // Obtener los datos de la tabla y convertirlos en arrays de objetos
     var dates = [];
-    var radiancionData = [];
-    var radiacionAltaData = [];
-    var temperaturaData = [];
+    radiancionData = [];
+    radiacionAltaData = [];
+    temperaturaData = [];
 
     
     document.querySelectorAll('#tablaG tbody tr').forEach(function(row, index) {
@@ -132,123 +158,124 @@
 
     console.log(radiancionData); // Verificar los datos extraídos
     console.log(radiacionAltaData); // Verificar los datos extraídos
-
-    // Configuración del gráfico
-    var options = {
-        series: [
-            {
-                name: 'Radiacion',
-                data: radiancionData
-            },
-            {
-                name: 'Radiacion Alta',
-                data: radiacionAltaData
-            },
-            {
-                name: 'Temperatura (°C)',
-                data: temperaturaData
-            }
-        ],
-        chart: {
-            type: 'line',
-            height: 300,
-            zoom: {
-                type: 'x',
-                enabled: true,
-                autoScaleYaxis: true
-            },
-            toolbar: {
-                autoSelected: 'zoom',
-                export: {
-                    csv: {
-                        filename: 'datos_irradiancia',
-                        columnDelimiter: ',',
-                        headerCategory: 'Fecha y Hora',
-                        headerValue: 'Valor',
-                        categoryFormatter(x) {
-                            // Formatear la fecha y hora para la exportación CSV
-                            return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+    window.crear_grafica_davis = function() {
+        // Configuración del gráfico
+        var options = {
+            series: [
+                {
+                    name: 'Radiacion',
+                    data: radiancionData
+                },
+                {
+                    name: 'Radiacion Alta',
+                    data: radiacionAltaData
+                },
+                {
+                    name: 'Temperatura (°C)',
+                    data: temperaturaData
+                }
+            ],
+            chart: {
+                type: 'line',
+                height: 300,
+                zoom: {
+                    type: 'x',
+                    enabled: true,
+                    autoScaleYaxis: true
+                },
+                toolbar: {
+                    autoSelected: 'zoom',
+                    export: {
+                        csv: {
+                            filename: 'datos_irradiancia',
+                            columnDelimiter: ',',
+                            headerCategory: 'Fecha y Hora',
+                            headerValue: 'Valor',
+                            categoryFormatter(x) {
+                                // Formatear la fecha y hora para la exportación CSV
+                                return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+                            },
+                            valueFormatter(y) {
+                                return y.toFixed(2); // Ajusta el formato del valor si es necesario
+                            }
                         },
-                        valueFormatter(y) {
-                            return y.toFixed(2); // Ajusta el formato del valor si es necesario
+                        svg: {
+                            filename: undefined,
+                        },
+                        png: {
+                            filename: undefined,
                         }
                     },
-                    svg: {
-                        filename: undefined,
-                    },
-                    png: {
-                        filename: undefined,
-                    }
-                },
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        markers: {
-            size: 0,
-        },
-        title: {
-            text: 'Datos Irradiancia',
-            align: 'left'
-        },
-        fill: {
-            type: 'solid',
-            gradient: {
-                shadeIntensity: 1,
-                inverseColors: false,
-                opacityFrom: 0.5,
-                opacityTo: 0,
-                stops: [0, 90, 100]
+                }
             },
-        },
-        stroke: {
-            width: 1 // Define el grosor de la línea
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    return val.toFixed(0); // Muestra los valores en el eje Y
-                },
+            dataLabels: {
+                enabled: false
+            },
+            markers: {
+                size: 0,
             },
             title: {
-                text: 'G'
+                text: 'Datos Irradiancia',
+                align: 'left'
             },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (value) {
-                    var date = new Date(value);
-                    return date.toLocaleDateString(); 
-                }
-            }
-        },
-        tooltip: {
-            shared: false,
-            y: {
-                formatter: function (val, opts) {
-                    const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
-                    if (seriesName.includes("Temperatura")) {
-                        return val.toFixed(1) + ' °C';
-                    } else {
-                        return val.toFixed(0) + ' W/m²';
+            fill: {
+                type: 'solid',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100]
+                },
+            },
+            stroke: {
+                width: 1 // Define el grosor de la línea
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val) {
+                        return val.toFixed(0); // Muestra los valores en el eje Y
+                    },
+                },
+                title: {
+                    text: 'G'
+                },
+            },
+            xaxis: {
+                type: 'datetime',
+                labels: {
+                    formatter: function (value) {
+                        var date = new Date(value);
+                        return date.toLocaleDateString(); 
                     }
                 }
             },
-            x: {
-                formatter: function (val) {
-                    return new Date(val).toLocaleString();
+            tooltip: {
+                shared: false,
+                y: {
+                    formatter: function (val, opts) {
+                        const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
+                        if (seriesName.includes("Temperatura")) {
+                            return val.toFixed(1) + ' °C';
+                        } else {
+                            return val.toFixed(0) + ' W/m²';
+                        }
+                    }
+                },
+                x: {
+                    formatter: function (val) {
+                        return new Date(val).toLocaleString();
+                    }
                 }
             }
-        }
 
-    };
+        };
 
-    // Crear y renderizar el gráfico
-    var chart = new ApexCharts(document.querySelector("#myChart"), options);
-    chart.render();
-
+        // Crear y renderizar el gráfico
+        chart = new ApexCharts(document.querySelector("#myChart"), options);
+        chart.render();
+    }
+    crear_grafica_davis();
     document.getElementById("exportCSVG").addEventListener("click", function () {
         // Variable para almacenar el contenido del CSV
         let csvContent = "data:text/csv;charset=utf-8,";

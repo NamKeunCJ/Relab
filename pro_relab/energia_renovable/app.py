@@ -2257,16 +2257,25 @@ def ejecutar_proyecto():
                         WHERE p.eje_pro = %s
                         GROUP BY a.id_pro;''', (True,))
             w_tot_rows = cur.fetchall()  # Obtener todas las filas
-            cur.execute('''SELECT id_irr, prom_irr, created_at FROM dato_irradiancia ORDER BY created_at desc limit 3;''')
-            #cur.execute('SELECT id_irr, prom_irr, created_at FROM dato_irradiancia WHERE created_at::date = CURRENT_DATE ORDER BY created_at;')
-            irr = cur.fetchall()
             
             for w_tot in w_tot_rows:
                 # Acceder a los valores individuales dentro de la tupla w_tot
                 tot_arr = w_tot[0]       
                 id_pro = w_tot[2]
                 Area_pro = w_tot[3]
-                
+
+                cur.execute('''select id_ene from energia_arreglo where id_pro=%s;''',(id_pro,))
+                valores_energia = cur.fetchall()
+
+                if len(valores_energia)>=3:
+                    cur.execute('''SELECT id_irr, prom_irr, created_at FROM dato_irradiancia ORDER BY created_at desc limit 3;''')
+                    irr = cur.fetchall()
+                    print("VALORES MAYOR 3",irr)
+                else:
+                    cur.execute('''SELECT id_irr, prom_irr, created_at FROM dato_irradiancia ORDER BY created_at desc limit 1;''')
+                    irr = cur.fetchall()
+                    print("VALORES menor 3",irr)
+
                 for row in irr:
                     prom_irr = row[1]
                     id_irr = row[0]
@@ -2307,9 +2316,9 @@ def mostrar_ejecucion_proyecto(id_pro,start_date,end_date):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             if start_date is None and end_date is None:
-                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro, e.vinv_ene   FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro where e.id_pro=%s ORDER BY e.created_at desc limit 257;''', (id_pro,))
+                cur.execute('''SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro, e.vinv_ene   FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro where e.id_pro=%s ORDER BY e.created_at desc limit 257 OFFSET 1;''', (id_pro,))
             else:
-                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro, e.vinv_ene  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro   WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc;', (start_date, end_date, id_pro,))
+                cur.execute('SELECT e.id_pro, e.parr_ene, irr.prom_irr, e.efi_ene, e.w_ene, e.kw_ene, e.created_at, p.eje_pro, e.vinv_ene  FROM energia_arreglo e join dato_irradiancia irr on e.id_irr=irr.id_irr join proyecto_fotovoltaica p on e.id_pro=p.id_pro   WHERE (e.created_at >= %s and e.created_at <= %s) and e.id_pro=%s ORDER BY e.created_at desc OFFSET 1;', (start_date, end_date, id_pro,))
             result_proyect_ene = cur.fetchall()# Obtener el id_pro de la carga
 
             return result_proyect_ene
@@ -2327,7 +2336,7 @@ def get_latest_proyecto_data(id_pro):
                 JOIN dato_irradiancia irr ON e.id_irr = irr.id_irr 
                 WHERE e.id_pro = %s 
                 ORDER BY e.created_at DESC 
-                LIMIT 1
+                LIMIT 1 OFFSET 1
             ''', (id_pro,))
             db_irr = cur.fetchall()  # Obtiene todos los resultados de la consulta
 

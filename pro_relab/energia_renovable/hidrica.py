@@ -385,7 +385,7 @@ def inicio_proyecto_hidrica():
             car_com = cur.fetchall()
             # Obtenemos el proyecto principal en cuestion de las tuberias
             cur.execute('''SELECT 
-                    tub.lon_tub, tub.ori_tub, cod.ang_cod, tra.dia_tra, g.cau_ene,
+                    tub.lon_tub*10, tub.ori_tub, cod.ang_cod, tra.dia_tra, g.cau_ene,
                     count(*) OVER () AS total_tubos,
                     row_number() OVER (ORDER BY tub.created_at) AS fila
                 FROM tubo tub
@@ -706,7 +706,7 @@ def add_tuberia_project():
     
     id_pro = request.form['id_pro']
     dia_tra = request.form['dia_tra']
-    lon_tub = request.form['lon_tub']
+    lon_tub = int(request.form['lon_tub'])
     id_cod = request.form['ang_cod']
     ori_tub = request.form.get('ori_tub', 'No Aplica')
 
@@ -716,7 +716,7 @@ def add_tuberia_project():
             cur.execute('''
                 INSERT INTO tubo (id_pro, lon_tub, id_cod, ori_tub)
                 VALUES (%s, %s, %s, %s)
-            ''', (id_pro, lon_tub, id_cod, ori_tub))
+            ''', (id_pro, lon_tub/100, id_cod, ori_tub))
             conn.commit()
 
             # Obtener datos para el cálculo de la altura
@@ -740,6 +740,7 @@ def add_tuberia_project():
             if alt_tra<0:
                 alt_tra = -(alt_tra)
 
+            alt_tra=round(alt_tra,2)
             
             # Actualizar la trayectoria del tubo con la nueva altura
             cur.execute('''

@@ -250,7 +250,7 @@
                                 <thead class="table-primary">
                                     <tr>
                                         <th>Tubo</th>
-                                        <th>Longitud</th>
+                                        <th>Longitud (mts)</th>
                                         <th>Codo</th>
                                         <th>Orientacion</th>
                                     </tr>
@@ -259,7 +259,7 @@
                                     {% for tub_com in tub_com %}
                                     <tr>
                                         <td>{{ tub_com[6] }}</td>
-                                        <td>{{ tub_com[0] }}</td>
+                                        <td>{{ tub_com[0]/10 }}</td>
                                         <td>{{ tub_com[2] }}</td>
                                         <td>{{ tub_com[1] }}</td>
                                     </tr>                                    

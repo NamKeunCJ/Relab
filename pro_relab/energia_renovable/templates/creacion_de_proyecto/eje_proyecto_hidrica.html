@@ -2,6 +2,8 @@
     var lastData = null;
     var table;
     var id_pro = '{{ pro_com[0] }}';
+    var chart;
+    var energiaData = [];
 
     $(document).ready(function() {
         // Inicializa DataTable y guarda la referencia
@@ -52,6 +54,26 @@
                                 
                             ];
                             table.row.add(newRow).draw(false); // Agrega la nueva fila
+                            // 🔹 Agregar nuevo punto a energiaData
+                            energiaData.push({
+                                x: new Date(item.created_at).getTime(),
+                                y: parseFloat(item.tot_ene),
+                                eficiencia: parseFloat(item.efi_ene),
+                                altura: parseFloat(item.alt_ene),
+                                caudal: parseFloat(item.cau_ene),
+                                presion: parseFloat(item.pre_ene),
+                                voltaje: parseFloat(item.vsal_ene),
+                                corriente: parseFloat(item.csal_ene)
+                            });
+
+                            // 🔹 Ordenar por tiempo para que no conecte al inicio
+                            energiaData.sort((a, b) => a.x - b.x);
+
+                            // 🔹 Actualizar gráfico con los nuevos datos
+                            chart.updateSeries([{
+                                name: 'Energía Generada',
+                                data: energiaData
+                            }]);
                         }
                     });
                     lastData = data; // Actualiza lastData
@@ -165,7 +187,7 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var energiaData = []; // Almacenará la información completa
+        energiaData = []; // Almacenará la información completa
 
         document.querySelectorAll('#tablaP tbody tr').forEach(function(row) {
             var timeElement = row.querySelector('.time_irradiance');
@@ -243,118 +265,121 @@
         });
 
         // Configuración del gráfico
-        var options = {
-            tooltip: {
-                shared: false,
-                custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                    var data = w.config.series[seriesIndex].data[dataPointIndex];
-                    var date = new Date(data.x).toLocaleString();
-                    
-                    return `
-                        <small><div class="card-header bg-secundary p-2 bg-opacity-55"">
-                                ${date}
-                            </div>
-                        <div class="card-body">  
-                            Detalles de Generación                          
-                            <ul class="text-dark">
-                                <li>Potencia Hidrica:<b> ${data.y.toFixed(3)} W</b></li>
-                                <li>Eficiencia Energética:<b> ${data.eficiencia.toFixed(3)}%</b></li>
-                                <li>Altura:<b> ${data.altura.toFixed(3)} m</b></li>
-                                <li>Caudal:<b> ${data.caudal.toFixed(5)} cm³/s</b></li>
-                                <li>Presion:<b> ${data.presion.toFixed(3)} Bar</b></li>
-                                <li>Voltaje:<b> ${data.voltaje.toFixed(3)} V</b></li>
-                                <li>Corriente:<b> ${data.corriente.toFixed(3)} A</b></li>
-                            </ul>
-                        </div></small>
-                    `;
-                },
-                x: {
-                    formatter: function (val) {
-                        return new Date(val).toLocaleString();
+        window.crear_grafica = function() {
+            var options = {
+                tooltip: {
+                    shared: false,
+                    custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                        var data = w.config.series[seriesIndex].data[dataPointIndex];
+                        var date = new Date(data.x).toLocaleString();
+                        
+                        return `
+                            <small><div class="card-header bg-secundary p-2 bg-opacity-55"">
+                                    ${date}
+                                </div>
+                            <div class="card-body">  
+                                Detalles de Generación                          
+                                <ul class="text-dark">
+                                    <li>Potencia Hidrica:<b> ${data.y.toFixed(3)} W</b></li>
+                                    <li>Eficiencia Energética:<b> ${data.eficiencia.toFixed(3)}%</b></li>
+                                    <li>Altura:<b> ${data.altura.toFixed(3)} m</b></li>
+                                    <li>Caudal:<b> ${data.caudal.toFixed(5)} cm³/s</b></li>
+                                    <li>Presion:<b> ${data.presion.toFixed(3)} Bar</b></li>
+                                    <li>Voltaje:<b> ${data.voltaje.toFixed(3)} V</b></li>
+                                    <li>Corriente:<b> ${data.corriente.toFixed(3)} A</b></li>
+                                </ul>
+                            </div></small>
+                        `;
+                    },
+                    x: {
+                        formatter: function (val) {
+                            return new Date(val).toLocaleString();
+                        }
                     }
-                }
-            },
-
-            series: [
-                {
-                    name: 'Energía Generada',
-                    data: energiaData
-                }
-            ],
-            chart: {
-                type: 'line',
-                height: 300,
-                zoom: {
-                    type: 'x',
-                    enabled: true,
-                    autoScaleYaxis: true
                 },
-                toolbar: {
-                    autoSelected: 'zoom',
-                    export: {
-                        csv: {
-                            filename: 'energia_generada',
-                            columnDelimiter: ',',
-                            headerCategory: 'Fecha y Hora',
-                            headerValue: 'Energía Generada',
-                            categoryFormatter(x) {
-                                return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+
+                series: [
+                    {
+                        name: 'Energía Generada',
+                        data: energiaData
+                    }
+                ],
+                chart: {
+                    type: 'line',
+                    height: 300,
+                    zoom: {
+                        type: 'x',
+                        enabled: true,
+                        autoScaleYaxis: true
+                    },
+                    toolbar: {
+                        autoSelected: 'zoom',
+                        export: {
+                            csv: {
+                                filename: 'energia_generada',
+                                columnDelimiter: ',',
+                                headerCategory: 'Fecha y Hora',
+                                headerValue: 'Energía Generada',
+                                categoryFormatter(x) {
+                                    return new Date(x).toLocaleDateString() + ' ' + new Date(x).toLocaleTimeString();
+                                },
+                                valueFormatter(y) {
+                                    return y.toFixed(2);
+                                }
                             },
-                            valueFormatter(y) {
-                                return y.toFixed(2);
+                            svg: {
+                                filename: undefined,
+                            },
+                            png: {
+                                filename: undefined,
                             }
                         },
-                        svg: {
-                            filename: undefined,
-                        },
-                        png: {
-                            filename: undefined,
-                        }
-                    },
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            markers: {
-                size: 0,
-            },
-            title: {
-                text: 'Energía generada por el proyecto',
-                align: 'left'
-            },
-            fill: {
-                type: 'solid',
-                gradient: {
-                    shadeIntensity: 1,
-                    inverseColors: false,
-                    opacityFrom: 0.5,
-                    opacityTo: 0,
-                    stops: [0, 90, 100]
-                },
-            },
-            stroke: {
-                width: 2,
-                curve: 'straight'
-            },
-            yaxis: {
-                title: {
-                    text: 'Energía Generada'
-                }
-            },
-            xaxis: {
-                type: 'datetime',
-                labels: {
-                    formatter: function (value) {
-                        return new Date(value).toLocaleDateString();
                     }
-                }
-            },            
-        };
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                markers: {
+                    size: 0,
+                },
+                title: {
+                    text: 'Energía generada por el proyecto',
+                    align: 'left'
+                },
+                fill: {
+                    type: 'solid',
+                    gradient: {
+                        shadeIntensity: 1,
+                        inverseColors: false,
+                        opacityFrom: 0.5,
+                        opacityTo: 0,
+                        stops: [0, 90, 100]
+                    },
+                },
+                stroke: {
+                    width: 2,
+                    curve: 'straight'
+                },
+                yaxis: {
+                    title: {
+                        text: 'Energía Generada'
+                    }
+                },
+                xaxis: {
+                    type: 'datetime',
+                    labels: {
+                        formatter: function (value) {
+                            return new Date(value).toLocaleDateString();
+                        }
+                    }
+                },            
+            };
 
-        // Crear y renderizar el gráfico
-        var chart = new ApexCharts(document.querySelector("#myChartPro"), options);
-        chart.render();
+            // Crear y renderizar el gráfico
+            chart = new ApexCharts(document.querySelector("#myChartPro"), options);
+            chart.render();
+        }
+        crear_grafica();
     });
 </script>
 
