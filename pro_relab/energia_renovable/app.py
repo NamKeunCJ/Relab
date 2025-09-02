@@ -16,7 +16,8 @@ import tensorflow as tf # type: ignore
 
 #########################################################################################################################
 ###### IR A hidrica.py ##### 
-from hidrica import hidrica_bp, procesar_datos_hidrica  # Importa el Blueprint
+from hidrica import hidrica_bp, procesar_datos_hidrica 
+from carga import carga_bp # Importa el Blueprint
 #########################################################################################################################
 
 
@@ -27,6 +28,7 @@ app.config['SECRET_KEY'] = 'unicesmag'
 # Establecer la duración de la sesión a 120 minutos
 #app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
 app.register_blueprint(hidrica_bp, url_prefix='/hidrica')
+app.register_blueprint(carga_bp, url_prefix='/carga')
 # Asegurar que las cookies solo se envíen por HTTPS y no accesibles por JavaScript
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
